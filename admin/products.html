@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Products - Enroute Admin</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/admin.css">
+</head>
+
+<body>
+
+    <aside class="admin-sidebar">
+        <div class="admin-logo">
+            Enroute<span>Admin</span>
+        </div>
+        <ul class="admin-nav">
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="products.html" class="active">Products</a></li>
+            <li><a href="orders.html">Orders</a></li>
+            <li><a href="users.html">Users</a></li>
+        </ul>
+        <div style="padding: var(--spacing-4); margin-top: auto;">
+            <button class="btn btn-outline" style="width: 100%;" id="admin-logout-btn">Logout</button>
+        </div>
+    </aside>
+
+    <main class="admin-main">
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-8);">
+            <h1>Manage Products</h1>
+            <button class="btn btn-primary" id="add-product-btn">+ Add Product</button>
+        </div>
+
+        <div class="table-container">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Featured</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="products-table-body">
+                    <tr>
+                        <td colspan="6" class="text-center">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Product Modal -->
+    <div class="modal-overlay" id="product-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Add Product</h3>
+                <button class="close-btn" id="close-modal-btn">&times;</button>
+            </div>
+            <form id="product-form">
+                <input type="hidden" id="product-id">
+
+                <div class="form-group">
+                    <label class="form-label">Product Name</label>
+                    <input type="text" id="p-name" class="form-control" required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-4);">
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <select id="p-category" class="form-control" required>
+                            <option value="bus">Bus</option>
+                            <option value="truck">Truck</option>
+                            <option value="car">Car</option>
+                            <option value="map">Map</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Price (INR)</label>
+                        <input type="number" id="p-price" class="form-control" min="0" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Product Images (URLs)</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-4); margin-bottom: 0.5rem;">
+                        <input type="url" id="p-image-1" class="form-control" placeholder="Image 1 URL (Primary)" required>
+                        <input type="url" id="p-image-2" class="form-control" placeholder="Image 2 URL (Optional)">
+                        <input type="url" id="p-image-3" class="form-control" placeholder="Image 3 URL (Optional)">
+                        <input type="url" id="p-image-4" class="form-control" placeholder="Image 4 URL (Optional)">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Download Link (Google Drive, MediaFire, etc.)</label>
+                    <input type="url" id="p-download" class="form-control" placeholder="https://..." required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-4);">
+                    <div class="form-group">
+                        <label class="form-label">Game Version</label>
+                        <input type="text" id="p-version" class="form-control" placeholder="e.g., v3.8 - v4.0">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Brand / Make</label>
+                        <input type="text" id="p-brand" class="form-control" placeholder="e.g., Volvo, Scania">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-4);">
+                    <div class="form-group">
+                        <label class="form-label">Engine / Power</label>
+                        <input type="text" id="p-engine" class="form-control" placeholder="e.g., 500 HP V8">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Polygon Quality</label>
+                        <select id="p-polygons" class="form-control">
+                            <option value="">Select Quality...</option>
+                            <option value="Ultra High-Poly">Ultra High-Poly</option>
+                            <option value="High-Poly">High-Poly</option>
+                            <option value="Optimized">Optimized</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-4);">
+                    <div class="form-group">
+                        <label class="form-label">File Size</label>
+                        <input type="text" id="p-size" class="form-control" placeholder="e.g., 45 MB">
+                    </div>
+                    <div style="display: flex; gap: var(--spacing-6); align-items: center; margin-top: 1.5rem;">
+                        <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0;">
+                            <input type="checkbox" id="p-interior" style="width: 18px; height: 18px;">
+                            <label class="form-label" style="margin-bottom: 0;">Includes Interior</label>
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0;">
+                            <input type="checkbox" id="p-featured" style="width: 18px; height: 18px;">
+                            <label class="form-label" style="margin-bottom: 0;">Featured Product</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Mod Summary (Short description under images)</label>
+                    <textarea id="p-summary" class="form-control" rows="2" placeholder="A quick, catchy summary..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">YouTube Video URL (Optional)</label>
+                    <input type="url" id="p-youtube" class="form-control" placeholder="https://youtube.com/watch?v=...">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Full Description</label>
+                    <textarea id="p-description" class="form-control" rows="4" required></textarea>
+                </div>
+
+                <div class="form-group" style="border: 1px solid var(--color-border); padding: var(--spacing-4); border-radius: var(--radius-md); background: var(--bg-secondary);">
+                    <label class="form-label" style="font-size: 1rem; margin-bottom: 0.5rem; color: var(--color-accent);">You May Also Like (Related Mods)</label>
+                    <p class="text-secondary" style="font-size: 0.85rem; margin-bottom: 1rem;">Select exactly which mods should appear as related products.</p>
+                    <div id="p-related-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; max-height: 200px; overflow-y: auto;">
+                        <!-- Checkboxes will be injected here by JS -->
+                    </div>
+                </div>
+
+                <div
+                    style="display: flex; justify-content: flex-end; gap: var(--spacing-4); margin-top: var(--spacing-6);">
+                    <button type="button" class="btn btn-outline" id="cancel-modal-btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="save-product-btn">Save Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Logic -->
+    <script type="module">
+        import { requireAdmin } from '../js/admin/admin-auth.js';
+        requireAdmin();
+    </script>
+    <script type="module" src="../js/admin/admin-products.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Enroute Store</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/components.css">
+    <style>
+        body { padding-top: 70px; }
+        .page-header {
+            padding: var(--spacing-12) 0;
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--color-border);
+            text-align: center;
+        }
+        .content-section {
+            max-width: 800px;
+            margin: var(--spacing-16) auto;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+        .content-section h2, .content-section h3 {
+            color: var(--text-primary);
+            margin-top: var(--spacing-8);
+            margin-bottom: var(--spacing-4);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container nav">
+            <a href="index.html" class="logo">Enroute<span>.</span></a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">Store</a></li>
+                <li><a href="about.html" class="active">About</a></li>
+                <li><a href="contact.html">Support</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="login.html" class="btn btn-outline" id="nav-login-btn">Login</a>
+                <a href="dashboard.html" class="btn btn-primary" id="nav-dash-btn" style="display: none; padding: 0.6rem; border-radius: 50%; aspect-ratio: 1/1;" title="Dashboard">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="page-header">
+        <div class="container">
+            <h1>About Enroute Store</h1>
+            <p class="text-secondary mt-2">Delivering Premium Digital Products</p>
+        </div>
+    </div>
+
+    <div class="container content-section">
+        <h2>Our Mission</h2>
+        <p>At Enroute Store, our mission is to provide the highest quality digital products and modifications for the BUSSID community. We believe that gaming experiences should be immersive, highly customizable, and accessible to everyone who wants to elevate their gameplay.</p>
+        
+        <h2>What We Do</h2>
+        <p>We specialize in curating and offering premium mods ranging from detailed buses and realistic trucks to expansive maps and unique vehicles. Every product on our store undergoes rigorous testing to ensure compatibility and quality.</p>
+        
+        <h2>Why Choose Us?</h2>
+        <ul>
+            <li class="mb-2"><strong>Quality Assurance:</strong> Only the best mods make it to our store.</li>
+            <li class="mb-2"><strong>Instant Delivery:</strong> Get access to your downloads immediately after a secure payment via Razorpay.</li>
+            <li class="mb-2"><strong>Community Focused:</strong> We listen to our users and constantly update our catalog based on your feedback.</li>
+        </ul>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 Enroute Store. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="js/firebase-config.js"></script>
+    <script type="module" src="js/auth.js"></script>
+</body>
+</html>

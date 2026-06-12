@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Enroute Store</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/components.css">
+    <style>
+        body { padding-top: 70px; }
+
+        .checkout-container {
+            max-width: 800px;
+            margin: var(--spacing-16) auto;
+        }
+
+        .checkout-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: var(--spacing-8);
+        }
+
+        .order-summary {
+            background: var(--bg-secondary);
+            padding: var(--spacing-6);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-4);
+            padding-bottom: var(--spacing-4);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .product-preview {
+            display: flex;
+            gap: var(--spacing-4);
+            margin-bottom: var(--spacing-6);
+        }
+
+        .product-preview img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: var(--radius-md);
+        }
+
+        @media (max-width: 768px) {
+            .checkout-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container nav">
+            <a href="index.html" class="logo">Enroute<span>.</span></a>
+        </div>
+    </header>
+
+    <div class="container checkout-container">
+        <h1 class="mb-8">Checkout</h1>
+        
+        <div id="checkout-content" class="checkout-grid">
+            <!-- Form -->
+            <div class="card p-6" style="padding: var(--spacing-6);">
+                <h3 class="mb-6">Billing Details</h3>
+                <form id="checkout-form">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" id="cust-name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" id="cust-email" class="form-control" required readonly>
+                        <small class="text-secondary mt-1 block">Digital product will be associated with this email.</small>
+                    </div>
+                    
+                    <button type="submit" id="pay-btn" class="btn btn-primary btn-lg mt-4" style="width: 100%;">Pay Securely with Razorpay</button>
+                </form>
+            </div>
+
+            <!-- Summary -->
+            <div class="order-summary" id="order-summary">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Razorpay Script -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <!-- Logic -->
+    <script type="module" src="js/firebase-config.js"></script>
+    <script type="module" src="js/checkout.js"></script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users - Enroute Admin</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+
+    <aside class="admin-sidebar">
+        <div class="admin-logo">
+            Enroute<span>Admin</span>
+        </div>
+        <ul class="admin-nav">
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="products.html">Products</a></li>
+            <li><a href="orders.html">Orders</a></li>
+            <li><a href="users.html" class="active">Users</a></li>
+        </ul>
+        <div style="padding: var(--spacing-4); margin-top: auto;">
+            <button class="btn btn-outline" style="width: 100%;" id="admin-logout-btn">Logout</button>
+        </div>
+    </aside>
+
+    <main class="admin-main">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-8);">
+            <h1>User Management</h1>
+        </div>
+
+        <!-- Filters -->
+        <div style="display: flex; gap: var(--spacing-4); margin-bottom: var(--spacing-6);">
+            <input type="text" id="search-user" class="form-control" placeholder="Search by Email or ID" style="max-width: 300px;">
+        </div>
+
+        <div class="table-container">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>User ID</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Joined Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="users-table-body">
+                    <tr><td colspan="5" class="text-center">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Logic -->
+    <script type="module">
+        import { requireAdmin } from '../js/admin/admin-auth.js';
+        requireAdmin();
+    </script>
+    <script type="module" src="../js/admin/admin-users.js"></script>
+</body>
+</html>

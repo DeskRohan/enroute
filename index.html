@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enroute Store - Premium Digital Products</title>
+    <meta name="description" content="Discover and purchase premium BUSSID mods and digital products at Enroute Store.">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/components.css">
+    <style>
+        /* Home Specific Styles */
+        body {
+            padding-top: 70px;
+        }
+
+        /* Offset for fixed header */
+
+        /* Banner Hero */
+        .hero-banner {
+            width: 100%;
+            background: var(--bg-primary);
+        }
+
+        .hero-image-wrapper {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--spacing-6) var(--spacing-4) 0;
+        }
+
+        .hero-image-wrapper img {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 4.5 / 1;
+            /* Maximum crop to remove all blaxck bars */
+            object-fit: cover;
+            object-position: center;
+            display: block;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero-text-container {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: var(--spacing-12) var(--spacing-4) var(--spacing-16);
+        }
+
+        .hero-text h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            line-height: 1.1;
+            letter-spacing: -2px;
+            margin-bottom: var(--spacing-6);
+            color: var(--text-primary);
+        }
+
+        .hero-text p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-8);
+            line-height: 1.6;
+        }
+
+        .hero-actions {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-4);
+        }
+
+        .trust-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-secondary);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin: 0 auto var(--spacing-6);
+            border: 1px solid var(--color-border);
+            color: var(--text-primary);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: var(--spacing-8);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: var(--spacing-6);
+        }
+
+        /* Clean Features Grid */
+        .features-section {
+            background-color: var(--bg-secondary);
+            padding: calc(var(--spacing-16) * 1.5) 0;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-8);
+        }
+
+        .feature-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--color-border);
+            border-radius: 16px;
+            padding: var(--spacing-8);
+            display: flex;
+            align-items: flex-start;
+            gap: var(--spacing-6);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.08);
+        }
+
+        .feature-icon-wrapper {
+            background: var(--bg-secondary);
+            width: 64px;
+            height: 64px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: var(--text-primary);
+        }
+
+        .feature-icon-wrapper svg {
+            width: 32px;
+            height: 32px;
+        }
+
+        /* How It Works */
+        .how-it-works {
+            padding: calc(var(--spacing-16) * 1.5) 0;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--spacing-12);
+            position: relative;
+            margin-top: var(--spacing-12);
+        }
+
+        .step-card {
+            text-align: center;
+        }
+
+        .step-number {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0 auto var(--spacing-6);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .step-card h3 {
+            margin-bottom: var(--spacing-3);
+        }
+
+        @media (max-width: 900px) {
+            .hero-image-wrapper {
+                padding: 0;
+            }
+
+            .hero-image-wrapper img {
+                border-radius: 0;
+                aspect-ratio: 4.5 / 1;
+                /* Maximum crop for mobile */
+                object-fit: cover;
+            }
+
+            .hero-text-container {
+                padding: var(--spacing-8) var(--spacing-4) var(--spacing-12);
+            }
+
+            .hero-text h1 {
+                font-size: 2.25rem;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+                gap: var(--spacing-3);
+            }
+
+            .hero-actions .btn {
+                width: 100%;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .feature-card {
+                flex-direction: column;
+                text-align: center;
+                align-items: center;
+            }
+
+            .steps-grid {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-8);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container nav">
+            <a href="index.html" class="logo">Enroute<span>.</span></a>
+            <ul class="nav-links">
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="products.html">Products</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="login.html" class="btn btn-outline" id="nav-login-btn">Login</a>
+                <a href="dashboard.html" class="btn btn-primary" id="nav-dash-btn" style="display: none;">Dashboard</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Banner Hero Section -->
+    <section class="hero-banner">
+        <div class="hero-image-wrapper">
+            <a href="products.html">
+                <img src="assets/images/herofinal.png" alt="Enroute Hero Banner">
+            </a>
+        </div>
+        <div class="hero-text-container">
+            <div class="hero-text">
+                <div class="trust-badge">
+                    <span style="color: #f59e0b;">★★★★★</span>
+                    Trusted by 10,000+ Players
+                </div>
+                <h1>Experience the Ultimate Drive.</h1>
+                <p>Elevate your gameplay with hyper-realistic, premium BUSSID mods. Meticulously crafted models, instant
+                    delivery, and unparalleled quality.</p>
+                <div class="hero-actions">
+                    <a href="products.html" class="btn btn-primary btn-lg"
+                        style="padding: 1rem 2.5rem; font-size: 1.125rem;">Browse Collection</a>
+                    <a href="#features" class="btn btn-outline btn-lg"
+                        style="padding: 1rem 2.5rem; font-size: 1.125rem;">Learn More</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Products -->
+    <section id="featured" style="padding: calc(var(--spacing-16) * 1) 0; background: var(--bg-secondary);">
+        <div class="container">
+            <div class="section-header">
+                <div>
+                    <h2>Latest Arrivals</h2>
+                    <p class="text-secondary mt-2">Discover our newest, highest-fidelity creations.</p>
+                </div>
+                <a href="products.html" class="btn btn-outline">View Collection</a>
+            </div>
+
+            <div class="products-grid" id="featured-products">
+                <!-- Skeleton Loading -->
+                <div class="card product-card">
+                    <div class="img-container" style="background: var(--color-border); animation: pulse 1.5s infinite;">
+                    </div>
+                    <div class="content">
+                        <div
+                            style="height: 20px; background: var(--color-border); margin-bottom: 10px; border-radius: 4px;">
+                        </div>
+                        <div
+                            style="height: 20px; background: var(--color-border); width: 50%; margin-bottom: 20px; border-radius: 4px;">
+                        </div>
+                        <div style="height: 36px; background: var(--color-border); border-radius: 4px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="features-section">
+        <div class="container">
+            <div style="text-align: center; max-width: 600px; margin: 0 auto var(--spacing-12);">
+                <h2>The Enroute Standard</h2>
+                <p class="text-secondary mt-4">We deliver a meticulously engineered digital experience for serious
+                    simulation enthusiasts.</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z">
+                            </path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 style="margin-bottom: 0.5rem;">Hyper-Realistic Quality</h3>
+                        <p class="text-secondary text-sm" style="line-height: 1.6;">Every texture and geometry is
+                            crafted to perfection, matching real-world counterparts flawlessly.</p>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 style="margin-bottom: 0.5rem;">Instant Access</h3>
+                        <p class="text-secondary text-sm" style="line-height: 1.6;">No waiting. As soon as your payment
+                            clears, your high-speed download link is immediately available.</p>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                            </path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 style="margin-bottom: 0.5rem;">Lifetime Updates</h3>
+                        <p class="text-secondary text-sm" style="line-height: 1.6;">When the game updates, we update.
+                            Your purchase guarantees you access to all future versions.</p>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                            </path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 style="margin-bottom: 0.5rem;">Bank-Grade Security</h3>
+                        <p class="text-secondary text-sm" style="line-height: 1.6;">Powered by Razorpay, our checkout
+                            process is encrypted and 100% secure. We never store your card data.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works">
+        <div class="container">
+            <h2 class="text-center">Simple, Fast, and Secure.</h2>
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h3>Choose Your Mod</h3>
+                    <p class="text-secondary">Browse our curated collection of premium vehicles and environments.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h3>Secure Checkout</h3>
+                    <p class="text-secondary">Complete your purchase using our lightning-fast, encrypted payment
+                        gateway.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h3>Download & Drive</h3>
+                    <p class="text-secondary">Instantly access your files from your dashboard and hit the road.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <a href="index.html" class="logo mb-4" style="display:block;">Enroute<span>.</span></a>
+                    <p class="text-secondary">The gold standard for digital simulation products.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Navigation</h4>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="products.html">Store</a></li>
+                        <li><a href="login.html">Login</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Support</h4>
+                    <ul class="footer-links">
+                        <li><a href="javascript:void(0)">Privacy Policy</a></li>
+                        <li><a href="javascript:void(0)">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom"
+                style="margin-top: var(--spacing-12); padding-top: var(--spacing-6); border-top: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center;">
+                <p class="text-secondary">&copy; 2026 Enroute Store. All rights reserved.</p>
+                <div style="display: flex; gap: 1rem; color: var(--text-secondary);">
+                    <span>Secured by Razorpay</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase and Logic -->
+    <script type="module" src="js/firebase-config.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/products.js"></script>
+</body>
+
+</html>

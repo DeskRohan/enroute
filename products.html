@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products - Enroute Store</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/components.css">
+    <style>
+        body { padding-top: 70px; }
+        
+        .page-header {
+            padding: var(--spacing-8) 0;
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--color-border);
+            text-align: center;
+        }
+
+        .filters-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-4);
+            margin-bottom: var(--spacing-8);
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .search-bar {
+            flex: 1;
+            min-width: 250px;
+            max-width: 400px;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: var(--spacing-4);
+        }
+
+        .filter-select {
+            padding: 0.75rem 1rem;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-family: inherit;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--spacing-6);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: var(--spacing-16) 0;
+            color: var(--text-secondary);
+            grid-column: 1 / -1;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container nav">
+            <a href="index.html" class="logo">Enroute<span>.</span></a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html" class="active">Store</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Support</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="login.html" class="btn btn-outline" id="nav-login-btn">Login</a>
+                <a href="dashboard.html" class="btn btn-primary" id="nav-dash-btn" style="display: none; padding: 0.6rem; border-radius: 50%; aspect-ratio: 1/1;" title="Dashboard">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="page-header">
+        <div class="container">
+            <h1>All Mods</h1>
+            <p class="text-secondary mt-2">Browse our collection of premium BUSSID mods.</p>
+        </div>
+    </div>
+
+    <section class="py-16">
+        <div class="container">
+            <!-- Filters -->
+            <div class="filters-section">
+                <div class="search-bar">
+                    <input type="text" id="search-input" class="form-control" placeholder="Search mods...">
+                </div>
+                <div class="filter-group">
+                    <select id="category-filter" class="filter-select">
+                        <option value="all">All Categories</option>
+                        <option value="bus">Bus</option>
+                        <option value="truck">Truck</option>
+                        <option value="car">Car</option>
+                        <option value="map">Map</option>
+                    </select>
+                    <select id="sort-filter" class="filter-select">
+                        <option value="newest">Newest First</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Products Grid -->
+            <div class="products-grid" id="products-container">
+                <!-- Skeleton Loading -->
+                <div class="card product-card">
+                    <div class="img-container" style="background: var(--bg-secondary); animation: pulse 1.5s infinite;"></div>
+                    <div class="content">
+                        <div style="height: 20px; background: var(--color-border); margin-bottom: 10px; border-radius: 4px;"></div>
+                        <div style="height: 20px; background: var(--color-border); width: 50%; margin-bottom: 20px; border-radius: 4px;"></div>
+                        <div style="height: 36px; background: var(--color-border); border-radius: 4px;"></div>
+                    </div>
+                </div>
+                <!-- Repeated for visual effect -->
+                <div class="card product-card">
+                    <div class="img-container" style="background: var(--bg-secondary); animation: pulse 1.5s infinite;"></div>
+                    <div class="content">
+                        <div style="height: 20px; background: var(--color-border); margin-bottom: 10px; border-radius: 4px;"></div>
+                        <div style="height: 20px; background: var(--color-border); width: 50%; margin-bottom: 20px; border-radius: 4px;"></div>
+                        <div style="height: 36px; background: var(--color-border); border-radius: 4px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 Enroute Store. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Logic -->
+    <script type="module" src="js/firebase-config.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/products.js"></script>
+</body>
+</html>
