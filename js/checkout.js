@@ -58,9 +58,9 @@ const initCheckout = () => {
         window.location.href = 'products.html';
         return;
     }
-    
+
     currentProduct = JSON.parse(productData);
-    
+
     const bc = document.getElementById('breadcrumbs');
     if (bc) {
         bc.innerHTML = `
@@ -71,10 +71,10 @@ const initCheckout = () => {
             <span class="current">Checkout</span>
         `;
     }
-    
+
     const rawImg = currentProduct.image || (currentProduct.images && currentProduct.images[0]) || '';
     const displayImage = getImageUrl(rawImg);
-    
+
     // Render Summary
     orderSummaryContainer.innerHTML = `
         <h3 class="mb-4">Order Summary</h3>
@@ -117,59 +117,79 @@ checkoutForm.addEventListener('submit', async (e) => {
     payBtn.disabled = true;
     payBtn.textContent = 'Processing...';
 
-    // Get Razorpay Key from ENV
-    const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY_ID;
-
-    const options = {
-        "key": RAZORPAY_KEY, 
-        "amount": currentProduct.price * 100, // Amount in paise
-        "currency": "INR",
-        "name": "Enroute Store",
-        "description": `Purchase: ${currentProduct.name}`,
-        "image": "https://via.placeholder.com/150", // Your logo here
-        "handler": async function (response) {
-            // Success handler
-            try {
-                // Save Order to Firestore
-                const orderData = {
-                    paymentId: response.razorpay_payment_id,
-                    userId: currentUser.uid,
-                    email: currentUser.email,
-                    customerName: custNameInput.value,
-                    productId: currentProduct.id,
-                    productName: currentProduct.name,
-                    amount: currentProduct.price,
-                    status: 'completed',
-                    createdAt: serverTimestamp()
-                };
-
-                const docRef = await addDoc(collection(db, "orders"), orderData);
-                
-                // Use sessionStorage to pass IDs robustly to prevent URL rewriting issues
-                sessionStorage.setItem('successOrderId', docRef.id);
-                sessionStorage.setItem('successProductId', currentProduct.id);
-                
-                // Clear session storage and redirect
-                sessionStorage.removeItem('checkoutProduct');
-                window.location.href = `success.html?orderId=${docRef.id}&productId=${currentProduct.id}`;
-
-            } catch (error) {
-                console.error("Error creating order:", error);
-                alert("Payment successful, but failed to record order. Please contact support.");
-            }
-        },
-        "prefill": {
-            "name": custNameInput.value,
-            "email": currentUser.email
-        },
-        "theme": {
-            "color": "#3b82f6" // Primary color
-        }
-    };
+    // Keep only the Razorpay Key ID visible on the frontend
+    const RAZORPAY_KEY = "rzp_live_T18UlWiOOjCX7g";
 
     try {
+        // Create order on the server to keep secret key hidden
+        const orderResponse = await fetch('/api/create-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                amount: currentProduct.price * 100, // Amount in paise
+                currency: "INR",
+                receipt: `rcpt_${Date.now()}`
+            })
+        });
+
+        const orderData = await orderResponse.json();
+
+        if (!orderResponse.ok) {
+            throw new Error(orderData.error || 'Failed to create order on server');
+        }
+
+        const options = {
+            "key": RAZORPAY_KEY,
+            "amount": orderData.amount,
+            "currency": orderData.currency,
+            "name": "Enroute Store",
+            "description": `Purchase: ${currentProduct.name}`,
+            "image": "https://via.placeholder.com/150", // Your logo here
+            "order_id": orderData.id, // Securely generated order ID from backend
+            "handler": async function (response) {
+                // Success handler
+                try {
+                    // Save Order to Firestore
+                    const orderDataForDb = {
+                        paymentId: response.razorpay_payment_id,
+                        orderId: response.razorpay_order_id,
+                        signature: response.razorpay_signature,
+                        userId: currentUser.uid,
+                        email: currentUser.email,
+                        customerName: custNameInput.value,
+                        productId: currentProduct.id,
+                        productName: currentProduct.name,
+                        amount: currentProduct.price,
+                        status: 'completed',
+                        createdAt: serverTimestamp()
+                    };
+
+                    const docRef = await addDoc(collection(db, "orders"), orderDataForDb);
+
+                    // Use sessionStorage to pass IDs robustly to prevent URL rewriting issues
+                    sessionStorage.setItem('successOrderId', docRef.id);
+                    sessionStorage.setItem('successProductId', currentProduct.id);
+
+                    // Clear session storage and redirect
+                    sessionStorage.removeItem('checkoutProduct');
+                    window.location.href = `success.html?orderId=${docRef.id}&productId=${currentProduct.id}`;
+
+                } catch (error) {
+                    console.error("Error creating order:", error);
+                    alert("Payment successful, but failed to record order. Please contact support.");
+                }
+            },
+            "prefill": {
+                "name": custNameInput.value,
+                "email": currentUser.email
+            },
+            "theme": {
+                "color": "#3b82f6" // Primary color
+            }
+        };
+
         const rzp1 = new Razorpay(options);
-        rzp1.on('payment.failed', function (response){
+        rzp1.on('payment.failed', function (response) {
             alert(`Payment Failed: ${response.error.description}`);
             payBtn.disabled = false;
             payBtn.textContent = 'Pay Securely with Razorpay';
