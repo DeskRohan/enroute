@@ -54,11 +54,13 @@ if (loginForm) {
             
             if (userDoc.exists() && userDoc.data().role === 'admin') {
                 localStorage.setItem('userRole', 'admin');
+                localStorage.setItem('adminEmail', user.email);
                 window.location.href = 'dashboard.html';
             } else {
                 // Not an admin
                 await signOut(auth);
                 localStorage.removeItem('userRole');
+                localStorage.removeItem('adminEmail');
                 throw new Error('Unauthorized Access');
             }
         } catch (error) {
@@ -85,6 +87,15 @@ export const requireAdmin = () => {
 
         // Fast check
         if (localStorage.getItem('userRole') === 'admin') {
+            const adminEmail = localStorage.getItem('adminEmail');
+            if (adminEmail && adminEmail !== 'admin@enroute.in') {
+                const currentPath = window.location.pathname;
+                document.querySelectorAll('a[href="orders.html"], a[href="users.html"], a[href="reports.html"]').forEach(el => el.style.display = 'none');
+                if (currentPath.endsWith('orders.html') || currentPath.endsWith('users.html') || currentPath.endsWith('reports.html')) {
+                    window.location.href = 'dashboard.html';
+                    return;
+                }
+            }
             return; // Proceed
         }
 
@@ -94,6 +105,15 @@ export const requireAdmin = () => {
         
         if (userDoc.exists() && userDoc.data().role === 'admin') {
             localStorage.setItem('userRole', 'admin');
+            localStorage.setItem('adminEmail', user.email);
+            
+            if (user.email !== 'admin@enroute.in') {
+                const currentPath = window.location.pathname;
+                document.querySelectorAll('a[href="orders.html"], a[href="users.html"], a[href="reports.html"]').forEach(el => el.style.display = 'none');
+                if (currentPath.endsWith('orders.html') || currentPath.endsWith('users.html') || currentPath.endsWith('reports.html')) {
+                    window.location.href = 'dashboard.html';
+                }
+            }
         } else {
             // Kick out
             window.location.href = '../index.html';
@@ -105,6 +125,7 @@ if (logoutBtn) {
     logoutBtn.addEventListener('click', () => {
         signOut(auth).then(() => {
             localStorage.removeItem('userRole');
+            localStorage.removeItem('adminEmail');
             window.location.href = 'login.html';
         });
     });

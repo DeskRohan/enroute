@@ -85,6 +85,10 @@ const loadProducts = async () => {
         const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
         const snapshot = await getDocs(q);
         allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const adminEmail = localStorage.getItem('adminEmail');
+        if (adminEmail !== 'admin@enroute.in') {
+            allProducts = allProducts.filter(p => p.addedBy === adminEmail);
+        }
         renderTable();
     } catch (error) {
         console.error("Error loading products:", error);
@@ -99,7 +103,15 @@ const renderTable = () => {
     }
 
     let html = '';
+    const adminEmail = localStorage.getItem('adminEmail');
+    const isSuperAdmin = adminEmail === 'admin@enroute.in';
+
     allProducts.forEach(product => {
+        let actionsHtml = `
+            <button class="btn btn-sm btn-outline edit-btn" data-id="${product.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Edit</button>
+            <button class="btn btn-sm btn-outline delete-btn" data-id="${product.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; color: var(--color-danger); border-color: var(--color-danger); margin-left: 0.5rem;">Delete</button>
+        `;
+
         html += `
             <tr>
                 <td><img src="${getImageUrl(product.image)}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"></td>
@@ -108,8 +120,7 @@ const renderTable = () => {
                 <td>${formatPrice(product.price)}</td>
                 <td>${product.featured ? '<span style="color:var(--color-accent)">Yes</span>' : '<span class="text-secondary">No</span>'}</td>
                 <td>
-                    <button class="btn btn-sm btn-outline edit-btn" data-id="${product.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Edit</button>
-                    <button class="btn btn-sm btn-outline delete-btn" data-id="${product.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; color: var(--color-danger); border-color: var(--color-danger); margin-left: 0.5rem;">Delete</button>
+                    ${actionsHtml}
                 </td>
             </tr>
         `;
@@ -273,8 +284,10 @@ productForm.addEventListener('submit', async (e) => {
         updatedAt: serverTimestamp()
     };
 
+    const adminEmail = localStorage.getItem('adminEmail');
     if (!fId.value) {
         productData.createdAt = serverTimestamp(); // Only set on create
+        productData.addedBy = adminEmail || 'unknown';
     }
 
     try {

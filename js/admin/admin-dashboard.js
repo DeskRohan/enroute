@@ -22,23 +22,43 @@ const formatDate = (timestamp) => {
 
 const loadStats = async () => {
     try {
+        const adminEmail = localStorage.getItem('adminEmail');
+        const isSuperAdmin = adminEmail === 'admin@enroute.in';
+
         // 1. Get Products Count
         const productsSnap = await getDocs(collection(db, "products"));
-        statProducts.textContent = productsSnap.size;
+        if (isSuperAdmin) {
+            statProducts.textContent = productsSnap.size;
+        } else {
+            let ownCount = 0;
+            productsSnap.forEach(doc => {
+                if (doc.data().addedBy === adminEmail) ownCount++;
+            });
+            statProducts.textContent = ownCount;
+        }
 
         // 2. Get Users Count
-        const usersSnap = await getDocs(collection(db, "users"));
-        statUsers.textContent = usersSnap.size;
+        if (isSuperAdmin) {
+            const usersSnap = await getDocs(collection(db, "users"));
+            statUsers.textContent = usersSnap.size;
+        } else {
+            statUsers.textContent = "N/A";
+        }
 
         // 3. Get Orders & Revenue
-        const ordersSnap = await getDocs(collection(db, "orders"));
-        statOrders.textContent = ordersSnap.size;
-        
-        let totalRev = 0;
-        ordersSnap.forEach(doc => {
-            totalRev += Number(doc.data().amount || 0);
-        });
-        statRevenue.textContent = formatPrice(totalRev);
+        if (isSuperAdmin) {
+            const ordersSnap = await getDocs(collection(db, "orders"));
+            statOrders.textContent = ordersSnap.size;
+            
+            let totalRev = 0;
+            ordersSnap.forEach(doc => {
+                totalRev += Number(doc.data().amount || 0);
+            });
+            statRevenue.textContent = formatPrice(totalRev);
+        } else {
+            statOrders.textContent = "N/A";
+            statRevenue.textContent = "N/A";
+        }
 
     } catch (error) {
         console.error("Error loading stats:", error);
@@ -47,6 +67,12 @@ const loadStats = async () => {
 
 const loadRecentOrders = async () => {
     try {
+        const adminEmail = localStorage.getItem('adminEmail');
+        if (adminEmail !== 'admin@enroute.in') {
+            recentOrdersBody.innerHTML = `<tr><td colspan="5" class="text-center text-secondary">Not available for your role</td></tr>`;
+            return;
+        }
+
         const q = query(collection(db, "orders"), orderBy("createdAt", "desc"), limit(5));
         const snapshot = await getDocs(q);
         
