@@ -7,4 +7,4 @@ Disallow: /register.html
 Disallow: /success.html
 Disallow: /sub2unlock.html
 
-Sitemap: https://yourdomain.com/sitemap.xml
+Sitemap: https://enroutestore.vercel.app/sitemap.xml

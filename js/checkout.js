@@ -1,7 +1,6 @@
 import { db, auth } from './firebase-config.js';
 import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { ENV } from './env.js';
 
 const checkoutForm = document.getElementById('checkout-form');
 const custNameInput = document.getElementById('cust-name');
@@ -119,7 +118,7 @@ checkoutForm.addEventListener('submit', async (e) => {
     payBtn.textContent = 'Processing...';
 
     // Get Razorpay Key from ENV
-    const RAZORPAY_KEY = ENV.RAZORPAY_KEY_ID;
+    const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY_ID;
 
     const options = {
         "key": RAZORPAY_KEY, 
