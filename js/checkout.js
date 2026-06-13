@@ -1,6 +1,7 @@
 import { db, auth } from './firebase-config.js';
 import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { ENV } from './env.js';
 
 const checkoutForm = document.getElementById('checkout-form');
 const custNameInput = document.getElementById('cust-name');
@@ -18,6 +19,39 @@ const formatPrice = (price) => {
     }).format(price);
 };
 
+// Google Drive Image URL Converter
+function getImageUrl(url) {
+    if (!url || url.trim() === "") {
+        return "https://via.placeholder.com/800x600?text=No+Image";
+    }
+
+    if (url.startsWith("http") && !url.includes("drive.google.com")) {
+        return url;
+    }
+
+    let fileId = null;
+    const patterns = [
+        /\/file\/d\/([a-zA-Z0-9_-]+)/,
+        /open\?id=([a-zA-Z0-9_-]+)/,
+        /uc\?id=([a-zA-Z0-9_-]+)/,
+        /[?&]id=([a-zA-Z0-9_-]+)/
+    ];
+
+    for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match && match[1]) {
+            fileId = match[1];
+            break;
+        }
+    }
+
+    if (fileId) {
+        return `https://drive.google.com/thumbnail?id=${fileId}&sz=w500`;
+    }
+
+    return url;
+}
+
 // Check if product exists in session storage
 const initCheckout = () => {
     const productData = sessionStorage.getItem('checkoutProduct');
@@ -28,11 +62,25 @@ const initCheckout = () => {
     
     currentProduct = JSON.parse(productData);
     
+    const bc = document.getElementById('breadcrumbs');
+    if (bc) {
+        bc.innerHTML = `
+            <a href="index.html">Home</a>
+            <span class="separator">&gt;</span>
+            <a href="product.html?id=${currentProduct.id}">${currentProduct.name}</a>
+            <span class="separator">&gt;</span>
+            <span class="current">Checkout</span>
+        `;
+    }
+    
+    const rawImg = currentProduct.image || (currentProduct.images && currentProduct.images[0]) || '';
+    const displayImage = getImageUrl(rawImg);
+    
     // Render Summary
     orderSummaryContainer.innerHTML = `
         <h3 class="mb-4">Order Summary</h3>
         <div class="product-preview">
-            <img src="${currentProduct.image || 'https://via.placeholder.com/80'}" alt="${currentProduct.name}">
+            <img src="${displayImage}" alt="${currentProduct.name}">
             <div>
                 <h4>${currentProduct.name}</h4>
                 <p class="text-secondary text-sm mt-1">${currentProduct.category}</p>
@@ -70,8 +118,8 @@ checkoutForm.addEventListener('submit', async (e) => {
     payBtn.disabled = true;
     payBtn.textContent = 'Processing...';
 
-    // TODO: Replace with your actual Razorpay Key ID
-    const RAZORPAY_KEY = 'rzp_test_T0jX2f4bENazLh';
+    // Get Razorpay Key from ENV
+    const RAZORPAY_KEY = ENV.RAZORPAY_KEY_ID;
 
     const options = {
         "key": RAZORPAY_KEY, 

@@ -1,6 +1,7 @@
 /* Header & Nav */
 .header {
-  background-color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
   position: fixed;
   width: 100%;
   top: 0;
@@ -109,7 +110,7 @@
 .card:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
-  border-color: #d1d5db;
+  border-color: #cbd5e1;
 }
 
 /* Product Card */
@@ -225,4 +226,37 @@
   .nav-links {
     display: none; /* Add mobile menu later */
   }
+}
+
+/* Breadcrumbs */
+.breadcrumbs {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-6);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.breadcrumbs a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.breadcrumbs a:hover {
+  color: var(--color-primary-hover);
+  text-decoration: underline;
+}
+
+.breadcrumbs .separator {
+  color: #9ca3af;
+  font-size: 0.75rem;
+}
+
+.breadcrumbs .current {
+  color: var(--text-primary);
+  font-weight: 600;
 }

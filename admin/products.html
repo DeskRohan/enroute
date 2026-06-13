@@ -8,11 +8,12 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- CSS -->
     <link rel="stylesheet" href="../css/index.css">
     <link rel="stylesheet" href="../css/components.css">
     <link rel="stylesheet" href="../css/admin.css">
+    <link rel="icon" type="image/png" href="../assets/images/fevicon.png">
 </head>
 
 <body>
@@ -26,6 +27,7 @@
             <li><a href="products.html" class="active">Products</a></li>
             <li><a href="orders.html">Orders</a></li>
             <li><a href="users.html">Users</a></li>
+            <li><a href="reports.html">Reports</a></li>
         </ul>
         <div style="padding: var(--spacing-4); margin-top: auto;">
             <button class="btn btn-outline" style="width: 100%;" id="admin-logout-btn">Logout</button>
@@ -77,6 +79,13 @@
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-4);">
                     <div class="form-group">
+                        <label class="form-label">Pricing Type</label>
+                        <select id="p-pricing-type" class="form-control" required>
+                            <option value="paid">Paid</option>
+                            <option value="free">Free (Sub2Unlock)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label class="form-label">Category</label>
                         <select id="p-category" class="form-control" required>
                             <option value="bus">Bus</option>
@@ -85,9 +94,16 @@
                             <option value="map">Map</option>
                         </select>
                     </div>
-                    <div class="form-group">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr; gap: var(--spacing-4);">
+                    <div class="form-group" id="price-group">
                         <label class="form-label">Price (INR)</label>
                         <input type="number" id="p-price" class="form-control" min="0" required>
+                    </div>
+                    <div class="form-group" id="channel-link-group" style="display: none;">
+                        <label class="form-label">YouTube Channel Link</label>
+                        <input type="url" id="p-channel-link" class="form-control" placeholder="https://youtube.com/@channel">
                     </div>
                 </div>
 

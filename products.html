@@ -4,10 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Products - Enroute Store</title>
+
+    <!-- Standard SEO Meta Tags -->
+    <meta name="description" content="Enroute Store - Premium Game Mods and Addons. Download high-quality mods for your favorite games.">
+    <meta name="keywords" content="gaming, mods, addons, enroute, game modifications">
+    <meta name="author" content="Enroute">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph (Facebook/WhatsApp/Discord) -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://yourdomain.com/">
+    <meta property="og:title" content="Enroute Store - Premium Game Mods">
+    <meta property="og:description" content="Download high-quality mods and addons for your favorite games.">
+    <meta property="og:image" content="https://yourdomain.com/assets/images/fevicon.png">
+    
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://yourdomain.com/">
+    <meta name="twitter:title" content="Enroute Store - Premium Game Mods">
+    <meta name="twitter:description" content="Download high-quality mods and addons for your favorite games.">
+    <meta name="twitter:image" content="https://yourdomain.com/assets/images/fevicon.png">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- CSS -->
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/components.css">
@@ -63,6 +84,7 @@
             grid-column: 1 / -1;
         }
     </style>
+    <link rel="icon" type="image/png" href="assets/images/fevicon.png">
 </head>
 <body>
 
@@ -141,8 +163,42 @@
 
     <footer class="footer">
         <div class="container">
-            <div class="footer-bottom">
-                <p>&copy; 2026 Enroute Store. All rights reserved.</p>
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <a href="index.html" class="logo mb-4" style="display:block;">Enroute<span>.</span></a>
+                    <p class="text-secondary">The gold standard for digital simulation products.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Navigation</h4>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="products.html">Store</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="contact.html">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="privacy.html">Privacy Policy</a></li>
+                        <li><a href="terms.html">Terms & Conditions</a></li>
+                        <li><a href="refund.html">Return & Refund Policy</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <ul class="footer-links">
+                        <li><a href="mailto:enroutestorein@gmail.com">enroutestorein@gmail.com</a></li>
+                        <li><a href="tel:+917621000916">+91 7621000916</a></li>
+                        <li>Ahmedabad, Gujarat, India</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom" style="margin-top: var(--spacing-12); padding-top: var(--spacing-6); border-top: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center;">
+                <p class="text-secondary">&copy; 2026 Enroute Store. All rights reserved.</p>
+                <div style="display: flex; gap: 1rem; color: var(--text-secondary);">
+                    <span>Secured by Razorpay</span>
+                </div>
             </div>
         </div>
     </footer>
@@ -151,5 +207,6 @@
     <script type="module" src="js/firebase-config.js"></script>
     <script type="module" src="js/auth.js"></script>
     <script type="module" src="js/products.js"></script>
+    <script src="js/cookie-consent.js"></script>
 </body>
 </html>

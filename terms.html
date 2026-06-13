@@ -4,63 +4,242 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Terms & Conditions - Enroute Store</title>
+
+    <!-- Standard SEO Meta Tags -->
+    <meta name="description" content="Enroute Store - Premium Game Mods and Addons. Download high-quality mods for your favorite games.">
+    <meta name="keywords" content="gaming, mods, addons, enroute, game modifications">
+    <meta name="author" content="Enroute">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph (Facebook/WhatsApp/Discord) -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://yourdomain.com/">
+    <meta property="og:title" content="Enroute Store - Premium Game Mods">
+    <meta property="og:description" content="Download high-quality mods and addons for your favorite games.">
+    <meta property="og:image" content="https://yourdomain.com/assets/images/fevicon.png">
+    
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://yourdomain.com/">
+    <meta name="twitter:title" content="Enroute Store - Premium Game Mods">
+    <meta name="twitter:description" content="Download high-quality mods and addons for your favorite games.">
+    <meta name="twitter:image" content="https://yourdomain.com/assets/images/fevicon.png">
+
+    <meta name="description" content="Read the Terms and Conditions of Enroute Store before using our website or purchasing digital products.">
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- CSS -->
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/components.css">
     <style>
         body { padding-top: 70px; }
+        .page-header {
+            padding: var(--spacing-12) 0;
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--color-border);
+            text-align: center;
+        }
         .content-section {
             max-width: 800px;
             margin: var(--spacing-16) auto;
             color: var(--text-secondary);
             line-height: 1.8;
+            padding-bottom: var(--spacing-16);
         }
         .content-section h1, .content-section h2, .content-section h3 {
             color: var(--text-primary);
             margin-top: var(--spacing-8);
             margin-bottom: var(--spacing-4);
         }
+        .content-section h1 { margin-top: 0; }
+        .content-section ul, .content-section ol {
+            margin-left: var(--spacing-6);
+            margin-bottom: var(--spacing-4);
+        }
+        .content-section li {
+            margin-bottom: var(--spacing-2);
+        }
+        .content-section a {
+            color: var(--color-primary);
+            text-decoration: underline;
+        }
+        .content-section a:hover {
+            color: var(--color-primary-hover);
+        }
     </style>
+    <link rel="icon" type="image/png" href="assets/images/fevicon.png">
 </head>
 <body>
 
+    <!-- Header -->
     <header class="header">
         <div class="container nav">
             <a href="index.html" class="logo">Enroute<span>.</span></a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">Store</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Support</a></li>
+            </ul>
             <div class="nav-actions">
-                <a href="index.html" class="btn btn-outline">Back to Home</a>
+                <a href="login.html" class="btn btn-outline" id="nav-login-btn">Login</a>
+                <a href="dashboard.html" class="btn btn-primary" id="nav-dash-btn" style="display: none; padding: 0.6rem; border-radius: 50%; aspect-ratio: 1/1;" title="Dashboard">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </a>
             </div>
         </div>
     </header>
 
+    <div class="page-header">
+        <div class="container">
+            <h1>Terms & Conditions</h1>
+            <p class="text-secondary mt-2">Please read these terms carefully before using our services</p>
+        </div>
+    </div>
+
     <div class="container content-section">
-        <h1 class="mb-4">Terms & Conditions</h1>
-        <p>Last updated: June 12, 2026</p>
+        <p><strong>Last updated:</strong> June 13, 2026</p>
+        <p>These Terms and Conditions ("Terms") govern your use of the Enroute Store website and the purchase of digital products from our platform. By accessing or using our website, you agree to be bound by these Terms. If you do not agree with any part of these Terms, you must not use our website.</p>
 
-        <h2>1. Acceptance of Terms</h2>
-        <p>By accessing and using Enroute Store, you accept and agree to be bound by the terms and provision of this agreement.</p>
+        <h2>1. Definitions</h2>
+        <ul>
+            <li><strong>"Website"</strong> refers to the Enroute Store website and all its pages.</li>
+            <li><strong>"Products"</strong> refers to digital goods (BUSSID mods, vehicle models, maps, etc.) available for purchase.</li>
+            <li><strong>"User"</strong>, <strong>"You"</strong>, or <strong>"Your"</strong> refers to any individual accessing or using the Website.</li>
+            <li><strong>"We"</strong>, <strong>"Us"</strong>, or <strong>"Our"</strong> refers to Enroute Store.</li>
+        </ul>
 
-        <h2>2. Digital Products</h2>
-        <p>All products sold on Enroute Store are digital files (BUSSID mods). Due to the nature of digital products, all sales are final. We do not offer refunds once the download link has been provided.</p>
+        <h2>2. Acceptance of Terms</h2>
+        <p>By creating an account, browsing, or making a purchase on Enroute Store, you acknowledge that you have read, understood, and agree to be bound by these Terms and our <a href="privacy.html">Privacy Policy</a>. We reserve the right to modify these Terms at any time, and your continued use of the website constitutes acceptance of any changes.</p>
 
-        <h2>3. License & Usage</h2>
-        <p>When you purchase a mod, you are granted a non-exclusive, non-transferable license to use the digital product for personal use. You may not resell, redistribute, or claim the product as your own creation.</p>
+        <h2>3. Account Registration</h2>
+        <ul>
+            <li>You must provide accurate, complete, and current information during the registration process.</li>
+            <li>You are responsible for maintaining the confidentiality of your account credentials (email and password).</li>
+            <li>You are responsible for all activities that occur under your account.</li>
+            <li>You must notify us immediately of any unauthorized use of your account.</li>
+            <li>We reserve the right to suspend or terminate accounts that violate these Terms.</li>
+        </ul>
 
-        <h2>4. Account Responsibilities</h2>
-        <p>You are responsible for maintaining the confidentiality of your account and password and for restricting access to your computer or device.</p>
+        <h2>4. Digital Products</h2>
+        <p>All products sold on Enroute Store are digital files designed for use with the Bus Simulator Indonesia (BUSSID) game. Please note:</p>
+        <ul>
+            <li>Products are delivered digitally via download links accessible from your dashboard after a successful purchase.</li>
+            <li>All product descriptions, images, and specifications are provided in good faith and are as accurate as possible.</li>
+            <li>We do not guarantee compatibility with all devices or game versions. Please check product requirements before purchasing.</li>
+        </ul>
+
+        <h2>5. Pricing and Payments</h2>
+        <ul>
+            <li>All prices are listed in Indian Rupees (INR) and include applicable taxes unless stated otherwise.</li>
+            <li>We reserve the right to change prices at any time without prior notice.</li>
+            <li>Payments are processed securely through Razorpay. We do not store your credit/debit card details.</li>
+            <li>A purchase is considered complete only when payment has been successfully processed and confirmed.</li>
+        </ul>
+
+        <h2>6. License and Usage Rights</h2>
+        <p>When you purchase a product from Enroute Store, you are granted a <strong>non-exclusive, non-transferable, personal license</strong> to use the digital product. This means:</p>
+        <ul>
+            <li><strong>Permitted:</strong> Using the product for personal, non-commercial gameplay purposes.</li>
+            <li><strong>Not Permitted:</strong> Reselling, redistributing, sharing, uploading, or making the product available to third parties by any means.</li>
+            <li><strong>Not Permitted:</strong> Claiming the product as your own creation or modifying it for redistribution.</li>
+            <li><strong>Not Permitted:</strong> Using the product for any illegal or unauthorized purpose.</li>
+        </ul>
+        <p>Violation of these terms may result in the termination of your license and account without refund.</p>
+
+        <h2>7. Intellectual Property</h2>
+        <p>All content on this website — including but not limited to text, graphics, logos, images, digital products, and software — is the property of Enroute Store or its content creators and is protected by applicable intellectual property laws. Unauthorized reproduction, distribution, or use of any content is strictly prohibited.</p>
+
+        <h2>8. Refund Policy</h2>
+        <p>Due to the digital nature of our products, all sales are generally final. For detailed information about refunds and exceptions, please refer to our <a href="refund.html">Return & Refund Policy</a>.</p>
+
+        <h2>9. Limitation of Liability</h2>
+        <p>To the maximum extent permitted by law:</p>
+        <ul>
+            <li>Enroute Store shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use our products or services.</li>
+            <li>Our total liability to you for any claim arising from these Terms shall not exceed the amount you paid for the specific product in question.</li>
+            <li>We are not responsible for any damage to your device or data loss resulting from the use of our products.</li>
+        </ul>
+
+        <h2>10. Disclaimer of Warranties</h2>
+        <p>Our products and services are provided on an "as is" and "as available" basis without warranties of any kind, either express or implied. We do not warrant that:</p>
+        <ul>
+            <li>The website will be uninterrupted, secure, or error-free.</li>
+            <li>Products will meet your specific requirements or expectations.</li>
+            <li>Any defects in the products will be corrected.</li>
+        </ul>
+
+        <h2>11. Prohibited Activities</h2>
+        <p>You agree not to:</p>
+        <ul>
+            <li>Use the website for any unlawful purpose.</li>
+            <li>Attempt to gain unauthorized access to other user accounts or our systems.</li>
+            <li>Interfere with or disrupt the integrity or performance of the website.</li>
+            <li>Upload or transmit viruses or any other malicious code.</li>
+            <li>Use automated means (bots, scrapers) to access the website without our permission.</li>
+        </ul>
+
+        <h2>12. Governing Law</h2>
+        <p>These Terms shall be governed by and construed in accordance with the laws of India. Any disputes arising out of or in connection with these Terms shall be subject to the exclusive jurisdiction of the courts in Ahmedabad, Gujarat, India.</p>
+
+        <h2>13. Severability</h2>
+        <p>If any provision of these Terms is found to be invalid or unenforceable, the remaining provisions will remain in full force and effect.</p>
+
+        <h2>14. Contact Us</h2>
+        <p>If you have any questions about these Terms & Conditions, please contact us:</p>
+        <ul>
+            <li><strong>Email:</strong> <a href="mailto:enroutestorein@gmail.com">enroutestorein@gmail.com</a></li>
+            <li><strong>Phone:</strong> <a href="tel:+917621000916">+91 7621000916</a></li>
+            <li><strong>Address:</strong> Ahmedabad, Gujarat, India</li>
+        </ul>
     </div>
 
     <footer class="footer">
         <div class="container">
-            <div class="footer-bottom">
-                <p>&copy; 2026 Enroute Store. All rights reserved.</p>
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <a href="index.html" class="logo mb-4" style="display:block;">Enroute<span>.</span></a>
+                    <p class="text-secondary">The gold standard for digital simulation products.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Navigation</h4>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="products.html">Store</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="contact.html">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="privacy.html">Privacy Policy</a></li>
+                        <li><a href="terms.html">Terms & Conditions</a></li>
+                        <li><a href="refund.html">Return & Refund Policy</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <ul class="footer-links">
+                        <li><a href="mailto:enroutestorein@gmail.com">enroutestorein@gmail.com</a></li>
+                        <li><a href="tel:+917621000916">+91 7621000916</a></li>
+                        <li>Ahmedabad, Gujarat, India</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom" style="margin-top: var(--spacing-12); padding-top: var(--spacing-6); border-top: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center;">
+                <p class="text-secondary">&copy; 2026 Enroute Store. All rights reserved.</p>
+                <div style="display: flex; gap: 1rem; color: var(--text-secondary);">
+                    <span>Secured by Razorpay</span>
+                </div>
             </div>
         </div>
     </footer>
 
+    <script type="module" src="js/firebase-config.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script src="js/cookie-consent.js"></script>
 </body>
 </html>

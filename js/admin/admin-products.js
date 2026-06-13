@@ -13,9 +13,13 @@ const saveBtn = document.getElementById('save-product-btn');
 
 // Form Inputs
 const fId = document.getElementById('product-id');
+const fPricingType = document.getElementById('p-pricing-type');
 const fName = document.getElementById('p-name');
 const fCategory = document.getElementById('p-category');
 const fPrice = document.getElementById('p-price');
+const fChannelLink = document.getElementById('p-channel-link');
+const priceGroup = document.getElementById('price-group');
+const channelLinkGroup = document.getElementById('channel-link-group');
 const fImage1 = document.getElementById('p-image-1');
 const fImage2 = document.getElementById('p-image-2');
 const fImage3 = document.getElementById('p-image-3');
@@ -155,6 +159,21 @@ addBtn.addEventListener('click', () => {
 closeBtn.addEventListener('click', closeModal);
 cancelBtn.addEventListener('click', closeModal);
 
+fPricingType.addEventListener('change', (e) => {
+    if (e.target.value === 'free') {
+        priceGroup.style.display = 'none';
+        fPrice.required = false;
+        fPrice.value = 0;
+        channelLinkGroup.style.display = 'block';
+        fChannelLink.required = true;
+    } else {
+        priceGroup.style.display = 'block';
+        fPrice.required = true;
+        channelLinkGroup.style.display = 'none';
+        fChannelLink.required = false;
+    }
+});
+
 const handleEdit = (e) => {
     const id = e.target.getAttribute('data-id');
     const product = allProducts.find(p => p.id === id);
@@ -162,7 +181,23 @@ const handleEdit = (e) => {
         fId.value = product.id;
         fName.value = product.name;
         fCategory.value = product.category;
-        fPrice.value = product.price;
+        
+        fPricingType.value = product.pricingType || (product.price === 0 ? 'free' : 'paid');
+        if (fPricingType.value === 'free') {
+            priceGroup.style.display = 'none';
+            fPrice.required = false;
+            fPrice.value = 0;
+            channelLinkGroup.style.display = 'block';
+            fChannelLink.required = true;
+            fChannelLink.value = product.channelLink || '';
+        } else {
+            priceGroup.style.display = 'block';
+            fPrice.required = true;
+            fPrice.value = product.price;
+            channelLinkGroup.style.display = 'none';
+            fChannelLink.required = false;
+            fChannelLink.value = '';
+        }
 
         const imgs = product.images || [product.image];
         fImage1.value = imgs[0] || '';
@@ -217,8 +252,10 @@ productForm.addEventListener('submit', async (e) => {
 
     const productData = {
         name: fName.value,
+        pricingType: fPricingType.value,
         category: fCategory.value,
-        price: parseFloat(fPrice.value),
+        price: fPricingType.value === 'free' ? 0 : parseFloat(fPrice.value),
+        channelLink: fPricingType.value === 'free' ? fChannelLink.value : '',
         images: [fImage1.value, fImage2.value, fImage3.value, fImage4.value].filter(url => url.trim() !== ''),
         image: fImage1.value, // Keep primary image for backwards compatibility
         downloadLink: fDownload.value,

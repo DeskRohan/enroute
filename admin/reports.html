@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - Enroute Admin</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="icon" type="image/png" href="../assets/images/fevicon.png">
+    <style>
+        .filter-row {
+            display: flex;
+            gap: var(--spacing-4);
+            margin-bottom: var(--spacing-6);
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex: 1;
+            min-width: 200px;
+        }
+        .filter-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        .date-inputs {
+            display: flex;
+            gap: var(--spacing-4);
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="admin-sidebar">
+        <div class="admin-logo">
+            Enroute<span>Admin</span>
+        </div>
+        <ul class="admin-nav">
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="products.html">Products</a></li>
+            <li><a href="orders.html">Orders</a></li>
+            <li><a href="users.html">Users</a></li>
+            <li><a href="reports.html" class="active">Reports</a></li>
+        </ul>
+        <div style="padding: var(--spacing-4); margin-top: auto;">
+            <button class="btn btn-outline" style="width: 100%;" id="admin-logout-btn">Logout</button>
+        </div>
+    </aside>
+
+    <main class="admin-main">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-8);">
+            <h1>Revenue Reports</h1>
+            <button class="btn btn-primary" id="export-pdf-btn" disabled>Export Report (PDF)</button>
+        </div>
+
+        <div class="card" style="padding: var(--spacing-6); margin-bottom: var(--spacing-8);">
+            <h3>Filter Data</h3>
+            <div class="filter-row" style="margin-top: 1rem;">
+                <div class="filter-group">
+                    <label for="filter-product">Select Mod / Product</label>
+                    <select id="filter-product" class="form-control">
+                        <option value="all">All Products</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="filter-time">Time Period</label>
+                    <select id="filter-time" class="form-control">
+                        <option value="all_time">All Time (Launch to Today)</option>
+                        <option value="last_30">Last 30 Days</option>
+                        <option value="last_7">Last 7 Days</option>
+                        <option value="custom">Custom Date Range</option>
+                    </select>
+                </div>
+
+                <div class="filter-group date-inputs" id="custom-date-group" style="display: none;">
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
+                        <label for="date-start">Start Date</label>
+                        <input type="date" id="date-start" class="form-control">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
+                        <label for="date-end">End Date</label>
+                        <input type="date" id="date-end" class="form-control">
+                    </div>
+                </div>
+                
+                <div>
+                    <button class="btn btn-accent" id="generate-btn" style="height: 46px;">Generate</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-grid" style="margin-bottom: var(--spacing-8);">
+            <div class="stat-card">
+                <div class="stat-title">Total Revenue (Filtered)</div>
+                <div class="stat-value" id="summary-revenue">₹0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Total Units Sold</div>
+                <div class="stat-value" id="summary-units">0</div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Pricing Type</th>
+                        <th>Units Sold</th>
+                        <th>Total Revenue Generated</th>
+                    </tr>
+                </thead>
+                <tbody id="reports-table-body">
+                    <tr><td colspan="4" class="text-center text-secondary">Select filters and click Generate to view report.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- Logic -->
+    <script type="module">
+        import { requireAdmin } from '../js/admin/admin-auth.js';
+        requireAdmin();
+    </script>
+    <script type="module" src="../js/admin/admin-reports.js"></script>
+</body>
+</html>

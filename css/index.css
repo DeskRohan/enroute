@@ -1,22 +1,23 @@
 :root {
   /* Colors - Light Mode Professional */
-  --bg-primary: #f9fafb;
+  --bg-primary: #f8fafc;
   --bg-secondary: #ffffff;
-  --text-primary: #111827;
-  --text-secondary: #6b7280;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
   --color-primary: #000000;
-  --color-primary-hover: #374151;
+  --color-primary-hover: #334155;
   --color-accent: #2563eb;
   --color-accent-hover: #1d4ed8;
   --color-danger: #ef4444;
-  --color-border: #e5e7eb;
+  --color-border: #e2e8f0;
   
   /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 4px 12px -4px rgba(0, 0, 0, 0.05);
 
   /* Typography */
-  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-heading: 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif;
   
   /* Transitions */
   --transition-fast: 0.2s ease;
@@ -72,6 +73,8 @@ img {
 h1, h2, h3, h4, h5, h6 {
   color: var(--text-primary);
   line-height: 1.2;
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
 }
 
 h1 { font-size: 2.5rem; font-weight: 800; }

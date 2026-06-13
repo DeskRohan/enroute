@@ -1,5 +1,5 @@
 import { db, auth } from './firebase-config.js';
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 const orderDetailsContainer = document.getElementById('order-details-container');
@@ -54,6 +54,12 @@ const loadSuccessData = async (user) => {
             renderSuccess(order, product, orderId);
             buildInvoice(order, product, orderId);
             triggerAutoDownload(product.downloadLink);
+
+            try {
+                await updateDoc(productRef, { downloadCount: increment(3) });
+            } catch (err) {
+                console.error("Error updating download count", err);
+            }
 
         } else {
             throw new Error("Data not found");
