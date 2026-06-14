@@ -1,5 +1,5 @@
 import { db } from '../firebase-config.js';
-import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { collection, getDocs, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const tableBody = document.getElementById('orders-table-body');
 const searchInput = document.getElementById('search-order');
@@ -19,9 +19,40 @@ const formatDate = (timestamp) => {
 
 const loadOrders = async () => {
     try {
+        const adminEmail = localStorage.getItem('adminEmail');
+        const isSuperAdmin = adminEmail === 'admin@enroute.in';
+
+        let adminProductIds = [];
+        let adminProductNames = [];
+
+        if (!isSuperAdmin) {
+            const prodQ = query(collection(db, "products"), where("addedBy", "==", adminEmail));
+            const prodSnap = await getDocs(prodQ);
+            prodSnap.forEach(doc => {
+                adminProductIds.push(doc.id);
+                adminProductNames.push(doc.data().name);
+            });
+            if (adminProductIds.length === 0) {
+                // Admin has no products, so no orders
+                tableBody.innerHTML = `<tr><td colspan="7" class="text-center text-secondary">No orders found for your products.</td></tr>`;
+                return;
+            }
+        }
+
         const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
         const snapshot = await getDocs(q);
-        allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        let orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        if (!isSuperAdmin) {
+            // filter orders belonging to admin's products
+            orders = orders.filter(o => {
+                if (o.productId && adminProductIds.includes(o.productId)) return true;
+                if (o.productName && adminProductNames.includes(o.productName)) return true;
+                return false;
+            });
+        }
+
+        allOrders = orders;
         renderTable(allOrders);
     } catch (error) {
         console.error("Error loading orders:", error);

@@ -9,6 +9,26 @@ const categoryFilter = document.getElementById('category-filter');
 const sortFilter = document.getElementById('sort-filter');
 
 let allProducts = [];
+let adminsMap = {}; // mapping email to {name, isVerified}
+
+// Fetch Admins
+const fetchAdmins = async () => {
+    try {
+        const q = query(collection(db, "users"), where("role", "==", "admin"));
+        const snapshot = await getDocs(q);
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.email) {
+                adminsMap[data.email] = {
+                    name: data.name || 'Admin',
+                    isVerified: data.isVerified || false
+                };
+            }
+        });
+    } catch (error) {
+        console.error("Error fetching admins:", error);
+    }
+};
 
 // Format currency
 const formatPrice = (price) => {
@@ -60,6 +80,11 @@ window.goToProduct = (id) => {
 // Render a single product card
 const createProductCard = (product) => {
     const imgUrl = (product.images && product.images.length > 0) ? product.images[0] : product.image;
+    
+    // Uploader details
+    const uploader = adminsMap[product.addedBy] || { name: 'Admin', isVerified: false };
+    const verificationBadge = uploader.isVerified ? `<img src="assets/images/varified.png" title="Verified Admin" style="height: 1.2em; vertical-align: middle; margin-left: 4px; display: inline-block;">` : '';
+    
     return `
         <div class="card product-card">
             <a href="javascript:void(0)" onclick="goToProduct('${product.id}')">
@@ -70,7 +95,10 @@ const createProductCard = (product) => {
             <div class="content">
                 <a href="javascript:void(0)" onclick="goToProduct('${product.id}')"><h3 class="title">${product.name}</h3></a>
                 <p class="text-secondary" style="font-size: 0.875rem; margin-bottom: 0.5rem;">${product.category || 'Mod'}</p>
-                <div class="price">${formatPrice(product.price)}</div>
+                <div style="font-size: 0.8rem; margin-bottom: 0.5rem; color: var(--text-secondary);">
+                    By: <span style="font-weight: 600; color: var(--text-primary);">${uploader.name}</span>${verificationBadge}
+                </div>
+                <div class="price">${(product.price === 0 || product.pricingType === 'free') ? 'FREE' : formatPrice(product.price)}</div>
                 <a href="javascript:void(0)" onclick="goToProduct('${product.id}')" class="btn btn-primary" style="width: 100%;">View Details</a>
             </div>
         </div>
@@ -148,7 +176,8 @@ if (categoryFilter) categoryFilter.addEventListener('change', applyFilters);
 if (sortFilter) sortFilter.addEventListener('change', applyFilters);
 
 // Initialize
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    await fetchAdmins();
     loadFeaturedProducts();
     loadAllProducts();
 });

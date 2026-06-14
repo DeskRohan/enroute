@@ -1,5 +1,5 @@
 import { db, auth } from './firebase-config.js';
-import { doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { doc, getDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const productContainer = document.getElementById('product-container');
 
@@ -76,11 +76,18 @@ const loadProduct = async () => {
         if (docSnap.exists()) {
             const product = docSnap.data();
 
-            console.log("Product Data:", product);
-            console.log("Raw Image URL:", product.image);
-            console.log("Converted URL:", getImageUrl(product.image));
+            let uploader = { name: 'Admin', isVerified: false };
+            if (product.addedBy) {
+                const uq = query(collection(db, "users"), where("email", "==", product.addedBy));
+                const uSnap = await getDocs(uq);
+                if (!uSnap.empty) {
+                    const ud = uSnap.docs[0].data();
+                    uploader.name = ud.name || 'Admin';
+                    uploader.isVerified = ud.isVerified || false;
+                }
+            }
 
-            renderProduct(product, productId);
+            renderProduct(product, productId, uploader);
         } else {
             productContainer.innerHTML = `
                 <div class="text-center mt-8">
@@ -103,7 +110,7 @@ const loadProduct = async () => {
     }
 };
 
-const renderProduct = (product, id) => {
+const renderProduct = (product, id, uploader) => {
     document.title = `${product.name || 'Product'} - Enroute Store`;
 
     const isFree = product.pricingType === 'free' || product.price === 0;
@@ -445,6 +452,8 @@ const renderProduct = (product, id) => {
         `;
     });
 
+    const verificationBadge = uploader.isVerified ? `<img src="assets/images/varified.png" title="Verified Admin" style="height: 1.2em; vertical-align: middle; margin-left: 6px; display: inline-block;">` : '';
+
     productContainer.innerHTML = `
         <nav class="breadcrumbs" style="margin-bottom: 2rem;">
             <a href="index.html">Home</a>
@@ -466,12 +475,15 @@ const renderProduct = (product, id) => {
                 <div class="product-info-container">
                     <h1 style="margin-bottom: 0.5rem; font-size: clamp(2rem, 4vw, 2.5rem); line-height: 1.2;">${product.name || 'Unnamed Product'}</h1>
                     
-                    <p class="text-secondary" style="text-transform:uppercase; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 1.5rem; color: var(--color-accent);">
+                    <p class="text-secondary" style="text-transform:uppercase; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 0.5rem; color: var(--color-accent);">
                         ${product.category || 'Mod'}
+                    </p>
+                    <p style="margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-secondary);">
+                        Uploaded By: <span style="font-weight: 600; color: var(--text-primary);">${uploader.name}</span>${verificationBadge}
                     </p>
 
                     <div class="product-price" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
-                        <span style="font-size: 2.5rem; font-weight: 700;">${isFree ? 'Free' : formatPrice(product.price)}</span>
+                        <span style="font-size: 2.5rem; font-weight: 700;">${isFree ? 'FREE' : formatPrice(product.price)}</span>
                         <span style="font-size: 0.95rem; font-weight: 600; color: var(--text-secondary); display: flex; align-items: center; gap: 0.5rem; background: var(--bg-secondary); padding: 0.5rem 1rem; border-radius: 20px; border: 1px solid var(--color-border);">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                             ${(product.downloadCount || 0) + '+'} Downloads

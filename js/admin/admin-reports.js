@@ -1,5 +1,5 @@
 import { db } from '../firebase-config.js';
-import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { collection, getDocs, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const productSelect = document.getElementById('filter-product');
 const timeSelect = document.getElementById('filter-time');
@@ -30,7 +30,16 @@ timeSelect.addEventListener('change', (e) => {
 
 const loadProducts = async () => {
     try {
-        const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
+        const adminEmail = localStorage.getItem('adminEmail');
+        const isSuperAdmin = adminEmail === 'admin@enroute.in';
+
+        let q;
+        if (isSuperAdmin) {
+            q = query(collection(db, "products"), orderBy("createdAt", "desc"));
+        } else {
+            q = query(collection(db, "products"), where("addedBy", "==", adminEmail));
+        }
+
         const snapshot = await getDocs(q);
         allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         
@@ -104,10 +113,14 @@ const generateReport = async () => {
             const orderDate = order.createdAt?.toDate ? order.createdAt.toDate() : new Date(order.createdAt);
             if (orderDate < start || orderDate > end) return;
 
-            // Check Product
+            // Check if product belongs to admin
+            const productMatch = allProducts.find(p => p.id === order.productId || p.name === order.productName);
+            if (!productMatch) return;
+
+            // Check selected Product Dropdown
             if (selectedProductId !== 'all' && order.productId !== selectedProductId) return;
 
-            const pid = order.productId;
+            const pid = order.productId || productMatch.id || order.productName;
             if (!productStats[pid]) {
                 productStats[pid] = {
                     name: order.productName || 'Unknown Product',
