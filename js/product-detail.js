@@ -78,16 +78,21 @@ const loadProduct = async () => {
 
             let uploader = { name: 'Admin', isVerified: false };
             if (product.addedBy) {
-                try {
-                    const uq = query(collection(db, "users"), where("email", "==", product.addedBy));
-                    const uSnap = await getDocs(uq);
-                    if (!uSnap.empty) {
-                        const ud = uSnap.docs[0].data();
-                        uploader.name = ud.name || 'Admin';
-                        uploader.isVerified = ud.isVerified || false;
+                // Main admin is always verified
+                if (product.addedBy === 'admin@enroute.in') {
+                    uploader = { name: 'EnrouteIn', isVerified: true };
+                } else {
+                    try {
+                        const uq = query(collection(db, "users"), where("email", "==", product.addedBy));
+                        const uSnap = await getDocs(uq);
+                        if (!uSnap.empty) {
+                            const ud = uSnap.docs[0].data();
+                            uploader.name = ud.name || 'Admin';
+                            uploader.isVerified = ud.isVerified || false;
+                        }
+                    } catch (e) {
+                        console.warn("Could not fetch uploader info:", e);
                     }
-                } catch (e) {
-                    console.warn("Could not fetch uploader info:", e);
                 }
             }
 

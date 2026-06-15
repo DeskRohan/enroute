@@ -25,6 +25,12 @@ const fetchAdmins = async () => {
                 };
             }
         });
+        // Main admin is always verified
+        if (adminsMap['admin@enroute.in']) {
+            adminsMap['admin@enroute.in'].isVerified = true;
+        } else {
+            adminsMap['admin@enroute.in'] = { name: 'EnrouteIn', isVerified: true };
+        }
     } catch (error) {
         console.error("Error fetching admins:", error);
     }

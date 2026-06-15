@@ -1,6 +1,8 @@
 import { db, auth } from '../firebase-config.js';
-import { collection, getDocs, query, orderBy, limit, doc, updateDoc, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { collection, getDocs, query, orderBy, limit, doc, updateDoc, where, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+const MAIN_ADMIN_EMAIL = 'admin@enroute.in';
 
 const statRevenue = document.getElementById('stat-revenue');
 const statOrders = document.getElementById('stat-orders');
@@ -24,7 +26,7 @@ const formatDate = (timestamp) => {
 const loadStats = async () => {
     try {
         const adminEmail = localStorage.getItem('adminEmail');
-        const isSuperAdmin = adminEmail === 'admin@enroute.in';
+        const isSuperAdmin = adminEmail === MAIN_ADMIN_EMAIL;
 
         // 1. Get Products Count
         const productsSnap = await getDocs(collection(db, "products"));
@@ -69,7 +71,7 @@ const loadStats = async () => {
 const loadRecentOrders = async () => {
     try {
         const adminEmail = localStorage.getItem('adminEmail');
-        if (adminEmail !== 'admin@enroute.in') {
+        if (adminEmail !== MAIN_ADMIN_EMAIL) {
             recentOrdersBody.innerHTML = `<tr><td colspan="5" class="text-center text-secondary">Not available for your role</td></tr>`;
             return;
         }
@@ -108,7 +110,7 @@ const loadRecentOrders = async () => {
 
 const loadVerifications = async () => {
     const adminEmail = localStorage.getItem('adminEmail');
-    const isSuperAdmin = adminEmail === 'admin@enroute.in';
+    const isSuperAdmin = adminEmail === MAIN_ADMIN_EMAIL;
 
     if (isSuperAdmin) {
         document.getElementById('pending-verifications-card').style.display = 'block';
@@ -131,8 +133,8 @@ const loadVerifications = async () => {
                         <div>
                             <h4 style="margin: 0; color: var(--text-primary);">${user.name || 'Unknown'}</h4>
                             <p style="margin: 0.2rem 0 0; font-size: 0.85rem; color: var(--text-secondary);">${user.email}</p>
-                            <p style="margin: 0.2rem 0 0; font-size: 0.85rem; color: var(--text-secondary);">Phone: ${user.phone}</p>
-                            <p style="margin: 0.2rem 0 0; font-size: 0.85rem; color: var(--text-secondary);">Address: ${user.address}</p>
+                            <p style="margin: 0.2rem 0 0; font-size: 0.85rem; color: var(--text-secondary);">Phone: ${user.phone || 'N/A'}</p>
+                            <p style="margin: 0.2rem 0 0; font-size: 0.85rem; color: var(--text-secondary);">Address: ${user.address || 'N/A'}</p>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                             <button class="btn btn-primary approve-btn" data-id="${doc.id}" style="padding: 0.4rem 1rem; font-size: 0.85rem;">Approve</button>
@@ -215,22 +217,28 @@ const showRejectModal = (userId) => {
 
 const handleVerification = () => {
     const adminEmail = localStorage.getItem('adminEmail');
-    const isSuperAdmin = adminEmail === 'admin@enroute.in';
+    const isSuperAdmin = adminEmail === MAIN_ADMIN_EMAIL;
 
-    if (!isSuperAdmin) {
+    if (isSuperAdmin) {
+        // Main admin is always verified — show tick badge next to heading
+        const header = document.querySelector('.admin-main h1');
+        if (header) {
+            header.innerHTML = `Dashboard Overview <img src="../assets/images/varified.png" title="Verified Admin" style="height: 1em; vertical-align: middle; margin-left: 8px; display: inline-block;">`;
+        }
+    } else {
         document.getElementById('apply-verification-card').style.display = 'block';
-        
+
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const docRef = doc(db, 'users', user.uid);
                 const userDoc = await getDoc(docRef);
-                
+
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
                     const badge = document.getElementById('admin-badge');
                     const form = document.getElementById('verification-form');
                     const pendingMsg = document.getElementById('ver-pending-msg');
-                    
+
                     if (userData.isVerified) {
                         badge.innerHTML = 'Verified <img src="../assets/images/varified.png" style="height: 1.2em; vertical-align: middle; display: inline-block;">';
                         badge.style.background = 'rgba(34, 197, 94, 0.1)';
@@ -253,7 +261,7 @@ const handleVerification = () => {
 
                     const phoneInput = document.getElementById('ver-phone');
                     const addressInput = document.getElementById('ver-address');
-                    
+
                     if (userData.phone) phoneInput.value = userData.phone;
                     if (userData.address) addressInput.value = userData.address;
 
@@ -269,7 +277,7 @@ const handleVerification = () => {
                                 address: addressInput.value,
                                 verificationStatus: 'pending'
                             });
-                            
+
                             form.style.display = 'none';
                             pendingMsg.innerHTML = 'Your verification request has been submitted and is pending approval.';
                             pendingMsg.style.display = 'block';
@@ -296,12 +304,12 @@ const showWelcomeToast = async () => {
                 const docRef = doc(db, 'users', user.uid);
                 const userDoc = await getDoc(docRef);
                 const name = userDoc.exists() ? (userDoc.data().name || 'Admin') : 'Admin';
-                
+
                 const toast = document.createElement('div');
                 toast.style = "position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #111827; color: white; padding: 12px 24px; border-radius: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 9999; animation: slideDownToast 0.3s ease, fadeOutToast 0.3s ease 2.7s forwards; border: 1px solid #374151;";
                 toast.innerHTML = `Welcome back, <strong>${name}</strong>! 👋`;
                 document.body.appendChild(toast);
-                
+
                 const style = document.createElement('style');
                 style.innerHTML = `
                     @keyframes slideDownToast { from { opacity: 0; transform: translate(-50%, -20px); } to { opacity: 1; transform: translate(-50%, 0); } }
