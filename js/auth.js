@@ -37,33 +37,40 @@ onAuthStateChanged(auth, async (user) => {
         if (loginBtn) loginBtn.style.display = 'none';
         if (dashBtn) dashBtn.style.display = 'inline-flex';
 
-        // Check role (Admin or Customer)
-        const userDocRef = doc(db, 'users', user.uid);
-        const userDoc = await getDoc(userDocRef);
-        
-        if (userDoc.exists()) {
-            const userData = userDoc.data();
-            // Store role in local storage for quick checks
-            localStorage.setItem('userRole', userData.role);
+        try {
+            // Check role (Admin or Customer)
+            const userDocRef = doc(db, 'users', user.uid);
+            const userDoc = await getDoc(userDocRef);
             
-            if (dashBtn) {
-                dashBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> ${userData.name || 'Profile'}`;
-            }
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                // Store role in local storage for quick checks
+                localStorage.setItem('userRole', userData.role);
+                
+                if (dashBtn) {
+                    dashBtn.style.borderRadius = 'var(--radius-full)';
+                    dashBtn.style.aspectRatio = 'auto';
+                    dashBtn.style.padding = '0.5rem 1.25rem';
+                    dashBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px; display:inline-block; vertical-align:middle;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> <span style="display:inline-block; vertical-align:middle;">${userData.name || 'Profile'}</span>`;
+                }
 
-            // First time login - ask for name
-            if (!userData.name) {
-                promptForName(user.uid);
-            } else {
-                if (!sessionStorage.getItem('welcomeShown')) {
-                    sessionStorage.setItem('welcomeShown', 'true');
-                    showUserWelcomeToast(userData.name);
+                // First time login - ask for name
+                if (!userData.name) {
+                    promptForName(user.uid);
+                } else {
+                    if (!sessionStorage.getItem('welcomeShown')) {
+                        sessionStorage.setItem('welcomeShown', 'true');
+                        showUserWelcomeToast(userData.name);
+                    }
+                }
+
+                // If on admin route but not admin, redirect
+                if (window.location.pathname.includes('/admin/') && userData.role !== 'admin') {
+                    window.location.href = '../index.html';
                 }
             }
-
-            // If on admin route but not admin, redirect
-            if (window.location.pathname.includes('/admin/') && userData.role !== 'admin') {
-                window.location.href = '../index.html';
-            }
+        } catch (error) {
+            console.warn("Auth: Could not fetch user profile:", error);
         }
     } else {
         // User is signed out
@@ -127,7 +134,7 @@ export const promptForName = (uid) => {
             .name-modal-content button:hover { opacity: 0.9; }
         </style>
         <div class="name-modal-content">
-            <h3>Welcome to Enroute!</h3>
+            <h3>Welcome to EnrouteIn.Store!</h3>
             <p>Please tell us your name to personalize your experience.</p>
             <input type="text" id="new-user-name" placeholder="Enter your full name" required>
             <button id="save-name-btn">Continue</button>

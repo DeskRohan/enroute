@@ -78,12 +78,16 @@ const loadProduct = async () => {
 
             let uploader = { name: 'Admin', isVerified: false };
             if (product.addedBy) {
-                const uq = query(collection(db, "users"), where("email", "==", product.addedBy));
-                const uSnap = await getDocs(uq);
-                if (!uSnap.empty) {
-                    const ud = uSnap.docs[0].data();
-                    uploader.name = ud.name || 'Admin';
-                    uploader.isVerified = ud.isVerified || false;
+                try {
+                    const uq = query(collection(db, "users"), where("email", "==", product.addedBy));
+                    const uSnap = await getDocs(uq);
+                    if (!uSnap.empty) {
+                        const ud = uSnap.docs[0].data();
+                        uploader.name = ud.name || 'Admin';
+                        uploader.isVerified = ud.isVerified || false;
+                    }
+                } catch (e) {
+                    console.warn("Could not fetch uploader info:", e);
                 }
             }
 
@@ -105,13 +109,21 @@ const loadProduct = async () => {
             <div class="text-center mt-8">
                 <h3>Error loading product</h3>
                 <p>Please try again later.</p>
+                <p style="color:#ef4444;margin:1rem 0;font-size:0.8rem;word-break:break-all;">
+                    Debug: ${error.code || 'unknown'} - ${error.message || error}
+                    <br>Product ID: ${productId}
+                    <br>URL: ${window.location.href}
+                </p>
+                <a href="products.html" class="btn btn-primary mt-4">
+                    Back to Store
+                </a>
             </div>
         `;
     }
 };
 
 const renderProduct = (product, id, uploader) => {
-    document.title = `${product.name || 'Product'} - Enroute Store`;
+    document.title = `${product.name || 'Product'} - EnrouteIn.Store`;
 
     const isFree = product.pricingType === 'free' || product.price === 0;
 

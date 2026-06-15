@@ -1,6 +1,6 @@
 // Cookie Consent Banner
 (function () {
-    if (localStorage.getItem('enroute_cookies_accepted')) return;
+    try { if (localStorage.getItem('enroute_cookies_accepted')) return; } catch(e) { return; }
 
     const banner = document.createElement('div');
     banner.id = 'cookie-banner';
@@ -88,7 +88,7 @@
     document.body.appendChild(banner);
 
     document.getElementById('cookie-accept').addEventListener('click', () => {
-        localStorage.setItem('enroute_cookies_accepted', 'true');
+        try { localStorage.setItem('enroute_cookies_accepted', 'true'); } catch(e) {}
         banner.style.animation = 'none';
         banner.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
         banner.style.transform = 'translateY(100%)';
@@ -97,7 +97,7 @@
     });
 
     document.getElementById('cookie-decline').addEventListener('click', () => {
-        localStorage.setItem('enroute_cookies_accepted', 'declined');
+        try { localStorage.setItem('enroute_cookies_accepted', 'declined'); } catch(e) {}
         banner.style.animation = 'none';
         banner.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
         banner.style.transform = 'translateY(100%)';

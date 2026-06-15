@@ -135,7 +135,7 @@ const buildInvoice = (order, product, id) => {
     invoiceContent.innerHTML = `
         <div class="invoice-header">
             <div class="invoice-brand">
-                <h2>Enroute<span>.</span></h2>
+                <h2>EnrouteIn<span>.</span></h2>
                 <p style="font-size: 0.85rem; opacity: 0.7; margin-top: 0.25rem;">Digital Mod Store</p>
             </div>
             <div style="text-align: right;">

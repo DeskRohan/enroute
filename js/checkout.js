@@ -142,7 +142,7 @@ checkoutForm.addEventListener('submit', async (e) => {
             "key": RAZORPAY_KEY,
             "amount": orderData.amount,
             "currency": orderData.currency,
-            "name": "Enroute Store",
+            "name": "EnrouteIn",
             "description": `Purchase: ${currentProduct.name}`,
             "image": "https://via.placeholder.com/150", // Your logo here
             "order_id": orderData.id, // Securely generated order ID from backend

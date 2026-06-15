@@ -73,7 +73,9 @@ const getImageUrl = (url) => {
 
 // Helper to navigate to product robustly
 window.goToProduct = (id) => {
-    sessionStorage.setItem('viewProductId', id);
+    try {
+        sessionStorage.setItem('viewProductId', id);
+    } catch(e) {}
     window.location.href = `product.html?id=${id}`;
 };
 
@@ -87,19 +89,21 @@ const createProductCard = (product) => {
     
     return `
         <div class="card product-card">
-            <a href="javascript:void(0)" onclick="goToProduct('${product.id}')">
+            <a href="product.html?id=${product.id}" onclick="try{sessionStorage.setItem('viewProductId', '${product.id}');}catch(e){}">
                 <div class="img-container">
                     <img src="${getImageUrl(imgUrl)}" alt="${product.name}" loading="lazy">
                 </div>
             </a>
             <div class="content">
-                <a href="javascript:void(0)" onclick="goToProduct('${product.id}')"><h3 class="title">${product.name}</h3></a>
+                <a href="product.html?id=${product.id}" onclick="try{sessionStorage.setItem('viewProductId', '${product.id}');}catch(e){}">
+                    <h3 class="title">${product.name}</h3>
+                </a>
                 <p class="text-secondary" style="font-size: 0.875rem; margin-bottom: 0.5rem;">${product.category || 'Mod'}</p>
                 <div style="font-size: 0.8rem; margin-bottom: 0.5rem; color: var(--text-secondary);">
                     By: <span style="font-weight: 600; color: var(--text-primary);">${uploader.name}</span>${verificationBadge}
                 </div>
                 <div class="price">${(product.price === 0 || product.pricingType === 'free') ? 'FREE' : formatPrice(product.price)}</div>
-                <a href="javascript:void(0)" onclick="goToProduct('${product.id}')" class="btn btn-primary" style="width: 100%;">View Details</a>
+                <a href="product.html?id=${product.id}" onclick="try{sessionStorage.setItem('viewProductId', '${product.id}');}catch(e){}" class="btn btn-primary" style="width: 100%;">View Details</a>
             </div>
         </div>
     `;
@@ -154,7 +158,9 @@ const applyFilters = () => {
     const sort = sortFilter.value;
 
     let filtered = allProducts.filter(p => {
-        const matchesSearch = p.name.toLowerCase().includes(searchTerm) || p.description?.toLowerCase().includes(searchTerm);
+        const safeName = p.name || '';
+        const safeDesc = p.description || '';
+        const matchesSearch = safeName.toLowerCase().includes(searchTerm) || safeDesc.toLowerCase().includes(searchTerm);
         const matchesCategory = category === 'all' || p.category === category;
         return matchesSearch && matchesCategory;
     });
@@ -176,8 +182,8 @@ if (categoryFilter) categoryFilter.addEventListener('change', applyFilters);
 if (sortFilter) sortFilter.addEventListener('change', applyFilters);
 
 // Initialize
-document.addEventListener('DOMContentLoaded', async () => {
-    await fetchAdmins();
+document.addEventListener('DOMContentLoaded', () => {
+    fetchAdmins();
     loadFeaturedProducts();
     loadAllProducts();
 });
