@@ -52,12 +52,13 @@
                         <th>Category</th>
                         <th>Price</th>
                         <th>Featured</th>
+                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="products-table-body">
                     <tr>
-                        <td colspan="6" class="text-center">Loading...</td>
+                        <td colspan="7" class="text-center">Loading...</td>
                     </tr>
                 </tbody>
             </table>
@@ -165,6 +166,33 @@
                             <label class="form-label" style="margin-bottom: 0;">Featured Product</label>
                         </div>
                     </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Publishing Status</label>
+                    <div class="status-options-grid">
+                        <label class="status-option-card active" id="status-live-card">
+                            <input type="radio" name="p-status" id="p-status-live" value="live" checked style="display: none;">
+                            <div class="status-indicator live"></div>
+                            <div class="status-info">
+                                <span class="status-title">Live Now</span>
+                                <span class="status-desc">Instantly visible in the store catalog</span>
+                            </div>
+                        </label>
+                        <label class="status-option-card" id="status-scheduled-card">
+                            <input type="radio" name="p-status" id="p-status-scheduled" value="scheduled" style="display: none;">
+                            <div class="status-indicator scheduled"></div>
+                            <div class="status-info">
+                                <span class="status-title">Schedule for Later</span>
+                                <span class="status-desc">Publish at a custom date & time</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group" id="schedule-datetime-group" style="display: none; animation: slideDown 0.3s ease-out forwards;">
+                    <label class="form-label">Scheduled Date & Time (Local Time)</label>
+                    <input type="datetime-local" id="p-scheduled-date" class="form-control">
                 </div>
 
                 <div class="form-group">

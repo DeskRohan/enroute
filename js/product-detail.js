@@ -76,6 +76,27 @@ const loadProduct = async () => {
         if (docSnap.exists()) {
             const product = docSnap.data();
 
+            // Block access to scheduled products for non-admins
+            const isAdmin = localStorage.getItem('userRole') === 'admin';
+            const isScheduled = product.status === 'scheduled' && (!product.scheduledDate || new Date(product.scheduledDate) > new Date());
+            
+            if (isScheduled && !isAdmin) {
+                const formattedTime = product.scheduledDate ? new Date(product.scheduledDate).toLocaleString('en-IN', {
+                    day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                }) : 'soon';
+                productContainer.innerHTML = `
+                    <div class="text-center mt-8" style="max-width: 500px; margin: var(--spacing-16) auto; padding: var(--spacing-8); background: var(--bg-secondary); border-radius: var(--radius-lg); border: 1px solid var(--color-border); box-shadow: var(--shadow-md);">
+                        <div style="font-size: 3rem; margin-bottom: var(--spacing-4);">🗓️</div>
+                        <h3 style="margin-bottom: var(--spacing-2);">Product Scheduled</h3>
+                        <p class="text-secondary" style="margin-bottom: var(--spacing-6);">This product is scheduled to go live on <br><strong style="color: var(--text-primary); font-size: 1.1rem;">${formattedTime}</strong>.</p>
+                        <a href="products.html" class="btn btn-primary" style="width: 100%;">
+                            Return to Store
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
             let uploader = { name: 'Admin', isVerified: false };
             if (product.addedBy) {
                 // Main admin is always verified

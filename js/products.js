@@ -131,10 +131,19 @@ const renderProducts = (products, container) => {
 export const loadFeaturedProducts = async () => {
     if (!featuredContainer) return;
     try {
-        const q = query(collection(db, "products"), orderBy("createdAt", "desc"), limit(3));
+        const q = query(collection(db, "products"), orderBy("createdAt", "desc"), limit(10));
         const snapshot = await getDocs(q);
-        const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        renderProducts(products, featuredContainer);
+        let products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        // Filter out scheduled products in the future
+        products = products.filter(p => {
+            if (p.status === 'scheduled') {
+                return p.scheduledDate && new Date(p.scheduledDate) <= new Date();
+            }
+            return true;
+        });
+        
+        renderProducts(products.slice(0, 3), featuredContainer);
     } catch (error) {
         console.error("Error loading featured products:", error);
         featuredContainer.innerHTML = `<p class="text-secondary text-center" style="grid-column: 1/-1;">Failed to load products. Please try again later.</p>`;
@@ -148,6 +157,15 @@ export const loadAllProducts = async () => {
         const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
         const snapshot = await getDocs(q);
         allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        // Filter out scheduled products in the future
+        allProducts = allProducts.filter(p => {
+            if (p.status === 'scheduled') {
+                return p.scheduledDate && new Date(p.scheduledDate) <= new Date();
+            }
+            return true;
+        });
+        
         renderProducts(allProducts, productsContainer);
     } catch (error) {
         console.error("Error loading all products:", error);

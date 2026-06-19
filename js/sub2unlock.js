@@ -27,6 +27,16 @@ const init = async () => {
 
         if (docSnap.exists()) {
             const product = docSnap.data();
+            
+            // Block access for non-admins if product is scheduled in the future
+            const isAdmin = localStorage.getItem('userRole') === 'admin';
+            const isScheduled = product.status === 'scheduled' && (!product.scheduledDate || new Date(product.scheduledDate) > new Date());
+            if (isScheduled && !isAdmin) {
+                modNameEl.textContent = 'This mod is scheduled to go live later.';
+                btnSubscribe.disabled = true;
+                return;
+            }
+
             modNameEl.textContent = `Mod: ${product.name}`;
             
             const bc = document.getElementById('breadcrumbs');

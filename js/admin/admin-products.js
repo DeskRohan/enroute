@@ -37,10 +37,26 @@ const fYoutube = document.getElementById('p-youtube');
 const fDesc = document.getElementById('p-description');
 const relatedContainer = document.getElementById('p-related-container');
 
+// Publishing Status controls
+const fStatusLiveCard = document.getElementById('status-live-card');
+const fStatusScheduledCard = document.getElementById('status-scheduled-card');
+const fStatusLiveInput = document.getElementById('p-status-live');
+const fStatusScheduledInput = document.getElementById('p-status-scheduled');
+const fScheduleDatetimeGroup = document.getElementById('schedule-datetime-group');
+const fScheduledDate = document.getElementById('p-scheduled-date');
+
 let allProducts = [];
 
 const formatPrice = (price) => {
     return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(price);
+};
+
+const formatDateTimeLocal = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const tzOffset = date.getTimezoneOffset() * 60000; // offset in milliseconds
+    const localISOTime = (new Date(date - tzOffset)).toISOString().slice(0, 16);
+    return localISOTime;
 };
 
 // Google Drive Image URL Converter
@@ -98,7 +114,7 @@ const loadProducts = async () => {
 
 const renderTable = () => {
     if (allProducts.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-secondary">No products found. Add one!</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="7" class="text-center text-secondary">No products found. Add one!</td></tr>`;
         return;
     }
 
@@ -112,6 +128,21 @@ const renderTable = () => {
             <button class="btn btn-sm btn-outline delete-btn" data-id="${product.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; color: var(--color-danger); border-color: var(--color-danger); margin-left: 0.5rem;">Delete</button>
         `;
 
+        let statusHtml = '';
+        if (product.status === 'scheduled') {
+            const isFuture = product.scheduledDate && new Date(product.scheduledDate) > new Date();
+            if (isFuture) {
+                const formattedTime = new Date(product.scheduledDate).toLocaleString('en-IN', {
+                    day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+                });
+                statusHtml = `<span class="badge badge-primary" title="Scheduled to go live on ${formattedTime}">Scheduled<br><span style="font-size:0.65rem;font-weight:400;opacity:0.9;">${formattedTime}</span></span>`;
+            } else {
+                statusHtml = '<span class="badge badge-success">Live (Sched)</span>';
+            }
+        } else {
+            statusHtml = '<span class="badge badge-success">Live</span>';
+        }
+
         html += `
             <tr>
                 <td><img src="${getImageUrl(product.image)}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"></td>
@@ -119,6 +150,7 @@ const renderTable = () => {
                 <td style="text-transform: capitalize;">${product.category}</td>
                 <td>${formatPrice(product.price)}</td>
                 <td>${product.featured ? '<span style="color:var(--color-accent)">Yes</span>' : '<span class="text-secondary">No</span>'}</td>
+                <td>${statusHtml}</td>
                 <td>
                     ${actionsHtml}
                 </td>
@@ -160,6 +192,14 @@ const closeModal = () => {
     fImage2.value = '';
     fImage3.value = '';
     fImage4.value = '';
+
+    // Reset Publishing Status UI
+    fStatusLiveCard.classList.add('active');
+    fStatusScheduledCard.classList.remove('active');
+    fStatusLiveInput.checked = true;
+    fScheduleDatetimeGroup.style.display = 'none';
+    fScheduledDate.required = false;
+    fScheduledDate.value = '';
 };
 
 // Handlers
@@ -169,6 +209,23 @@ addBtn.addEventListener('click', () => {
 
 closeBtn.addEventListener('click', closeModal);
 cancelBtn.addEventListener('click', closeModal);
+
+// Publishing Status card selection logic
+fStatusLiveCard.addEventListener('click', () => {
+    fStatusLiveCard.classList.add('active');
+    fStatusScheduledCard.classList.remove('active');
+    fStatusLiveInput.checked = true;
+    fScheduleDatetimeGroup.style.display = 'none';
+    fScheduledDate.required = false;
+});
+
+fStatusScheduledCard.addEventListener('click', () => {
+    fStatusScheduledCard.classList.add('active');
+    fStatusLiveCard.classList.remove('active');
+    fStatusScheduledInput.checked = true;
+    fScheduleDatetimeGroup.style.display = 'block';
+    fScheduledDate.required = true;
+});
 
 fPricingType.addEventListener('change', (e) => {
     if (e.target.value === 'free') {
@@ -227,6 +284,24 @@ const handleEdit = (e) => {
         fSummary.value = product.summary || '';
         fYoutube.value = product.youtube || '';
         fDesc.value = product.description;
+
+        // Populate status fields
+        if (product.status === 'scheduled') {
+            fStatusScheduledCard.classList.add('active');
+            fStatusLiveCard.classList.remove('active');
+            fStatusScheduledInput.checked = true;
+            fScheduleDatetimeGroup.style.display = 'block';
+            fScheduledDate.required = true;
+            fScheduledDate.value = formatDateTimeLocal(product.scheduledDate);
+        } else {
+            fStatusLiveCard.classList.add('active');
+            fStatusScheduledCard.classList.remove('active');
+            fStatusLiveInput.checked = true;
+            fScheduleDatetimeGroup.style.display = 'none';
+            fScheduledDate.required = false;
+            fScheduledDate.value = '';
+        }
+
         openModal(true, id);
 
         // Check related mods
@@ -261,6 +336,9 @@ productForm.addEventListener('submit', async (e) => {
     const productId = fId.value || generateId();
     const selectedRelated = Array.from(document.querySelectorAll('.related-mod-checkbox:checked')).map(cb => cb.value);
 
+    const selectedStatus = document.querySelector('input[name="p-status"]:checked').value;
+    const scheduledDateValue = selectedStatus === 'scheduled' ? new Date(fScheduledDate.value).toISOString() : null;
+
     const productData = {
         name: fName.value,
         pricingType: fPricingType.value,
@@ -277,6 +355,8 @@ productForm.addEventListener('submit', async (e) => {
         size: fSize.value,
         interior: fInterior.checked,
         featured: fFeatured.checked,
+        status: selectedStatus,
+        scheduledDate: scheduledDateValue,
         summary: fSummary.value,
         youtube: fYoutube.value,
         relatedMods: selectedRelated,
