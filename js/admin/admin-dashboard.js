@@ -14,7 +14,7 @@ const formatPrice = (price) => {
     return new Intl.NumberFormat('en-IN', {
         style: 'currency',
         currency: 'INR'
-    }).format(price);
+    }).format(price || 0);
 };
 
 const formatDate = (timestamp) => {
@@ -28,39 +28,66 @@ const loadStats = async () => {
         const adminEmail = localStorage.getItem('adminEmail');
         const isSuperAdmin = adminEmail === MAIN_ADMIN_EMAIL;
 
-        // 1. Get Products Count
+        // 1. Get Products Count & Mapping
         const productsSnap = await getDocs(collection(db, "products"));
+        const adminProductIds = [];
+        const adminProductNames = [];
+
+        productsSnap.forEach(docSnap => {
+            const data = docSnap.data();
+            if (isSuperAdmin || data.addedBy === adminEmail) {
+                adminProductIds.push(docSnap.id);
+                if (data.name) adminProductNames.push(data.name);
+            }
+        });
+
         if (isSuperAdmin) {
             statProducts.textContent = productsSnap.size;
         } else {
-            let ownCount = 0;
-            productsSnap.forEach(doc => {
-                if (doc.data().addedBy === adminEmail) ownCount++;
-            });
-            statProducts.textContent = ownCount;
+            statProducts.textContent = adminProductIds.length;
         }
 
-        // 2. Get Users Count
+        // 2. Fetch Orders
+        const ordersSnap = await getDocs(collection(db, "orders"));
+        let matchingOrders = [];
+
+        ordersSnap.forEach(docSnap => {
+            const order = { id: docSnap.id, ...docSnap.data() };
+            if (isSuperAdmin) {
+                matchingOrders.push(order);
+            } else {
+                // Match by product ID, product name, or addedBy attribution
+                const matchesId = order.productId && adminProductIds.includes(order.productId);
+                const matchesName = order.productName && adminProductNames.includes(order.productName);
+                const matchesCreator = order.addedBy === adminEmail;
+                if (matchesId || matchesName || matchesCreator) {
+                    matchingOrders.push(order);
+                }
+            }
+        });
+
+        // 3. Compute Total Revenue / Total Income & Total Orders
+        let totalRevenue = 0;
+        matchingOrders.forEach(order => {
+            totalRevenue += Number(order.amount || 0);
+        });
+
+        statRevenue.textContent = formatPrice(totalRevenue);
+        statOrders.textContent = matchingOrders.length;
+
+        // 4. Users / Customers Count
         if (isSuperAdmin) {
             const usersSnap = await getDocs(collection(db, "users"));
             statUsers.textContent = usersSnap.size;
         } else {
-            statUsers.textContent = "N/A";
-        }
-
-        // 3. Get Orders & Revenue
-        if (isSuperAdmin) {
-            const ordersSnap = await getDocs(collection(db, "orders"));
-            statOrders.textContent = ordersSnap.size;
-            
-            let totalRev = 0;
-            ordersSnap.forEach(doc => {
-                totalRev += Number(doc.data().amount || 0);
+            // Count unique customers who purchased this admin's products
+            const uniqueCustomers = new Set();
+            matchingOrders.forEach(o => {
+                if (o.email) uniqueCustomers.add(o.email.toLowerCase());
             });
-            statRevenue.textContent = formatPrice(totalRev);
-        } else {
-            statOrders.textContent = "N/A";
-            statRevenue.textContent = "N/A";
+            statUsers.textContent = uniqueCustomers.size;
+            const userTitle = statUsers.previousElementSibling;
+            if (userTitle) userTitle.textContent = "Customer Base";
         }
 
     } catch (error) {
@@ -71,31 +98,59 @@ const loadStats = async () => {
 const loadRecentOrders = async () => {
     try {
         const adminEmail = localStorage.getItem('adminEmail');
-        if (adminEmail !== MAIN_ADMIN_EMAIL) {
-            recentOrdersBody.innerHTML = `<tr><td colspan="5" class="text-center text-secondary">Not available for your role</td></tr>`;
-            return;
+        const isSuperAdmin = adminEmail === MAIN_ADMIN_EMAIL;
+
+        // Fetch products added by this admin for filtering
+        const adminProductIds = [];
+        const adminProductNames = [];
+
+        if (!isSuperAdmin) {
+            const prodQ = query(collection(db, "products"), where("addedBy", "==", adminEmail));
+            const prodSnap = await getDocs(prodQ);
+            prodSnap.forEach(docSnap => {
+                adminProductIds.push(docSnap.id);
+                if (docSnap.data().name) adminProductNames.push(docSnap.data().name);
+            });
         }
 
-        const q = query(collection(db, "orders"), orderBy("createdAt", "desc"), limit(5));
+        const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
         const snapshot = await getDocs(q);
-        
+
         if (snapshot.empty) {
-            recentOrdersBody.innerHTML = `<tr><td colspan="5" class="text-center text-secondary">No orders yet</td></tr>`;
+            recentOrdersBody.innerHTML = `<tr><td colspan="5" class="text-center text-secondary">No orders found</td></tr>`;
             return;
         }
 
+        let orders = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+
+        if (!isSuperAdmin) {
+            // Filter orders belonging to this admin's products
+            orders = orders.filter(order => {
+                const matchesId = order.productId && adminProductIds.includes(order.productId);
+                const matchesName = order.productName && adminProductNames.includes(order.productName);
+                const matchesCreator = order.addedBy === adminEmail;
+                return matchesId || matchesName || matchesCreator;
+            });
+        }
+
+        if (orders.length === 0) {
+            recentOrdersBody.innerHTML = `<tr><td colspan="5" class="text-center text-secondary">No orders yet for your uploaded products</td></tr>`;
+            return;
+        }
+
+        // Take top 5
+        const top5 = orders.slice(0, 5);
         let html = '';
-        snapshot.forEach(doc => {
-            const order = doc.data();
+        top5.forEach(order => {
             html += `
                 <tr>
-                    <td style="font-family: monospace;">#${doc.id.slice(0, 8)}</td>
+                    <td style="font-family: monospace;">#${order.id.slice(0, 8)}</td>
                     <td>
-                        <div>${order.customerName || 'N/A'}</div>
-                        <div class="text-secondary" style="font-size: 0.75rem;">${order.email}</div>
+                        <div>${order.customerName || 'Customer'}</div>
+                        <div class="text-secondary" style="font-size: 0.75rem;">${order.email || 'N/A'}</div>
                     </td>
-                    <td>${order.productName}</td>
-                    <td class="color-primary" style="font-weight: 600;">${formatPrice(order.amount)}</td>
+                    <td>${order.productName || 'Mod Package'}</td>
+                    <td style="font-weight: 700; color: var(--admin-primary);">${formatPrice(order.amount)}</td>
                     <td>${formatDate(order.createdAt)}</td>
                 </tr>
             `;
@@ -113,8 +168,10 @@ const loadVerifications = async () => {
     const isSuperAdmin = adminEmail === MAIN_ADMIN_EMAIL;
 
     if (isSuperAdmin) {
-        document.getElementById('pending-verifications-card').style.display = 'block';
+        const card = document.getElementById('pending-verifications-card');
+        if (card) card.style.display = 'block';
         const list = document.getElementById('pending-verifications-list');
+        if (!list) return;
         
         try {
             const q = query(collection(db, "users"), where("verificationStatus", "==", "pending"));
@@ -126,19 +183,19 @@ const loadVerifications = async () => {
             }
 
             let html = '';
-            snapshot.forEach(doc => {
-                const user = doc.data();
+            snapshot.forEach(docSnap => {
+                const user = docSnap.data();
                 html += `
-                    <div style="background: var(--bg-secondary); padding: 1rem; border-radius: 8px; border: 1px solid var(--color-border); margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="background: #ffffff; padding: 1rem; border-radius: 12px; border: 1px solid var(--admin-border); margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
                         <div>
-                            <h4 style="margin: 0; color: var(--text-primary);">${user.name || 'Unknown'}</h4>
-                            <p style="margin: 0.2rem 0 0; font-size: 0.85rem; color: var(--text-secondary);">${user.email}</p>
-                            <p style="margin: 0.2rem 0 0; font-size: 0.85rem; color: var(--text-secondary);">Phone: ${user.phone || 'N/A'}</p>
-                            <p style="margin: 0.2rem 0 0; font-size: 0.85rem; color: var(--text-secondary);">Address: ${user.address || 'N/A'}</p>
+                            <h4 style="margin: 0; color: var(--admin-text-primary);">${user.name || 'Unknown'}</h4>
+                            <p style="margin: 0.2rem 0 0; font-size: 0.85rem; color: var(--admin-text-secondary);">${user.email}</p>
+                            <p style="margin: 0.2rem 0 0; font-size: 0.85rem; color: var(--admin-text-secondary);">Phone: ${user.phone || 'N/A'}</p>
+                            <p style="margin: 0.2rem 0 0; font-size: 0.85rem; color: var(--admin-text-secondary);">Address: ${user.address || 'N/A'}</p>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                            <button class="btn btn-primary approve-btn" data-id="${doc.id}" style="padding: 0.4rem 1rem; font-size: 0.85rem;">Approve</button>
-                            <button class="btn btn-outline reject-btn" data-id="${doc.id}" style="padding: 0.4rem 1rem; font-size: 0.85rem; color: #ef4444; border-color: #ef4444;">Reject</button>
+                            <button class="btn btn-primary approve-btn" data-id="${docSnap.id}" style="padding: 0.4rem 1rem; font-size: 0.85rem;">Approve</button>
+                            <button class="btn btn-outline reject-btn" data-id="${docSnap.id}" style="padding: 0.4rem 1rem; font-size: 0.85rem; color: #ef4444; border-color: #ef4444;">Reject</button>
                         </div>
                     </div>
                 `;
@@ -220,13 +277,13 @@ const handleVerification = () => {
     const isSuperAdmin = adminEmail === MAIN_ADMIN_EMAIL;
 
     if (isSuperAdmin) {
-        // Main admin is always verified — show tick badge next to heading
         const header = document.querySelector('.admin-main h1');
         if (header) {
             header.innerHTML = `Dashboard Overview <img src="../assets/images/varified.png" title="Verified Admin" style="height: 1em; vertical-align: middle; margin-left: 8px; display: inline-block;">`;
         }
     } else {
-        document.getElementById('apply-verification-card').style.display = 'block';
+        const applyCard = document.getElementById('apply-verification-card');
+        if (applyCard) applyCard.style.display = 'block';
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -240,57 +297,71 @@ const handleVerification = () => {
                     const pendingMsg = document.getElementById('ver-pending-msg');
 
                     if (userData.isVerified) {
-                        badge.innerHTML = 'Verified <img src="../assets/images/varified.png" style="height: 1.2em; vertical-align: middle; display: inline-block;">';
-                        badge.style.background = 'rgba(34, 197, 94, 0.1)';
-                        badge.style.color = '#22c55e';
+                        if (badge) {
+                            badge.innerHTML = 'Verified <img src="../assets/images/varified.png" style="height: 1.2em; vertical-align: middle; display: inline-block;">';
+                            badge.style.background = 'rgba(34, 197, 94, 0.1)';
+                            badge.style.color = '#22c55e';
+                        }
                     } else if (userData.verificationStatus === 'pending') {
-                        badge.textContent = 'Pending';
-                        badge.style.background = 'rgba(234, 179, 8, 0.1)';
-                        badge.style.color = '#eab308';
-                        pendingMsg.style.display = 'block';
+                        if (badge) {
+                            badge.textContent = 'Pending';
+                            badge.style.background = 'rgba(234, 179, 8, 0.1)';
+                            badge.style.color = '#eab308';
+                        }
+                        if (pendingMsg) pendingMsg.style.display = 'block';
                     } else if (userData.verificationStatus === 'rejected') {
-                        badge.textContent = 'Rejected';
-                        badge.style.background = 'rgba(239, 68, 68, 0.1)';
-                        badge.style.color = '#ef4444';
-                        pendingMsg.innerHTML = `<span style="color: #ef4444;">Your application was rejected: <strong>${userData.rejectReason || 'Invalid details'}</strong>. Please correct your details and apply again.</span>`;
-                        pendingMsg.style.display = 'block';
-                        form.style.display = 'flex';
+                        if (badge) {
+                            badge.textContent = 'Rejected';
+                            badge.style.background = 'rgba(239, 68, 68, 0.1)';
+                            badge.style.color = '#ef4444';
+                        }
+                        if (pendingMsg) {
+                            pendingMsg.innerHTML = `<span style="color: #ef4444;">Your application was rejected: <strong>${userData.rejectReason || 'Invalid details'}</strong>. Please correct your details and apply again.</span>`;
+                            pendingMsg.style.display = 'block';
+                        }
+                        if (form) form.style.display = 'flex';
                     } else {
-                        form.style.display = 'flex';
+                        if (form) form.style.display = 'flex';
                     }
 
                     const phoneInput = document.getElementById('ver-phone');
                     const addressInput = document.getElementById('ver-address');
 
-                    if (userData.phone) phoneInput.value = userData.phone;
-                    if (userData.address) addressInput.value = userData.address;
+                    if (phoneInput && userData.phone) phoneInput.value = userData.phone;
+                    if (addressInput && userData.address) addressInput.value = userData.address;
 
-                    form.addEventListener('submit', async (e) => {
-                        e.preventDefault();
-                        const btn = form.querySelector('button');
-                        btn.disabled = true;
-                        btn.textContent = 'Submitting...';
+                    if (form) {
+                        form.addEventListener('submit', async (e) => {
+                            e.preventDefault();
+                            const btn = form.querySelector('button');
+                            btn.disabled = true;
+                            btn.textContent = 'Submitting...';
 
-                        try {
-                            await updateDoc(docRef, {
-                                phone: phoneInput.value,
-                                address: addressInput.value,
-                                verificationStatus: 'pending'
-                            });
+                            try {
+                                await updateDoc(docRef, {
+                                    phone: phoneInput.value,
+                                    address: addressInput.value,
+                                    verificationStatus: 'pending'
+                                });
 
-                            form.style.display = 'none';
-                            pendingMsg.innerHTML = 'Your verification request has been submitted and is pending approval.';
-                            pendingMsg.style.display = 'block';
-                            badge.textContent = 'Pending';
-                            badge.style.background = 'rgba(234, 179, 8, 0.1)';
-                            badge.style.color = '#eab308';
-                        } catch (error) {
-                            console.error(error);
-                            alert("Failed to submit.");
-                            btn.disabled = false;
-                            btn.textContent = 'Apply for Verification';
-                        }
-                    });
+                                form.style.display = 'none';
+                                if (pendingMsg) {
+                                    pendingMsg.innerHTML = 'Your verification request has been submitted and is pending approval.';
+                                    pendingMsg.style.display = 'block';
+                                }
+                                if (badge) {
+                                    badge.textContent = 'Pending';
+                                    badge.style.background = 'rgba(234, 179, 8, 0.1)';
+                                    badge.style.color = '#eab308';
+                                }
+                            } catch (error) {
+                                console.error(error);
+                                alert("Failed to submit.");
+                                btn.disabled = false;
+                                btn.textContent = 'Apply for Verification';
+                            }
+                        });
+                    }
                 }
             }
         });
@@ -306,7 +377,7 @@ const showWelcomeToast = async () => {
                 const name = userDoc.exists() ? (userDoc.data().name || 'Admin') : 'Admin';
 
                 const toast = document.createElement('div');
-                toast.style = "position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #111827; color: white; padding: 12px 24px; border-radius: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 9999; animation: slideDownToast 0.3s ease, fadeOutToast 0.3s ease 2.7s forwards; border: 1px solid #374151;";
+                toast.style = "position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #0f172a; color: white; padding: 12px 24px; border-radius: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 9999; animation: slideDownToast 0.3s ease, fadeOutToast 0.3s ease 2.7s forwards; border: 1px solid rgba(255,255,255,0.15); font-family: 'Plus Jakarta Sans', sans-serif;";
                 toast.innerHTML = `Welcome back, <strong>${name}</strong>! 👋`;
                 document.body.appendChild(toast);
 

@@ -85,31 +85,67 @@ window.goToProduct = (id) => {
     window.location.href = `product.html?id=${id}`;
 };
 
+// Wishlist bookmark helper
+window.toggleWishlist = (e, id) => {
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    try {
+        let wishlist = JSON.parse(localStorage.getItem('enroute_wishlist') || '[]');
+        const btn = document.getElementById(`wish-btn-${id}`);
+        if (wishlist.includes(id)) {
+            wishlist = wishlist.filter(x => x !== id);
+            if (btn) btn.classList.remove('active');
+        } else {
+            wishlist.push(id);
+            if (btn) btn.classList.add('active');
+        }
+        localStorage.setItem('enroute_wishlist', JSON.stringify(wishlist));
+    } catch(err) {}
+};
+
 // Render a single product card
 const createProductCard = (product) => {
     const imgUrl = (product.images && product.images.length > 0) ? product.images[0] : product.image;
+    const isFree = (product.price === 0 || product.pricingType === 'free');
     
     // Uploader details
     const uploader = adminsMap[product.addedBy] || { name: 'Admin', isVerified: false };
-    const verificationBadge = uploader.isVerified ? `<img src="assets/images/varified.png" title="Verified Admin" style="height: 1.2em; vertical-align: middle; margin-left: 4px; display: inline-block;">` : '';
+    const verificationBadge = uploader.isVerified ? `<img src="assets/images/varified.png" title="Verified Admin" style="height: 1.15em; vertical-align: middle; margin-left: 4px; display: inline-block;">` : '';
     
+    let isWishlisted = false;
+    try {
+        const currentWish = JSON.parse(localStorage.getItem('enroute_wishlist') || '[]');
+        isWishlisted = currentWish.includes(product.id);
+    } catch(e) {}
+
     return `
         <div class="card product-card">
-            <a href="product.html?id=${product.id}" onclick="try{sessionStorage.setItem('viewProductId', '${product.id}');}catch(e){}">
+            <button class="card-wishlist-btn ${isWishlisted ? 'active' : ''}" id="wish-btn-${product.id}" onclick="window.toggleWishlist(event, '${product.id}')" title="Save to Garage Wishlist">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="${isWishlisted ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            </button>
+            <a href="product.html?id=${product.id}" onclick="try{sessionStorage.setItem('viewProductId', '${product.id}');}catch(e){}" style="display: block;">
                 <div class="img-container">
                     <img src="${getImageUrl(imgUrl)}" alt="${product.name}" loading="lazy">
                 </div>
             </a>
             <div class="content">
+                <span class="category-pill">${product.category || 'BUSSID MOD'}</span>
                 <a href="product.html?id=${product.id}" onclick="try{sessionStorage.setItem('viewProductId', '${product.id}');}catch(e){}">
                     <h3 class="title">${product.name}</h3>
                 </a>
-                <p class="text-secondary" style="font-size: 0.875rem; margin-bottom: 0.5rem;">${product.category || 'Mod'}</p>
-                <div style="font-size: 0.8rem; margin-bottom: 0.5rem; color: var(--text-secondary);">
-                    By: <span style="font-weight: 600; color: var(--text-primary);">${uploader.name}</span>${verificationBadge}
+                <div class="uploader-info">
+                    <span>By:</span>
+                    <span class="uploader-name">${uploader.name}</span>${verificationBadge}
                 </div>
-                <div class="price">${(product.price === 0 || product.pricingType === 'free') ? 'FREE' : formatPrice(product.price)}</div>
-                <a href="product.html?id=${product.id}" onclick="try{sessionStorage.setItem('viewProductId', '${product.id}');}catch(e){}" class="btn btn-primary" style="width: 100%;">View Details</a>
+                <div class="price-row">
+                    <span class="price ${isFree ? 'free' : ''}">${isFree ? 'FREE' : formatPrice(product.price)}</span>
+                </div>
+                <a href="product.html?id=${product.id}" onclick="try{sessionStorage.setItem('viewProductId', '${product.id}');}catch(e){}" class="btn btn-primary" style="width: 100%;">
+                    <span>View Details</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </a>
             </div>
         </div>
     `;
@@ -120,7 +156,15 @@ const renderProducts = (products, container) => {
     if (!container) return;
     
     if (products.length === 0) {
-        container.innerHTML = `<div class="empty-state"><h3>No products found</h3><p>Try adjusting your search or filters.</p></div>`;
+        container.innerHTML = `
+            <div class="empty-state" style="grid-column: 1/-1; text-align: center; padding: var(--spacing-16) var(--spacing-4); background: var(--bg-secondary); border-radius: var(--radius-xl); border: 1px dashed var(--color-border);">
+                <div style="width: 64px; height: 64px; border-radius: var(--radius-full); background: var(--color-primary-light); color: var(--color-primary); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-4);">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </div>
+                <h3 style="margin-bottom: 0.5rem; font-size: 1.25rem;">No products found</h3>
+                <p class="text-secondary" style="font-size: 0.95rem;">Try adjusting your search query or filter criteria.</p>
+            </div>
+        `;
         return;
     }
 

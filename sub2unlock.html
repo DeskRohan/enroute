@@ -7,24 +7,18 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
     <!-- CSS -->
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/components.css">
     <style>
         body { 
-            padding-top: 70px; 
-            background: linear-gradient(135deg, #f6f8fd 0%, #f1f5f9 100%);
+            padding-top: 72px; 
+            background: var(--bg-primary);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             font-family: var(--font-sans);
-        }
-
-        .header {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .page-wrapper {
@@ -32,62 +26,63 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 2rem 1rem;
+            padding: 3rem 1.5rem;
         }
 
         .unlock-card {
             width: 100%;
             max-width: 520px;
-            background: #ffffff;
+            background: var(--bg-secondary);
             padding: 3rem 2.5rem;
-            border-radius: 24px;
-            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.02);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--color-border);
             text-align: center;
             position: relative;
             overflow: hidden;
         }
 
-        /* Decorative top border gradient */
+        /* Decorative top border */
         .unlock-card::before {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #4f46e5, #ec4899);
+            height: 3px;
+            background: var(--color-primary);
         }
 
         .icon-wrapper {
-            width: 72px;
-            height: 72px;
-            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
-            border-radius: 20px;
+            width: 76px;
+            height: 76px;
+            background: var(--color-primary-light);
+            border-radius: var(--radius-2xl);
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 1.5rem auto;
-            color: #4f46e5;
-            box-shadow: inset 0 2px 4px rgba(255,255,255,0.5);
-            border: 1px solid #c7d2fe;
+            color: var(--color-primary);
+            border: 1px solid rgba(37, 99, 235, 0.2);
         }
 
         .icon-wrapper svg {
-            width: 32px;
-            height: 32px;
-            stroke-width: 2.5;
+            width: 36px;
+            height: 36px;
+            stroke-width: 2.2;
         }
 
         .unlock-title {
-            font-size: 1.75rem;
+            font-size: 2rem;
             font-weight: 800;
-            color: #0f172a;
+            color: var(--text-primary);
             margin-bottom: 0.5rem;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.03em;
+            font-family: var(--font-heading);
         }
 
         .mod-subtitle {
             font-size: 0.95rem;
-            color: #64748b;
-            margin-bottom: 2.5rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
             font-weight: 500;
         }
 
@@ -102,22 +97,22 @@
             align-items: center;
             justify-content: space-between;
             padding: 1.25rem;
-            border-radius: 16px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            border-radius: var(--radius-xl);
+            background: var(--bg-primary);
+            border: 1px solid var(--color-border);
             transition: all 0.3s ease;
         }
 
         .step-row.active {
-            background: #ffffff;
-            border-color: #cbd5e1;
-            box-shadow: 0 4px 12px -4px rgba(0,0,0,0.05);
+            background: var(--bg-secondary);
+            border-color: var(--color-primary);
+            box-shadow: var(--shadow-md);
         }
 
         .step-row.disabled {
-            opacity: 0.5;
+            opacity: 0.45;
             pointer-events: none;
-            background: #f1f5f9;
+            background: var(--bg-primary);
         }
 
         .step-left {
@@ -128,40 +123,44 @@
         }
 
         .step-number {
-            width: 36px;
-            height: 36px;
-            border-radius: 12px;
-            background: #eef2ff;
-            color: #4f46e5;
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-lg);
+            background: var(--bg-secondary);
+            color: var(--color-primary);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
+            font-weight: 800;
             font-size: 1rem;
+            border: 1px solid var(--color-border);
+            font-family: var(--font-heading);
         }
 
         .step-row.completed .step-number {
-            background: #dcfce7;
-            color: #16a34a;
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+            border-color: rgba(16, 185, 129, 0.3);
         }
 
         .step-text h4 {
             margin: 0;
-            color: #1e293b;
+            color: var(--text-primary);
             font-size: 1.05rem;
             font-weight: 700;
+            font-family: var(--font-heading);
         }
 
         .step-text p {
             margin: 0.2rem 0 0 0;
-            color: #64748b;
+            color: var(--text-muted);
             font-size: 0.8rem;
             font-weight: 500;
         }
 
         .btn-action {
-            padding: 0.6rem 1.25rem;
-            border-radius: 10px;
+            padding: 0.65rem 1.35rem;
+            border-radius: var(--radius-md);
             font-weight: 600;
             font-size: 0.9rem;
             border: none;
@@ -170,70 +169,72 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
+            font-family: inherit;
         }
 
         .btn-youtube {
             background: #ef4444;
             color: #ffffff;
-            box-shadow: 0 4px 10px -2px rgba(239, 68, 68, 0.4);
+            box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
         }
 
         .btn-youtube:hover {
             background: #dc2626;
             transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(239, 68, 68, 0.45);
         }
 
         .btn-completed {
             background: #10b981;
             color: #ffffff;
             pointer-events: none;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
         }
 
         .btn-download {
-            background: #4f46e5;
+            background: var(--gradient-primary);
             color: #ffffff;
-            box-shadow: 0 4px 10px -2px rgba(79, 70, 229, 0.4);
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
         }
 
         .btn-download:hover:not(:disabled) {
-            background: #4338ca;
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
             transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
         }
 
         .btn-download:disabled {
-            background: #94a3b8;
+            background: #cbd5e1;
             box-shadow: none;
             cursor: not-allowed;
-            color: #f1f5f9;
+            color: #64748b;
         }
 
         .timer-status {
             margin-top: 1.5rem;
             font-size: 0.9rem;
-            color: #ec4899;
-            font-weight: 600;
+            color: var(--color-primary);
+            font-weight: 700;
             display: none;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.6; }
-            100% { opacity: 1; }
+            padding: 0.6rem 1rem;
+            background: var(--color-primary-light);
+            border-radius: var(--radius-full);
+            border: 1px solid var(--color-primary-subtle);
+            animation: pulse 1.5s infinite;
         }
 
         @media (max-width: 500px) {
             .step-row {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 1.25rem;
+                gap: 1rem;
             }
             .btn-action {
                 width: 100%;
                 justify-content: center;
             }
             .unlock-card {
-                padding: 2rem 1.5rem;
+                padding: 2rem 1.25rem;
             }
         }
     </style>
@@ -243,7 +244,13 @@
 
     <header class="header">
         <div class="container nav">
-            <a href="index.html" class="logo">EnrouteIn<span>.</span></a>
+            <a href="index.html" class="logo">
+                EnrouteIn<span>.</span>
+                <span class="logo-badge">Store</span>
+            </a>
+            <div class="nav-actions">
+                <a href="products.html" class="btn btn-outline btn-sm">Back to Store</a>
+            </div>
         </div>
     </header>
 
@@ -266,12 +273,12 @@
                         <div class="step-number" id="step-1-num">1</div>
                         <div class="step-text">
                             <h4>Subscribe & Support</h4>
-                            <p>Verify subscription to continue</p>
+                            <p>Verify channel to unlock file</p>
                         </div>
                     </div>
                     <button class="btn-action btn-youtube" id="btn-subscribe">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33 2.78 2.78 0 0 0 1.94 2c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.33 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="#fff"/></svg>
-                        Subscribe
+                        <span>Subscribe</span>
                     </button>
                 </div>
 
@@ -280,13 +287,13 @@
                     <div class="step-left">
                         <div class="step-number" id="step-2-num">2</div>
                         <div class="step-text">
-                            <h4>Get Link</h4>
-                            <p>Ready to download</p>
+                            <h4>Direct Download</h4>
+                            <p>Instant file access</p>
                         </div>
                     </div>
                     <button class="btn-action btn-download" id="btn-get-link" disabled>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        Download
+                        <span>Download</span>
                     </button>
                 </div>
             </div>

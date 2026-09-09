@@ -27,45 +27,77 @@
 
     <meta name="description" content="Read EnrouteIn's Privacy Policy to understand how we collect, use, and protect your personal information.">
     <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
     <!-- CSS -->
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/components.css">
     <style>
-        body { padding-top: 70px; }
-        .page-header {
-            padding: var(--spacing-12) 0;
-            background-color: var(--bg-secondary);
-            border-bottom: 1px solid var(--color-border);
+        body { padding-top: 80px; }
+        .legal-hero {
+            padding: var(--spacing-16) 0 var(--spacing-8);
             text-align: center;
+            position: relative;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--color-border);
+            margin-bottom: var(--spacing-12);
+        }
+        .legal-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 1rem;
+            background: var(--color-primary-light);
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            border-radius: var(--radius-full);
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-4);
         }
         .content-section {
-            max-width: 800px;
-            margin: var(--spacing-16) auto;
+            max-width: 860px;
+            margin: 0 auto var(--spacing-16);
             color: var(--text-secondary);
             line-height: 1.8;
             padding-bottom: var(--spacing-16);
+            position: relative;
+            z-index: 1;
         }
-        .content-section h1, .content-section h2, .content-section h3 {
+        .legal-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-8) var(--spacing-10);
+            box-shadow: var(--shadow-sm);
+            position: relative;
+        }
+        .legal-card h2, .legal-card h3 {
             color: var(--text-primary);
             margin-top: var(--spacing-8);
-            margin-bottom: var(--spacing-4);
+            margin-bottom: var(--spacing-3);
+            font-weight: 700;
+            font-family: var(--font-heading);
         }
-        .content-section h1 { margin-top: 0; }
-        .content-section ul, .content-section ol {
+        .legal-card h2 {
+            font-size: 1.35rem;
+            border-bottom: 1px solid var(--color-border-subtle);
+            padding-bottom: var(--spacing-2);
+        }
+        .legal-card h3 {
+            font-size: 1.1rem;
+        }
+        .legal-card ul, .legal-card ol {
             margin-left: var(--spacing-6);
             margin-bottom: var(--spacing-4);
         }
-        .content-section li {
+        .legal-card li {
             margin-bottom: var(--spacing-2);
         }
-        .content-section a {
+        .legal-card a {
             color: var(--color-primary);
             text-decoration: underline;
         }
-        .content-section a:hover {
+        .legal-card a:hover {
             color: var(--color-primary-hover);
         }
     </style>
@@ -92,16 +124,21 @@
         </div>
     </header>
 
-    <div class="page-header">
+    <div class="legal-hero">
         <div class="container">
-            <h1>Privacy Policy</h1>
-            <p class="text-secondary mt-2">Your privacy matters to us</p>
+            <div class="legal-badge">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Legal & Compliance
+            </div>
+            <h1 style="font-size: clamp(2rem, 4vw, 2.75rem); font-weight: 800; letter-spacing: -0.02em;">Privacy <span style="background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Policy</span></h1>
+            <p class="text-secondary mt-2">How we protect, process, and respect your personal information.</p>
         </div>
     </div>
 
     <div class="container content-section">
-        <p><strong>Last updated:</strong> June 13, 2026</p>
-        <p>EnrouteIn ("we", "us", or "our") operates the EnrouteIn website. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and purchase our digital products.</p>
+        <div class="legal-card">
+            <p><strong>Last updated:</strong> June 13, 2026</p>
+            <p>EnrouteIn ("we", "us", or "our") operates the EnrouteIn website. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and purchase our digital products.</p>
 
         <h2>1. Information We Collect</h2>
         <h3>Personal Information</h3>
@@ -186,6 +223,7 @@
             <li><strong>Phone:</strong> <a href="tel:+917621000916">+91 7621000916</a></li>
             <li><strong>Address:</strong> Ahmedabad, Gujarat, India</li>
         </ul>
+        </div>
     </div>
 
     <footer class="footer">
@@ -235,5 +273,6 @@
     <script type="module" src="js/firebase-config.js"></script>
     <script type="module" src="js/auth.js"></script>
     <script src="js/cookie-consent.js"></script>
+    <script src="js/bottom-ticker.js"></script>
 </body>
 </html>

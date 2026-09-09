@@ -31,103 +31,141 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
     <!-- CSS -->
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/chatbot.css">
     <style>
-        /* Home Specific Styles */
+        /* Home Automotive Editorial Styles */
         body {
-            padding-top: 70px;
+            padding-top: 76px;
         }
-
-        /* Offset for fixed header */
 
         /* Banner Hero */
         .hero-banner {
             width: 100%;
-            background: var(--bg-primary);
+            position: relative;
+            padding: var(--spacing-8) 0 var(--spacing-12);
+            overflow: hidden;
+            background: linear-gradient(180deg, #ffffff 0%, var(--bg-primary) 100%);
         }
 
         .hero-image-wrapper {
             width: 100%;
-            max-width: 1400px;
+            max-width: 1240px;
             margin: 0 auto;
-            padding: var(--spacing-6) var(--spacing-4) 0;
+            padding: 0 var(--spacing-6);
+        }
+
+        .hero-image-wrapper a {
+            display: block;
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--color-border);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            background: #ffffff;
+            padding: 5px;
+        }
+
+        .hero-image-wrapper a:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--color-border-hover);
         }
 
         .hero-image-wrapper img {
             width: 100%;
             height: auto;
             aspect-ratio: 4.5 / 1;
-            /* Maximum crop to remove all blaxck bars */
             object-fit: cover;
             object-position: center;
             display: block;
-            border-radius: 16px;
-            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
+            border-radius: calc(var(--radius-xl) - 5px);
         }
 
         .hero-text-container {
             text-align: center;
-            max-width: 800px;
+            max-width: 920px;
             margin: 0 auto;
-            padding: var(--spacing-12) var(--spacing-4) var(--spacing-16);
+            padding: var(--spacing-12) var(--spacing-6) var(--spacing-8);
+        }
+
+        .hero-pill-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #ffffff;
+            padding: 6px 18px;
+            border-radius: var(--radius-full);
+            font-size: 0.825rem;
+            font-weight: 700;
+            margin-bottom: var(--spacing-6);
+            border: 1px solid var(--color-border);
+            color: var(--text-primary);
+            box-shadow: var(--shadow-xs);
+        }
+
+        .hero-pill-badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
         }
 
         .hero-text h1 {
-            font-size: clamp(2.5rem, 5vw, 4rem);
-            line-height: 1.1;
-            letter-spacing: -2px;
+            font-size: clamp(2.5rem, 5vw, 4.25rem);
+            line-height: 1.08;
+            letter-spacing: -0.04em;
             margin-bottom: var(--spacing-6);
             color: var(--text-primary);
+            font-weight: 800;
+        }
+
+        .hero-text h1 .highlight {
+            color: var(--color-primary);
+            display: inline;
         }
 
         .hero-text p {
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             color: var(--text-secondary);
             margin-bottom: var(--spacing-8);
-            line-height: 1.6;
+            line-height: 1.65;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .hero-actions {
             display: flex;
             justify-content: center;
             gap: var(--spacing-4);
-        }
-
-        .trust-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: var(--bg-secondary);
-            padding: 8px 16px;
-            border-radius: 100px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            margin: 0 auto var(--spacing-6);
-            border: 1px solid var(--color-border);
-            color: var(--text-primary);
+            flex-wrap: wrap;
         }
 
         .section-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
-            margin-bottom: var(--spacing-8);
+            margin-bottom: var(--spacing-10);
+            gap: var(--spacing-4);
         }
 
         .products-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: var(--spacing-6);
+            gap: var(--spacing-8);
         }
 
-        /* Clean Features Grid */
+        /* Automotive Features Grid */
         .features-section {
-            background-color: var(--bg-secondary);
-            padding: calc(var(--spacing-16) * 1.5) 0;
+            background: #ffffff;
+            padding: var(--spacing-20) 0;
+            border-top: 1px solid var(--color-border);
+            border-bottom: 1px solid var(--color-border);
+            position: relative;
         }
 
         .features-grid {
@@ -137,92 +175,115 @@
         }
 
         .feature-card {
-            background: var(--bg-primary);
+            background: #ffffff;
             border: 1px solid var(--color-border);
-            border-radius: 16px;
+            border-radius: var(--radius-xl);
             padding: var(--spacing-8);
             display: flex;
             align-items: flex-start;
             gap: var(--spacing-6);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition-normal);
         }
 
         .feature-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.08);
+            box-shadow: var(--shadow-md);
+            border-color: var(--color-border-hover);
         }
 
         .feature-icon-wrapper {
-            background: var(--bg-secondary);
-            width: 64px;
-            height: 64px;
-            border-radius: 12px;
+            background: var(--bg-tertiary);
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius-lg);
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            color: var(--text-primary);
+            color: var(--color-primary);
+            border: 1px solid var(--color-border);
         }
 
         .feature-icon-wrapper svg {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
         }
 
         /* How It Works */
         .how-it-works {
-            padding: calc(var(--spacing-16) * 1.5) 0;
+            padding: var(--spacing-20) 0;
+            position: relative;
+            background: var(--bg-primary);
         }
 
         .steps-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: var(--spacing-12);
+            gap: var(--spacing-8);
             position: relative;
             margin-top: var(--spacing-12);
         }
 
         .step-card {
+            background: #ffffff;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-10) var(--spacing-6);
             text-align: center;
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition-normal);
+            position: relative;
+        }
+
+        .step-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--color-border-hover);
         }
 
         .step-number {
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
+            width: 54px;
+            height: 54px;
+            border-radius: var(--radius-full);
             background: var(--text-primary);
-            color: var(--bg-primary);
+            color: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
-            font-weight: 700;
+            font-size: 1.35rem;
+            font-weight: 800;
+            font-family: var(--font-heading);
             margin: 0 auto var(--spacing-6);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow-sm);
         }
 
         .step-card h3 {
+            font-size: 1.2rem;
             margin-bottom: var(--spacing-3);
+        }
+
+        .step-card p {
+            font-size: 0.95rem;
+            line-height: 1.6;
         }
 
         @media (max-width: 900px) {
             .hero-image-wrapper {
-                padding: 0;
+                padding: 0 var(--spacing-4);
             }
 
             .hero-image-wrapper img {
-                border-radius: 0;
                 aspect-ratio: 4.5 / 1;
-                /* Maximum crop for mobile */
                 object-fit: cover;
             }
 
             .hero-text-container {
-                padding: var(--spacing-8) var(--spacing-4) var(--spacing-12);
+                padding: var(--spacing-8) var(--spacing-4) var(--spacing-10);
             }
 
             .hero-text h1 {
-                font-size: 2.25rem;
+                font-size: 2.35rem;
             }
 
             .hero-actions {
@@ -246,7 +307,7 @@
 
             .steps-grid {
                 grid-template-columns: 1fr;
-                gap: var(--spacing-8);
+                gap: var(--spacing-6);
             }
         }
     </style>
@@ -258,14 +319,25 @@
     <!-- Header -->
     <header class="header">
         <div class="container nav">
-            <a href="index.html" class="logo">EnrouteIn<span>.</span></a>
+            <a href="index.html" class="logo">
+                EnrouteIn<span>.</span>
+                <span class="logo-badge">Store</span>
+            </a>
             <ul class="nav-links">
                 <li><a href="index.html" class="active">Home</a></li>
-                <li><a href="products.html">Products</a></li>
+                <li><a href="products.html">Store</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Support</a></li>
             </ul>
             <div class="nav-actions">
-                <a href="login.html" class="btn btn-outline" id="nav-login-btn">Login</a>
-                <a href="dashboard.html" class="btn btn-primary" id="nav-dash-btn" style="display: none;">Dashboard</a>
+                <a href="login.html" class="btn btn-outline" id="nav-login-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+                    <span>Login</span>
+                </a>
+                <a href="dashboard.html" class="btn btn-primary" id="nav-dash-btn" style="display: none;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    <span>Dashboard</span>
+                </a>
             </div>
         </div>
     </header>
@@ -279,47 +351,49 @@
         </div>
         <div class="hero-text-container">
             <div class="hero-text">
-                <div class="trust-badge">
-                    <span style="color: #f59e0b;">★★★★★</span>
-                    Trusted by 10,000+ Players
+                <div class="hero-pill-badge">
+                    <span class="dot"></span>
+                    <span style="color: #f59e0b; font-weight: 700;">★★★★★</span>
+                    <span>Trusted by 10,000+ Drivers</span>
                 </div>
-                <h1>Experience the Ultimate Drive.</h1>
-                <p>Elevate your gameplay with hyper-realistic, premium BUSSID mods. Meticulously crafted models, instant
-                    delivery, and unparalleled quality.</p>
+                <h1>Experience the <span class="highlight">Ultimate Drive</span>.</h1>
+                <p>Elevate your gameplay with hyper-realistic, premium BUSSID mods. Meticulously crafted 3D models, instant delivery, and lifetime access.</p>
                 <div class="hero-actions">
-                    <a href="products.html" class="btn btn-primary btn-lg"
-                        style="padding: 1rem 2.5rem; font-size: 1.125rem;">Browse Collection</a>
-                    <a href="#features" class="btn btn-outline btn-lg"
-                        style="padding: 1rem 2.5rem; font-size: 1.125rem;">Learn More</a>
+                    <a href="products.html" class="btn btn-primary btn-lg">
+                        <span>Browse Collection</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </a>
+                    <a href="#features" class="btn btn-outline btn-lg">
+                        <span>Why Enroute</span>
+                    </a>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Featured Products -->
-    <section id="featured" style="padding: calc(var(--spacing-16) * 1) 0; background: var(--bg-secondary);">
+    <section id="featured" class="py-16" style="background: var(--bg-secondary); border-top: 1px solid var(--color-border);">
         <div class="container">
             <div class="section-header">
                 <div>
                     <h2>Latest Arrivals</h2>
                     <p class="text-secondary mt-2">Discover our newest, highest-fidelity creations.</p>
                 </div>
-                <a href="products.html" class="btn btn-outline">View Collection</a>
+                <a href="products.html" class="btn btn-outline">
+                    <span>View All</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </a>
             </div>
 
             <div class="products-grid" id="featured-products">
                 <!-- Skeleton Loading -->
                 <div class="card product-card">
-                    <div class="img-container" style="background: var(--color-border); animation: pulse 1.5s infinite;">
-                    </div>
+                    <div class="img-container" style="background: var(--bg-tertiary); animation: pulse 1.5s infinite;"></div>
                     <div class="content">
-                        <div
-                            style="height: 20px; background: var(--color-border); margin-bottom: 10px; border-radius: 4px;">
-                        </div>
-                        <div
-                            style="height: 20px; background: var(--color-border); width: 50%; margin-bottom: 20px; border-radius: 4px;">
-                        </div>
-                        <div style="height: 36px; background: var(--color-border); border-radius: 4px;"></div>
+                        <div style="height: 18px; width: 35%; background: var(--color-border); margin-bottom: 12px; border-radius: var(--radius-full);"></div>
+                        <div style="height: 24px; background: var(--color-border); margin-bottom: 12px; border-radius: 4px;"></div>
+                        <div style="height: 18px; background: var(--color-border); width: 60%; margin-bottom: 20px; border-radius: 4px;"></div>
+                        <div style="height: 42px; background: var(--color-border); border-radius: var(--radius-md);"></div>
                     </div>
                 </div>
             </div>
@@ -329,69 +403,62 @@
     <!-- Features -->
     <section id="features" class="features-section">
         <div class="container">
-            <div style="text-align: center; max-width: 600px; margin: 0 auto var(--spacing-12);">
+            <div style="text-align: center; max-width: 680px; margin: 0 auto var(--spacing-16);">
+                <div class="trust-badge trust-badge-primary mb-4">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                    <span>Premium Standards</span>
+                </div>
                 <h2>The Enroute Standard</h2>
-                <p class="text-secondary mt-4">We deliver a meticulously engineered digital experience for serious
-                    simulation enthusiasts.</p>
+                <p class="text-secondary mt-3">We deliver a meticulously engineered digital experience for serious simulation enthusiasts.</p>
             </div>
 
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon-wrapper">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z">
-                            </path>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                         </svg>
                     </div>
                     <div>
                         <h3 style="margin-bottom: 0.5rem;">Hyper-Realistic Quality</h3>
-                        <p class="text-secondary text-sm" style="line-height: 1.6;">Every texture and geometry is
-                            crafted to perfection, matching real-world counterparts flawlessly.</p>
+                        <p class="text-secondary" style="font-size: 0.95rem; line-height: 1.6;">Every 3D model, geometry, and high-resolution texture is crafted with exacting detail to match real-world vehicles.</p>
                     </div>
                 </div>
 
                 <div class="feature-card">
                     <div class="feature-icon-wrapper">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
                         </svg>
                     </div>
                     <div>
-                        <h3 style="margin-bottom: 0.5rem;">Instant Access</h3>
-                        <p class="text-secondary text-sm" style="line-height: 1.6;">No waiting. As soon as your payment
-                            clears, your high-speed download link is immediately available.</p>
+                        <h3 style="margin-bottom: 0.5rem;">Instant Cloud Access</h3>
+                        <p class="text-secondary" style="font-size: 0.95rem; line-height: 1.6;">No waiting or broken links. The instant your order is confirmed, high-speed direct downloads are ready in your dashboard.</p>
                     </div>
                 </div>
 
                 <div class="feature-card">
                     <div class="feature-icon-wrapper">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
-                            </path>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
                         </svg>
                     </div>
                     <div>
-                        <h3 style="margin-bottom: 0.5rem;">Lifetime Updates</h3>
-                        <p class="text-secondary text-sm" style="line-height: 1.6;">When the game updates, we update.
-                            Your purchase guarantees you access to all future versions.</p>
+                        <h3 style="margin-bottom: 0.5rem;">Free Lifetime Updates</h3>
+                        <p class="text-secondary" style="font-size: 0.95rem; line-height: 1.6;">When game patches and new features arrive, all our mods are updated immediately. You get free access to every future iteration.</p>
                     </div>
                 </div>
 
                 <div class="feature-card">
                     <div class="feature-icon-wrapper">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
-                            </path>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            <polyline points="9 12 11 14 15 10"></polyline>
                         </svg>
                     </div>
                     <div>
                         <h3 style="margin-bottom: 0.5rem;">Bank-Grade Security</h3>
-                        <p class="text-secondary text-sm" style="line-height: 1.6;">Powered by Razorpay, our checkout
-                            process is encrypted and 100% secure. We never store your card data.</p>
+                        <p class="text-secondary" style="font-size: 0.95rem; line-height: 1.6;">Powered by Razorpay, checkout is fully encrypted and PCI-DSS compliant. Your transactions and data are always 100% protected.</p>
                     </div>
                 </div>
             </div>
@@ -401,23 +468,25 @@
     <!-- How It Works -->
     <section class="how-it-works">
         <div class="container">
-            <h2 class="text-center">Simple, Fast, and Secure.</h2>
+            <div style="text-align: center; max-width: 600px; margin: 0 auto var(--spacing-4);">
+                <h2>Simple, Fast, and Secure</h2>
+                <p class="text-secondary mt-2">Hit the road in just three easy steps.</p>
+            </div>
             <div class="steps-grid">
                 <div class="step-card">
                     <div class="step-number">1</div>
                     <h3>Choose Your Mod</h3>
-                    <p class="text-secondary">Browse our curated collection of premium vehicles and environments.</p>
+                    <p class="text-secondary">Explore our curated collection of premium buses, cars, trucks, and custom livery maps.</p>
                 </div>
                 <div class="step-card">
                     <div class="step-number">2</div>
                     <h3>Secure Checkout</h3>
-                    <p class="text-secondary">Complete your purchase using our lightning-fast, encrypted payment
-                        gateway.</p>
+                    <p class="text-secondary">Complete your payment securely via UPI, Cards, NetBanking, or Wallet with instant confirmation.</p>
                 </div>
                 <div class="step-card">
                     <div class="step-number">3</div>
                     <h3>Download & Drive</h3>
-                    <p class="text-secondary">Instantly access your files from your dashboard and hit the road.</p>
+                    <p class="text-secondary">Instantly access your download file directly in your dashboard and import into your game.</p>
                 </div>
             </div>
         </div>
@@ -428,42 +497,53 @@
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-col">
-                    <a href="index.html" class="logo mb-4" style="display:block;">EnrouteIn<span>.</span></a>
-                    <p class="text-secondary">The gold standard for digital simulation products.</p>
+                    <a href="index.html" class="logo mb-4" style="display:inline-flex;">EnrouteIn<span>.</span><span class="logo-badge">Store</span></a>
+                    <p class="text-secondary" style="font-size: 0.95rem; line-height: 1.6;">The premier destination for hyper-realistic BUSSID mods, liveries, and simulation digital products.</p>
                 </div>
                 <div class="footer-col">
                     <h4>Navigation</h4>
                     <ul class="footer-links">
                         <li><a href="index.html">Home</a></li>
-                        <li><a href="products.html">Store</a></li>
+                        <li><a href="products.html">Store Collection</a></li>
                         <li><a href="about.html">About Us</a></li>
-                        <li><a href="contact.html">Contact Us</a></li>
+                        <li><a href="contact.html">Support & Contact</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
-                    <h4>Legal</h4>
+                    <h4>Legal & Policy</h4>
                     <ul class="footer-links">
                         <li><a href="privacy.html">Privacy Policy</a></li>
-                        <li><a href="terms.html">Terms & Conditions</a></li>
-                        <li><a href="refund.html">Return & Refund Policy</a></li>
+                        <li><a href="terms.html">Terms of Service</a></li>
+                        <li><a href="refund.html">Refund & Return Policy</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
-                    <h4>Contact</h4>
+                    <h4>Get in Touch</h4>
                     <ul class="footer-links">
-                        <li><a href="mailto:enroutestorein@gmail.com">enroutestorein@gmail.com</a></li>
-                        <li><a href="tel:+917621000916">+91 7621000916</a></li>
-                        <li>Ahmedabad, Gujarat, India</li>
+                        <li style="display: flex; align-items: center; gap: 8px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary); flex-shrink: 0;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                            <a href="mailto:enroutestorein@gmail.com">enroutestorein@gmail.com</a>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 8px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary); flex-shrink: 0;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                            <a href="tel:+917621000916">+91 7621000916</a>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 0.925rem;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary); flex-shrink: 0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                            <span>Ahmedabad, Gujarat, India</span>
+                        </li>
                     </ul>
                 </div>
             </div>
-            <div class="footer-bottom"
-                style="margin-top: var(--spacing-12); padding-top: var(--spacing-6); border-top: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center;">
-                <p class="text-secondary">&copy; 2026 EnrouteIn. All rights reserved.</p>
-                <div style="display: flex; gap: 1rem; color: var(--text-secondary);">
-                    <span>Developed by SIMPLINOVUS</span>
+            <div class="footer-bottom">
+                <p>&copy; 2026 EnrouteIn. All rights reserved.</p>
+                <div style="display: flex; gap: 1rem; align-items: center; color: var(--text-secondary); font-size: 0.85rem;">
+                    <span>Developed by <strong>SIMPLINOVUS</strong></span>
                     <span>•</span>
-                    <span>Secured by Razorpay</span>
+                    <span style="display: inline-flex; align-items: center; gap: 4px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-success);"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        Secured by Razorpay
+                    </span>
                 </div>
             </div>
         </div>
@@ -475,6 +555,7 @@
     <script type="module" src="js/products.js"></script>
     <script type="module" src="js/chatbot.js"></script>
     <script src="js/cookie-consent.js"></script>
+    <script src="js/bottom-ticker.js"></script>
 </body>
 
 </html>

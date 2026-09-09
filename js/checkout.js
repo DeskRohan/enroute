@@ -1,5 +1,5 @@
 import { db, auth } from './firebase-config.js';
-import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { collection, addDoc, serverTimestamp, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 const checkoutForm = document.getElementById('checkout-form');
@@ -165,6 +165,14 @@ checkoutForm.addEventListener('submit', async (e) => {
                     };
 
                     const docRef = await addDoc(collection(db, "orders"), orderDataForDb);
+
+                    // Update product download count in database
+                    try {
+                        const prodDocRef = doc(db, "products", currentProduct.id);
+                        await updateDoc(prodDocRef, { downloadCount: increment(1) });
+                    } catch (countErr) {
+                        console.warn("Could not increment product downloadCount:", countErr);
+                    }
 
                     // Use sessionStorage to pass IDs robustly to prevent URL rewriting issues
                     sessionStorage.setItem('successOrderId', docRef.id);

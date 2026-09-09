@@ -7,29 +7,66 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
     <!-- CSS -->
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/components.css">
     <style>
-        body { padding-top: 70px; }
+        body { padding-top: 80px; }
 
         .checkout-container {
-            max-width: 800px;
-            margin: var(--spacing-16) auto;
+            max-width: 950px;
+            margin: var(--spacing-12) auto var(--spacing-16);
+        }
+
+        .checkout-header {
+            margin-bottom: var(--spacing-8);
+        }
+
+        .checkout-title {
+            font-size: 2.25rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+            margin-top: var(--spacing-3);
+            font-family: var(--font-heading);
         }
 
         .checkout-grid {
             display: grid;
-            grid-template-columns: 1.5fr 1fr;
+            grid-template-columns: 1.35fr 1fr;
             gap: var(--spacing-8);
+            align-items: start;
+        }
+
+        .checkout-card {
+            background: var(--bg-secondary);
+            padding: var(--spacing-8);
+            border-radius: var(--radius-2xl);
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-sm);
+            position: relative;
+        }
+
+        .checkout-card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            font-family: var(--font-heading);
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-6);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .order-summary {
             background: var(--bg-secondary);
-            padding: var(--spacing-6);
-            border-radius: var(--radius-lg);
+            padding: var(--spacing-8);
+            border-radius: var(--radius-2xl);
             border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 100px;
         }
 
         .summary-item {
@@ -37,33 +74,67 @@
             justify-content: space-between;
             margin-bottom: var(--spacing-4);
             padding-bottom: var(--spacing-4);
-            border-bottom: 1px solid var(--color-border);
+            border-bottom: 1px solid var(--color-border-subtle);
+            color: var(--text-secondary);
+            font-size: 0.95rem;
         }
 
         .summary-item:last-child {
             border-bottom: none;
             margin-bottom: 0;
             padding-bottom: 0;
-            font-size: 1.25rem;
-            font-weight: 700;
+            font-size: 1.4rem;
+            font-weight: 800;
+            font-family: var(--font-heading);
+            color: var(--color-primary);
         }
 
         .product-preview {
             display: flex;
             gap: var(--spacing-4);
             margin-bottom: var(--spacing-6);
+            padding-bottom: var(--spacing-6);
+            border-bottom: 1px solid var(--color-border-subtle);
         }
 
         .product-preview img {
-            width: 80px;
-            height: 80px;
+            width: 84px;
+            height: 84px;
             object-fit: cover;
-            border-radius: var(--radius-md);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .security-badge-box {
+            margin-top: var(--spacing-6);
+            padding: var(--spacing-4);
+            background: var(--bg-primary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .security-badge-icon {
+            color: var(--color-primary);
+            flex-shrink: 0;
+        }
+        .security-badge-text {
+            font-size: 0.825rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+        .security-badge-text strong {
+            color: var(--text-primary);
         }
 
         @media (max-width: 768px) {
             .checkout-grid {
                 grid-template-columns: 1fr;
+            }
+            .order-summary {
+                position: static;
             }
         }
     </style>
@@ -75,29 +146,53 @@
     <header class="header">
         <div class="container nav">
             <a href="index.html" class="logo">EnrouteIn<span>.</span></a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">Store</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Support</a></li>
+            </ul>
         </div>
     </header>
 
     <div class="container checkout-container">
-        <nav class="breadcrumbs" id="breadcrumbs"></nav>
-        <h1 class="mb-8">Checkout</h1>
+        <div class="checkout-header">
+            <nav class="breadcrumbs" id="breadcrumbs"></nav>
+            <h1 class="checkout-title">Secure Checkout</h1>
+        </div>
         
         <div id="checkout-content" class="checkout-grid">
             <!-- Form -->
-            <div class="card p-6" style="padding: var(--spacing-6);">
-                <h3 class="mb-6">Billing Details</h3>
+            <div class="checkout-card">
+                <h3>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    Billing & Account
+                </h3>
                 <form id="checkout-form">
                     <div class="form-group">
                         <label class="form-label">Full Name</label>
-                        <input type="text" id="cust-name" class="form-control" required>
+                        <input type="text" id="cust-name" class="form-control" placeholder="Enter your full name" required>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Email Address</label>
                         <input type="email" id="cust-email" class="form-control" required readonly>
-                        <small class="text-secondary mt-1 block">Digital product will be associated with this email.</small>
+                        <small class="text-secondary mt-1 block" style="font-size: 0.8rem;">Your digital download license will be linked directly to this email.</small>
                     </div>
                     
-                    <button type="submit" id="pay-btn" class="btn btn-primary btn-lg mt-4" style="width: 100%;">Pay Securely with Razorpay</button>
+                    <button type="submit" id="pay-btn" class="btn btn-primary btn-lg mt-6" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; border-radius: var(--radius-full);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        Pay Securely with Razorpay
+                    </button>
+
+                    <div class="security-badge-box">
+                        <div class="security-badge-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        </div>
+                        <div class="security-badge-text">
+                            <strong>100% Secure Payment Guarantee</strong><br>
+                            Encrypted 256-bit checkout supporting UPI, Cards, Netbanking & Wallets.
+                        </div>
+                    </div>
                 </form>
             </div>
 

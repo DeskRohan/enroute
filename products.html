@@ -28,61 +28,103 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
     <!-- CSS -->
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/chatbot.css">
     <style>
-        body { padding-top: 70px; }
+        body { padding-top: 76px; }
         
         .page-header {
-            padding: var(--spacing-8) 0;
-            background-color: var(--bg-secondary);
+            padding: var(--spacing-16) 0 var(--spacing-10);
+            background: var(--bg-secondary);
             border-bottom: 1px solid var(--color-border);
             text-align: center;
+            position: relative;
         }
 
         .filters-section {
             display: flex;
             flex-wrap: wrap;
             gap: var(--spacing-4);
-            margin-bottom: var(--spacing-8);
+            margin-bottom: var(--spacing-10);
             justify-content: space-between;
             align-items: center;
+            background: var(--bg-secondary);
+            padding: var(--spacing-4) var(--spacing-6);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-sm);
         }
 
         .search-bar {
             flex: 1;
-            min-width: 250px;
-            max-width: 400px;
+            min-width: 260px;
+            max-width: 440px;
+            position: relative;
+        }
+
+        .search-bar svg {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .search-bar input {
+            padding-left: 46px;
+            background: var(--bg-primary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-full);
+            color: var(--text-primary);
+            font-size: 0.925rem;
+            transition: all var(--transition-fast);
+        }
+
+        .search-bar input:focus {
+            background: var(--bg-secondary);
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px var(--color-primary-light);
         }
 
         .filter-group {
             display: flex;
-            gap: var(--spacing-4);
+            gap: var(--spacing-3);
+            flex-wrap: wrap;
         }
 
         .filter-select {
-            padding: 0.75rem 1rem;
-            background-color: var(--bg-secondary);
+            padding: 0.75rem 2.4rem 0.75rem 1.25rem;
+            background-color: var(--bg-primary);
             border: 1px solid var(--color-border);
-            border-radius: var(--radius-md);
+            border-radius: var(--radius-full);
             color: var(--text-primary);
             font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            transition: all var(--transition-fast);
+        }
+
+        .filter-select:focus {
+            outline: none;
+            background-color: var(--bg-secondary);
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px var(--color-primary-light);
         }
 
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: var(--spacing-6);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: var(--spacing-16) 0;
-            color: var(--text-secondary);
-            grid-column: 1 / -1;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--spacing-8);
         }
     </style>
     <link rel="icon" type="image/png" href="assets/images/fevicon.png">
@@ -92,7 +134,10 @@
     <!-- Header -->
     <header class="header">
         <div class="container nav">
-            <a href="index.html" class="logo">EnrouteIn<span>.</span></a>
+            <a href="index.html" class="logo">
+                EnrouteIn<span>.</span>
+                <span class="logo-badge">Store</span>
+            </a>
             <ul class="nav-links">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="products.html" class="active">Store</a></li>
@@ -100,7 +145,10 @@
                 <li><a href="contact.html">Support</a></li>
             </ul>
             <div class="nav-actions">
-                <a href="login.html" class="btn btn-outline" id="nav-login-btn">Login</a>
+                <a href="login.html" class="btn btn-outline" id="nav-login-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+                    <span>Login</span>
+                </a>
                 <a href="dashboard.html" class="btn btn-primary" id="nav-dash-btn" style="display: none; padding: 0.6rem; border-radius: 50%; aspect-ratio: 1/1;" title="Dashboard">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 </a>
@@ -110,8 +158,12 @@
 
     <div class="page-header">
         <div class="container">
-            <h1>All Mods</h1>
-            <p class="text-secondary mt-2">Browse our collection of premium BUSSID mods.</p>
+            <div class="trust-badge trust-badge-primary mb-4">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                <span>Full Catalog</span>
+            </div>
+            <h1>BUSSID Mod Store</h1>
+            <p class="text-secondary mt-2">Explore our hyper-realistic collection of buses, cars, trucks, and custom liveries.</p>
         </div>
     </div>
 
@@ -120,17 +172,18 @@
             <!-- Filters -->
             <div class="filters-section">
                 <div class="search-bar">
-                    <input type="text" id="search-input" class="form-control" placeholder="Search mods...">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" id="search-input" class="form-control" placeholder="Search by name, brand, livery...">
                 </div>
                 <div class="filter-group">
                     <select id="category-filter" class="filter-select">
                         <option value="all">All Categories</option>
-                        <option value="mod">Mod</option>
-                        <option value="livery">Livery</option>
-                        <option value="map">Map</option>
+                        <option value="mod">Mods</option>
+                        <option value="livery">Liveries</option>
+                        <option value="map">Maps & Addons</option>
                     </select>
                     <select id="sort-filter" class="filter-select">
-                        <option value="newest">Newest First</option>
+                        <option value="newest">Sort: Newest First</option>
                         <option value="price-low">Price: Low to High</option>
                         <option value="price-high">Price: High to Low</option>
                     </select>
@@ -141,65 +194,88 @@
             <div class="products-grid" id="products-container">
                 <!-- Skeleton Loading -->
                 <div class="card product-card">
-                    <div class="img-container" style="background: var(--bg-secondary); animation: pulse 1.5s infinite;"></div>
+                    <div class="img-container" style="background: var(--bg-tertiary); animation: pulse 1.5s infinite;"></div>
                     <div class="content">
-                        <div style="height: 20px; background: var(--color-border); margin-bottom: 10px; border-radius: 4px;"></div>
-                        <div style="height: 20px; background: var(--color-border); width: 50%; margin-bottom: 20px; border-radius: 4px;"></div>
-                        <div style="height: 36px; background: var(--color-border); border-radius: 4px;"></div>
+                        <div style="height: 18px; width: 35%; background: var(--color-border); margin-bottom: 12px; border-radius: var(--radius-full);"></div>
+                        <div style="height: 24px; background: var(--color-border); margin-bottom: 12px; border-radius: 4px;"></div>
+                        <div style="height: 18px; background: var(--color-border); width: 60%; margin-bottom: 20px; border-radius: 4px;"></div>
+                        <div style="height: 42px; background: var(--color-border); border-radius: var(--radius-md);"></div>
                     </div>
                 </div>
-                <!-- Repeated for visual effect -->
                 <div class="card product-card">
-                    <div class="img-container" style="background: var(--bg-secondary); animation: pulse 1.5s infinite;"></div>
+                    <div class="img-container" style="background: var(--bg-tertiary); animation: pulse 1.5s infinite;"></div>
                     <div class="content">
-                        <div style="height: 20px; background: var(--color-border); margin-bottom: 10px; border-radius: 4px;"></div>
-                        <div style="height: 20px; background: var(--color-border); width: 50%; margin-bottom: 20px; border-radius: 4px;"></div>
-                        <div style="height: 36px; background: var(--color-border); border-radius: 4px;"></div>
+                        <div style="height: 18px; width: 35%; background: var(--color-border); margin-bottom: 12px; border-radius: var(--radius-full);"></div>
+                        <div style="height: 24px; background: var(--color-border); margin-bottom: 12px; border-radius: 4px;"></div>
+                        <div style="height: 18px; background: var(--color-border); width: 60%; margin-bottom: 20px; border-radius: 4px;"></div>
+                        <div style="height: 42px; background: var(--color-border); border-radius: var(--radius-md);"></div>
+                    </div>
+                </div>
+                <div class="card product-card">
+                    <div class="img-container" style="background: var(--bg-tertiary); animation: pulse 1.5s infinite;"></div>
+                    <div class="content">
+                        <div style="height: 18px; width: 35%; background: var(--color-border); margin-bottom: 12px; border-radius: var(--radius-full);"></div>
+                        <div style="height: 24px; background: var(--color-border); margin-bottom: 12px; border-radius: 4px;"></div>
+                        <div style="height: 18px; background: var(--color-border); width: 60%; margin-bottom: 20px; border-radius: 4px;"></div>
+                        <div style="height: 42px; background: var(--color-border); border-radius: var(--radius-md);"></div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
+    <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-col">
-                    <a href="index.html" class="logo mb-4" style="display:block;">EnrouteIn<span>.</span></a>
-                    <p class="text-secondary">The gold standard for digital simulation products.</p>
+                    <a href="index.html" class="logo mb-4" style="display:inline-flex;">EnrouteIn<span>.</span><span class="logo-badge">Store</span></a>
+                    <p class="text-secondary" style="font-size: 0.95rem; line-height: 1.6;">The premier destination for hyper-realistic BUSSID mods, liveries, and simulation digital products.</p>
                 </div>
                 <div class="footer-col">
                     <h4>Navigation</h4>
                     <ul class="footer-links">
                         <li><a href="index.html">Home</a></li>
-                        <li><a href="products.html">Store</a></li>
+                        <li><a href="products.html">Store Collection</a></li>
                         <li><a href="about.html">About Us</a></li>
-                        <li><a href="contact.html">Contact Us</a></li>
+                        <li><a href="contact.html">Support & Contact</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
-                    <h4>Legal</h4>
+                    <h4>Legal & Policy</h4>
                     <ul class="footer-links">
                         <li><a href="privacy.html">Privacy Policy</a></li>
-                        <li><a href="terms.html">Terms & Conditions</a></li>
-                        <li><a href="refund.html">Return & Refund Policy</a></li>
+                        <li><a href="terms.html">Terms of Service</a></li>
+                        <li><a href="refund.html">Refund & Return Policy</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
-                    <h4>Contact</h4>
+                    <h4>Get in Touch</h4>
                     <ul class="footer-links">
-                        <li><a href="mailto:enroutestorein@gmail.com">enroutestorein@gmail.com</a></li>
-                        <li><a href="tel:+917621000916">+91 7621000916</a></li>
-                        <li>Ahmedabad, Gujarat, India</li>
+                        <li style="display: flex; align-items: center; gap: 8px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary); flex-shrink: 0;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                            <a href="mailto:enroutestorein@gmail.com">enroutestorein@gmail.com</a>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 8px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary); flex-shrink: 0;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                            <a href="tel:+917621000916">+91 7621000916</a>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 0.925rem;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary); flex-shrink: 0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                            <span>Ahmedabad, Gujarat, India</span>
+                        </li>
                     </ul>
                 </div>
             </div>
-            <div class="footer-bottom" style="margin-top: var(--spacing-12); padding-top: var(--spacing-6); border-top: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center;">
-                <p class="text-secondary">&copy; 2026 EnrouteIn.Store. All rights reserved.</p>
-                <div style="display: flex; gap: 1rem; color: var(--text-secondary);">
-                    <span>Developed by SIMPLINOVUS</span>
+            <div class="footer-bottom">
+                <p>&copy; 2026 EnrouteIn. All rights reserved.</p>
+                <div style="display: flex; gap: 1rem; align-items: center; color: var(--text-secondary); font-size: 0.85rem;">
+                    <span>Developed by <strong>SIMPLINOVUS</strong></span>
                     <span>•</span>
-                    <span>Secured by Razorpay</span>
+                    <span style="display: inline-flex; align-items: center; gap: 4px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-success);"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        Secured by Razorpay
+                    </span>
                 </div>
             </div>
         </div>
@@ -211,5 +287,6 @@
     <script type="module" src="js/products.js"></script>
     <script type="module" src="js/chatbot.js"></script>
     <script src="js/cookie-consent.js"></script>
+    <script src="js/bottom-ticker.js"></script>
 </body>
 </html>

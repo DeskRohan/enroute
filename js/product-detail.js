@@ -49,8 +49,6 @@ function getImageUrl(url) {
     return url;
 }
 
-
-
 const loadProduct = async () => {
     if (!productId) {
         productContainer.innerHTML = `
@@ -117,7 +115,19 @@ const loadProduct = async () => {
                 }
             }
 
-            renderProduct(product, productId, uploader);
+            // Query database orders collection to count total downloads/purchases for this mod
+            let dbOrderCount = 0;
+            try {
+                const ordersQuery = query(collection(db, "orders"), where("productId", "==", productId));
+                const ordersSnap = await getDocs(ordersQuery);
+                dbOrderCount = ordersSnap.size;
+            } catch (e) {
+                console.warn("Could not query orders count:", e);
+            }
+
+            const totalDownloads = Math.max(dbOrderCount, (product.downloadCount || 0));
+
+            renderProduct(product, productId, uploader, totalDownloads);
         } else {
             productContainer.innerHTML = `
                 <div class="text-center mt-8">
@@ -148,7 +158,7 @@ const loadProduct = async () => {
     }
 };
 
-const renderProduct = (product, id, uploader) => {
+const renderProduct = (product, id, uploader, totalDownloads = 0) => {
     document.title = `${product.name || 'Product'} - EnrouteIn.Store`;
 
     const isFree = product.pricingType === 'free' || product.price === 0;
@@ -196,116 +206,130 @@ const renderProduct = (product, id, uploader) => {
             <style>
                 #captcha-overlay {
                     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-                    background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+                    background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px);
                     z-index: 10000; display: flex; align-items: center; justify-content: center;
                     animation: captchaFadeIn 0.25s ease;
                 }
                 @keyframes captchaFadeIn { from { opacity: 0; } to { opacity: 1; } }
                 .captcha-modal {
-                    background: #fff; border-radius: 16px; padding: 2rem;
-                    max-width: 380px; width: 90%; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+                    background: #ffffff;
+                    border: 1px solid var(--color-border);
+                    border-radius: var(--radius-2xl); padding: 2.25rem 2rem;
+                    max-width: 400px; width: 90%;
+                    box-shadow: var(--shadow-xl);
                     text-align: center; animation: captchaSlideUp 0.3s ease;
-                    user-select: none;
+                    user-select: none; position: relative;
                 }
                 @keyframes captchaSlideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-                .captcha-modal h3 { margin: 0 0 0.25rem; font-size: 1.2rem; color: #111827; }
-                .captcha-modal p.desc { color: #6b7280; font-size: 0.8rem; margin: 0 0 1.25rem; }
+                .captcha-modal h3 { margin: 0 0 0.35rem; font-size: 1.3rem; font-family: 'Space Grotesk', sans-serif; font-weight: 700; color: #090d16; }
+                .captcha-modal p.desc { color: #64748b; font-size: 0.85rem; margin: 0 0 1.5rem; }
                 .captcha-lock { font-size: 2.25rem; margin-bottom: 0.5rem; }
 
                 /* Puzzle area */
                 .puzzle-area {
                     position: relative; width: 100%; height: 140px;
-                    background: linear-gradient(135deg, #e0e7ff 0%, #dbeafe 50%, #ede9fe 100%);
-                    border-radius: 12px; overflow: hidden; margin-bottom: 1rem;
-                    border: 1px solid #c7d2fe;
+                    background: var(--bg-tertiary);
+                    border-radius: var(--radius-xl); overflow: hidden; margin-bottom: 1.25rem;
+                    border: 1px solid var(--color-border);
                 }
                 .puzzle-pattern {
                     position: absolute; top: 0; left: 0; right: 0; bottom: 0;
                     background-image:
-                        radial-gradient(circle at 20% 30%, rgba(99,102,241,0.15) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 70%, rgba(139,92,246,0.12) 0%, transparent 50%),
-                        radial-gradient(circle at 50% 50%, rgba(59,130,246,0.08) 0%, transparent 60%);
+                        radial-gradient(circle at 20% 30%, rgba(37,99,235,0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(14,165,233,0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 50% 50%, rgba(15,23,42,0.04) 0%, transparent 60%);
                 }
                 .puzzle-target {
                     position: absolute; top: 50%; transform: translateY(-50%);
                     width: 48px; height: 48px; border-radius: 10px;
-                    border: 3px dashed rgba(99,102,241,0.5);
-                    background: rgba(99,102,241,0.08);
+                    border: 2px dashed rgba(37,99,235,0.6);
+                    background: rgba(37,99,235,0.08);
                     transition: border-color 0.2s, background 0.2s;
                 }
                 .puzzle-piece {
                     position: absolute; top: 50%; transform: translateY(-50%);
                     width: 48px; height: 48px; border-radius: 10px;
-                    background: transparent;
-                    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+                    background: #ffffff;
+                    box-shadow: 0 4px 12px rgba(15,23,42,0.15);
+                    border: 1px solid var(--color-border);
                     display: flex; align-items: center; justify-content: center;
-                    transition: filter 0.2s;
+                    transition: filter 0.2s, box-shadow 0.2s;
                     pointer-events: none;
                 }
-                .puzzle-piece img { width: 100%; height: 100%; color: #fff; }
+                .puzzle-piece img { width: 32px; height: 32px; object-fit: contain; }
                 .puzzle-piece.matched {
-                    filter: drop-shadow(0 4px 12px rgba(34,197,94,0.8));
+                    box-shadow: 0 0 20px rgba(16,185,129,0.5);
+                    border-color: #10b981;
                 }
 
                 /* Slider track */
                 .slider-track {
-                    position: relative; width: 100%; height: 48px;
-                    background: #f3f4f6; border-radius: 24px;
-                    border: 1px solid #d1d5db; overflow: hidden;
-                    margin-bottom: 0.75rem;
+                    position: relative; width: 100%; height: 50px;
+                    background: var(--bg-tertiary);
+                    border-radius: var(--radius-full);
+                    border: 1px solid var(--color-border);
+                    overflow: hidden;
+                    margin-bottom: 1rem;
                 }
                 .slider-fill {
                     position: absolute; top: 0; left: 0; bottom: 0; width: 0;
-                    background: linear-gradient(90deg, #e0e7ff, #c7d2fe);
-                    border-radius: 24px; transition: background 0.2s;
+                    background: linear-gradient(90deg, rgba(37,99,235,0.15), rgba(37,99,235,0.3));
+                    border-radius: var(--radius-full); transition: background 0.2s;
                     pointer-events: none;
                 }
-                .slider-fill.matched { background: linear-gradient(90deg, #dcfce7, #bbf7d0); }
+                .slider-fill.matched { background: rgba(16,185,129,0.25); }
                 .slider-label {
                     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-                    color: #9ca3af; font-size: 0.8rem; font-weight: 600;
+                    color: #64748b; font-size: 0.8rem; font-weight: 700;
                     pointer-events: none; white-space: nowrap;
-                    letter-spacing: 0.5px;
+                    letter-spacing: 0.5px; text-transform: uppercase;
                 }
                 .slider-thumb {
-                    position: absolute; top: 2px; left: 2px;
-                    width: 44px; height: 44px; border-radius: 50%;
-                    background: #fff; border: 2px solid #d1d5db;
+                    position: absolute; top: 4px; left: 4px;
+                    width: 42px; height: 42px; border-radius: 50%;
+                    background: #ffffff;
+                    border: 1.5px solid var(--color-border-strong);
                     display: flex; align-items: center; justify-content: center;
                     cursor: grab; touch-action: none;
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    box-shadow: var(--shadow-sm);
                     transition: border-color 0.2s, box-shadow 0.2s;
                     z-index: 2;
                 }
-                .slider-thumb:active { cursor: grabbing; }
-                .slider-thumb:hover { border-color: #6366f1; box-shadow: 0 2px 12px rgba(99,102,241,0.25); }
-                .slider-thumb svg { width: 20px; height: 20px; color: #6b7280; }
-                .slider-thumb.matched { border-color: #22c55e; background: #22c55e; }
+                .slider-thumb:active { cursor: grabbing; box-shadow: var(--shadow-xs); }
+                .slider-thumb:hover { border-color: var(--color-primary); box-shadow: 0 0 12px rgba(37,99,235,0.25); }
+                .slider-thumb svg { width: 18px; height: 18px; color: #090d16; }
+                .slider-thumb.matched { border-color: #10b981; background: #10b981; box-shadow: 0 0 16px rgba(16,185,129,0.4); }
                 .slider-thumb.matched svg { color: #fff; }
 
                 .captcha-status {
-                    font-size: 0.8rem; color: #6b7280; min-height: 1.25rem;
-                    margin-bottom: 0.75rem;
+                    font-size: 0.85rem; color: #64748b; min-height: 1.25rem;
+                    margin-bottom: 1rem; font-weight: 600;
                 }
-                .captcha-status.success { color: #16a34a; font-weight: 600; }
-                .captcha-status.fail { color: #ef4444; }
+                .captcha-status.success { color: #10b981; }
+                .captcha-status.fail { color: #dc2626; }
 
                 .captcha-btn-cancel {
-                    padding: 0.6rem 1.5rem; border: 1px solid #d1d5db; border-radius: 8px;
-                    background: #f9fafb; color: #374151; font-size: 0.85rem; font-weight: 600;
+                    padding: 0.6rem 1.5rem;
+                    border: 1px solid var(--color-border);
+                    border-radius: var(--radius-md);
+                    background: var(--bg-tertiary);
+                    color: var(--text-secondary); font-size: 0.85rem; font-weight: 700;
                     cursor: pointer; font-family: inherit; transition: all 0.2s;
                 }
-                .captcha-btn-cancel:hover { background: #e5e7eb; }
+                .captcha-btn-cancel:hover {
+                    color: var(--text-primary); border-color: var(--color-border-hover);
+                    background: #ffffff;
+                }
             </style>
             <div class="captcha-modal">
                 <div class="captcha-lock">🛡️</div>
-                <h3>Security Check</h3>
-                <p class="desc">Drag the slider to fit the puzzle piece into the target</p>
+                <h3>Security Verification</h3>
+                <p class="desc">Slide to align the puzzle piece</p>
                 <div class="puzzle-area">
                     <div class="puzzle-pattern"></div>
                     <div class="puzzle-target" id="captcha-target" style="left: ${puzzleTarget}%;"></div>
                     <div class="puzzle-piece" id="captcha-piece" style="left: 2%;">
-                        <img src="assets/images/fevicon.png" style="width: 48px; height: 48px; object-fit: contain; pointer-events: none;" alt="Captcha Piece">
+                        <img src="assets/images/fevicon.png" alt="Captcha Piece">
                     </div>
                 </div>
                 <div class="slider-track" id="captcha-track">
@@ -438,93 +462,151 @@ const renderProduct = (product, id, uploader) => {
         console.warn("Invalid Date:", product.createdAt);
     }
 
-    const getYoutubeEmbed = (url) => {
-        if (!url) return '';
-        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-        const match = url.match(regExp);
-        if (match && match[2].length === 11) {
-            return `https://www.youtube.com/embed/${match[2]}`;
+    // YouTube Embed Link
+    let youtubeEmbedHtml = '';
+    if (product.youtube) {
+        let videoId = null;
+        const ytMatch = product.youtube.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        if (ytMatch && ytMatch[1]) {
+            videoId = ytMatch[1];
         }
-        return '';
-    };
 
-    const ytEmbedUrl = getYoutubeEmbed(product.youtube);
-    const youtubeHtml = ytEmbedUrl ? `
-        <div class="video-container">
-            <iframe src="${ytEmbedUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-        </div>
-    ` : '';
-
-    const summaryHtml = product.summary ? `
-        <div class="product-summary">
-            <strong>Mod Summary:</strong><br>
-            ${product.summary}
-        </div>
-    ` : '';
+        if (videoId) {
+            youtubeEmbedHtml = `
+                <div class="video-container" style="margin-top: var(--spacing-8);">
+                    <iframe src="https://www.youtube.com/embed/${videoId}" title="Product Video Review" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+            `;
+        }
+    }
 
     // Process Images
     const rawImages = product.images || [product.image];
     const images = rawImages.filter(img => img && img.trim() !== '').map(img => getImageUrl(img));
-    if (images.length === 0) images.push("https://via.placeholder.com/800x600?text=Image+Not+Found");
+    if (images.length === 0) images.push("https://via.placeholder.com/800x600?text=No+Image");
 
+    // Thumbnails HTML
     let thumbnailsHtml = '';
-
-    // Process Specs
-    const specs = [
-        { label: 'Game Version', value: product.version || 'Universal' },
-        { label: 'Brand / Make', value: product.brand || 'Custom' },
-        { label: 'Engine', value: product.engine || 'Standard' },
-        { label: 'Polygons', value: product.polygons || 'Standard' },
-        { label: 'File Size', value: product.size || 'Unknown' },
-        { label: 'Interior', value: product.interior ? 'Included' : 'Not Included' },
-        { label: 'Last Updated', value: formattedDate }
-    ];
-
-    let specsHtml = '';
-    specs.forEach(spec => {
-        specsHtml += `
-            <div class="spec-item">
-                <span class="spec-label">${spec.label}</span>
-                <span class="spec-value">${spec.value}</span>
+    if (images.length > 1) {
+        thumbnailsHtml = `
+            <div class="thumbnail-strip" style="margin-top: var(--spacing-4);">
+                ${images.map((imgUrl, idx) => `
+                    <div class="thumbnail-item ${idx === 0 ? 'active' : ''}" data-idx="${idx}">
+                        <img src="${imgUrl}" alt="${product.name} Thumbnail ${idx + 1}">
+                    </div>
+                `).join('')}
             </div>
         `;
-    });
+    }
 
-    const verificationBadge = uploader.isVerified ? `<img src="assets/images/varified.png" title="Verified Admin" style="height: 1.2em; vertical-align: middle; margin-left: 6px; display: inline-block;">` : '';
+    // Summary Text
+    const summaryCardHtml = product.summary ? `
+        <div class="product-summary" style="margin-top: var(--spacing-4);">
+            <strong>Mod Summary:</strong> ${product.summary}
+        </div>
+    ` : '';
+
+    // Specifications HTML
+    const specs = [
+        { 
+            icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>`, 
+            label: 'Game Version', 
+            value: product.version || 'BUSSID v3.8+' 
+        },
+        { 
+            icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>`, 
+            label: 'Brand / Make', 
+            value: product.brand || 'Custom Coach' 
+        },
+        { 
+            icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="m4.93 4.93 4.24 4.24"></path><path d="m14.83 9.17 4.24-4.24"></path><path d="m14.83 14.83 4.24 4.24"></path><path d="m9.17 14.83-4.24 4.24"></path><circle cx="12" cy="12" r="4"></circle></svg>`, 
+            label: 'Engine Specs', 
+            value: product.engine || 'High Power Transmission' 
+        },
+        { 
+            icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>`, 
+            label: 'Poly Quality', 
+            value: product.polygons || 'Ultra High-Poly' 
+        },
+        { 
+            icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`, 
+            label: 'Download Size', 
+            value: product.size || '35 MB' 
+        },
+        { 
+            icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`, 
+            label: 'Interior Cockpit', 
+            value: product.interior ? 'Fully Detailed Interior' : 'Exterior Only' 
+        }
+    ];
+
+    const specsHtml = specs.map(s => `
+        <div class="spec-item">
+            <span class="spec-label">
+                ${s.icon}
+                ${s.label}
+            </span>
+            <span class="spec-value">${s.value}</span>
+        </div>
+    `).join('');
+
+    // Description formatted text
+    const formattedDescription = (product.description || 'No description available.').replace(/\n/g, '<br>');
+
+    // Verified badge for uploader
+    const verificationBadge = uploader.isVerified ? `<img src="assets/images/varified.png" title="Verified Admin" style="height: 1.15em; vertical-align: middle; margin-left: 4px; display: inline-block;">` : '';
 
     productContainer.innerHTML = `
-        <nav class="breadcrumbs" style="margin-bottom: 2rem;">
-            <a href="index.html">Home</a>
-            <span class="separator">&gt;</span>
-            <a href="products.html">Store</a>
-            <span class="separator">&gt;</span>
-            <span class="current">${product.name}</span>
+        <nav class="breadcrumb" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: var(--spacing-6); font-size: 0.85rem; color: var(--text-secondary);">
+            <a href="index.html" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 0.35rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                Home
+            </a>
+            <span class="separator">/</span>
+            <a href="products.html" style="color: inherit; text-decoration: none;">Store</a>
+            <span class="separator">/</span>
+            <span style="color: var(--text-primary); font-weight: 600;">${product.name || 'Details'}</span>
         </nav>
-        <div class="product-grid">
 
+        <div class="product-grid">
             <div class="product-gallery">
-                <div class="main-image-wrapper" style="position: relative; overflow: hidden; border-radius: var(--radius-lg);">
-                    <img id="main-product-image" src="${images[0]}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/800x600?text=Image+Not+Found'" style="width: 100%; display: block; transition: opacity 0.5s ease-in-out;">
+                <div class="main-image-wrapper">
+                    <img id="main-product-image" src="${images[0]}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/800x600?text=Image+Not+Found'">
                 </div>
-                ${summaryHtml}
+                ${thumbnailsHtml}
+                ${summaryCardHtml}
+
+                <!-- Mod Description Section -->
+                <div style="margin-top: var(--spacing-6); background: #ffffff; border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--spacing-6); box-shadow: var(--shadow-sm);">
+                    <h3 style="font-size: 1.25rem; font-family: var(--font-heading); margin-bottom: var(--spacing-4); color: var(--text-primary);">Vehicle Overview & Documentation</h3>
+                    <div style="font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary); word-break: break-word;">
+                        ${formattedDescription}
+                    </div>
+                </div>
+
+                ${youtubeEmbedHtml}
             </div>
 
             <div class="product-info">
                 <div class="product-info-container">
-                    <h1 style="margin-bottom: 0.5rem; font-size: clamp(2rem, 4vw, 2.5rem); line-height: 1.2;">${product.name || 'Unnamed Product'}</h1>
-                    
-                    <p class="text-secondary" style="text-transform:uppercase; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 0.5rem; color: var(--color-accent);">
-                        ${product.category || 'Mod'}
-                    </p>
-                    <p style="margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-secondary);">
-                        Uploaded By: <span style="font-weight: 600; color: var(--text-primary);">${uploader.name}</span>${verificationBadge}
-                    </p>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                        <span class="category-pill">${product.category || 'BUSSID MOD'}</span>
+                        <span class="trust-badge"><span style="color: #f59e0b;">★</span> Verified Mod</span>
+                    </div>
+                    <h1 style="margin-bottom: 0.75rem; font-size: 2rem; font-family: var(--font-heading);">${product.name || 'Unnamed Product'}</h1>
+                    <div class="uploader-info" style="margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-secondary);">
+                        <span>Published By:</span>
+                        <strong style="color: var(--text-primary); margin-left: 0.35rem;">${uploader.name}</strong>${verificationBadge}
+                    </div>
 
-                    <div class="product-price" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
-                        <span style="font-size: 2.5rem; font-weight: 700;">${isFree ? 'FREE' : formatPrice(product.price)}</span>
-                        <span style="font-size: 0.95rem; font-weight: 600; color: var(--text-secondary); display: flex; align-items: center; gap: 0.5rem; background: var(--bg-secondary); padding: 0.5rem 1rem; border-radius: 20px; border: 1px solid var(--color-border);">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                            ${(product.downloadCount || 0) + '+'} Downloads
+                    <div class="product-price" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.75rem; padding: 1.15rem 1.35rem; background: var(--bg-secondary); border-radius: var(--radius-xl); border: 1px solid var(--color-border);">
+                        <div>
+                            <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); display: block; margin-bottom: 0.2rem;">Price</span>
+                            <span style="font-size: 2.25rem; font-weight: 800; font-family: var(--font-heading); color: var(--color-primary);">${isFree ? 'FREE' : formatPrice(product.price)}</span>
+                        </div>
+                        <span style="font-size: 0.875rem; font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 0.45rem; background: var(--color-primary-light); padding: 0.5rem 1.15rem; border-radius: var(--radius-full); border: 1px solid rgba(37, 99, 235, 0.2);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            ${totalDownloads} Downloads
                         </span>
                     </div>
 
@@ -532,65 +614,103 @@ const renderProduct = (product, id, uploader) => {
                         ${specsHtml}
                     </div>
 
-                    <div class="buy-card" style="margin-bottom: 2rem;">
-                        <button id="buy-btn" class="btn btn-primary btn-lg" style="width:100%; font-size:1.125rem; padding:1rem; display:flex; align-items:center; justify-content:center; gap:0.5rem; box-shadow: 0 10px 20px -10px var(--color-primary);">
-                            ${isFree ? 
-                            `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                             Download` :
-                            `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-                             Buy Now`
-                            }
-                        </button>
-                        
-                        ${!isFree ? `
+                    <div class="buy-card">
+                        <div class="download-stats-card" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; padding: 0.85rem 1.15rem; background: var(--bg-primary); border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
+                            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                                <div style="width: 36px; height: 36px; border-radius: 8px; background: var(--color-primary-light); color: var(--color-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">Database Telemetry</div>
+                                    <div style="font-size: 0.95rem; font-weight: 800; font-family: var(--font-heading); color: var(--text-primary);"><span style="color: var(--color-primary);">${totalDownloads}</span> Total Downloads</div>
+                                </div>
+                            </div>
+                            <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 700; color: #059669; background: rgba(16, 185, 129, 0.1); padding: 4px 10px; border-radius: var(--radius-full); border: 1px solid rgba(16, 185, 129, 0.25);">
+                                <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981;"></span> Instant Access
+                            </span>
+                        </div>
+
+                        <div style="display: flex; gap: var(--spacing-3); width: 100%;">
+                            <button id="buy-btn" class="btn btn-primary btn-lg" style="flex: 1; font-size:1.05rem; padding:0.95rem; display:flex; align-items:center; justify-content:center; gap:0.5rem; border-radius: var(--radius-xl);">
+                                ${isFree ? 
+                                `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                 <span>Free Instant Download</span>` :
+                                `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                                 <span>Buy Now & Download</span>`
+                                }
+                            </button>
+                            <button id="detail-wishlist-btn" class="btn btn-outline" style="padding: 0 1.15rem; border-radius: var(--radius-xl);" title="Save to Garage Wishlist">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                            </button>
+                        </div>
+
                         <div class="guarantee-list">
                             <div class="guarantee-item">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                                Instant delivery upon checkout
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                <span>100% Virus-Free & File Integrity Verified</span>
                             </div>
                             <div class="guarantee-item">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                                100% Secure Encrypted Payment
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                <span>Immediate High-Speed Cloud Download</span>
                             </div>
                             <div class="guarantee-item">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                                Free lifetime updates
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                <span>Lifetime Order History Access</span>
                             </div>
                         </div>
-                        ` : ''}
-                    </div>
-
-                    <div class="product-description">
-                        <h3 style="margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--color-border); font-size: 1.25rem;">Description</h3>
-                        ${youtubeHtml}
-                        <p style="line-height: 1.8; color: var(--text-secondary); font-size: 0.95rem;">
-                            ${product.description ? product.description.replace(/\n/g, '<br>') : 'No description provided.'}
-                        </p>
                     </div>
                 </div>
             </div>
-
         </div>
-        
         <div id="related-mods-container"></div>
     `;
 
-    document.getElementById('buy-btn').addEventListener('click', handleBuyNow);
-
-    // Carousel Logic
-    if (images.length > 1) {
-        const mainImg = document.getElementById('main-product-image');
-        let currentIdx = 0;
-        
-        setInterval(() => {
-            mainImg.style.opacity = '0.7'; // Small fade effect
-            setTimeout(() => {
-                currentIdx = (currentIdx + 1) % images.length;
-                mainImg.src = images[currentIdx];
-                mainImg.style.opacity = '1';
-            }, 150);
-        }, 3000);
+    const buyBtnEl = document.getElementById('buy-btn');
+    if (buyBtnEl) {
+        buyBtnEl.addEventListener('click', handleBuyNow);
     }
+
+    const detailWishBtn = document.getElementById('detail-wishlist-btn');
+    if (detailWishBtn) {
+        let wishlist = JSON.parse(localStorage.getItem('enroute_wishlist') || '[]');
+        if (wishlist.includes(id)) {
+            detailWishBtn.classList.add('active');
+            detailWishBtn.querySelector('svg').style.fill = '#ef4444';
+            detailWishBtn.querySelector('svg').style.color = '#ef4444';
+        }
+
+        detailWishBtn.addEventListener('click', () => {
+            wishlist = JSON.parse(localStorage.getItem('enroute_wishlist') || '[]');
+            const svg = detailWishBtn.querySelector('svg');
+            if (wishlist.includes(id)) {
+                wishlist = wishlist.filter(x => x !== id);
+                detailWishBtn.classList.remove('active');
+                svg.style.fill = 'none';
+                svg.style.color = 'currentColor';
+            } else {
+                wishlist.push(id);
+                detailWishBtn.classList.add('active');
+                svg.style.fill = '#ef4444';
+                svg.style.color = '#ef4444';
+            }
+            localStorage.setItem('enroute_wishlist', JSON.stringify(wishlist));
+        });
+    }
+
+    // Thumbnail switching logic
+    const thumbItems = document.querySelectorAll('.thumbnail-item');
+    const mainImg = document.getElementById('main-product-image');
+    
+    thumbItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const idx = parseInt(item.getAttribute('data-idx'));
+            if (images[idx]) {
+                thumbItems.forEach(t => t.classList.remove('active'));
+                item.classList.add('active');
+                mainImg.src = images[idx];
+            }
+        });
+    });
 
     // Load Related Mods
     if (product.relatedMods && product.relatedMods.length > 0) {

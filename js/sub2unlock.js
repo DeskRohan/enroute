@@ -103,7 +103,7 @@ btnGetLink.addEventListener('click', async () => {
         window.open(targetDownloadLink, '_blank');
         try {
             const docRef = doc(db, "products", productId);
-            await updateDoc(docRef, { downloadCount: increment(3) });
+            await updateDoc(docRef, { downloadCount: increment(1) });
         } catch (err) {
             console.error("Error updating count", err);
         }

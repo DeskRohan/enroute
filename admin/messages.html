@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages - Enroute Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="icon" type="image/png" href="../assets/images/fevicon.png">
+</head>
+<body>
+
+    <div class="mobile-admin-header">
+        <div class="admin-logo" style="border: none; padding: 0;">EnrouteIn<span>Admin</span></div>
+    </div>
+
+    <aside class="admin-sidebar">
+        <div class="admin-logo">
+            EnrouteIn<span>Admin</span>
+        </div>
+        <ul class="admin-nav">
+            <li><a href="dashboard.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span class="nav-text">Dashboard</span></a></li>
+            <li><a href="products.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg> <span class="nav-text">Products</span></a></li>
+            <li><a href="orders.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> <span class="nav-text">Orders</span></a></li>
+            <li><a href="users.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> <span class="nav-text">Users</span></a></li>
+            <li><a href="reports.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg> <span class="nav-text">Reports</span></a></li>
+            <li><a href="messages.html" class="active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> <span class="nav-text">Messages</span></a></li>
+            <li><a href="account.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> <span class="nav-text">Account</span></a></li>
+        </ul>
+    </aside>
+
+    <main class="admin-main">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h1>Admin Comms Relay</h1>
+                <p class="text-secondary" style="font-size: 0.88rem; margin: 4px 0 0 0;">Direct secure messaging channel between authorized studio administrators.</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="background: #ffffff; border: 1px solid var(--admin-border); padding: 0.5rem 1rem; border-radius: var(--radius-xl); font-size: 0.82rem; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                    <span style="color: var(--admin-text-muted);">YOUR ADMIN ID:</span>
+                    <strong id="my-admin-id-badge" style="color: #ef4444; font-family: monospace; font-size: 0.95rem;">ADM-0001</strong>
+                </div>
+                <button type="button" class="btn btn-primary" id="open-compose-btn" style="padding: 0.55rem 1.25rem; font-size: 0.85rem; border-radius: var(--radius-full); font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+                    <span>New Message</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Chat Main Interface -->
+        <div class="chat-container-card">
+            <!-- Sidebar / Thread List -->
+            <div class="chat-sidebar">
+                <div class="chat-sidebar-header">
+                    <span style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--admin-text-muted);">Direct Channels</span>
+                    <span id="threads-count-badge" style="font-size: 0.72rem; font-weight: 800; background: var(--admin-primary-light); color: var(--admin-primary); padding: 2px 8px; border-radius: var(--radius-full);">0 Active</span>
+                </div>
+                <div class="chat-search-wrap">
+                    <input type="text" id="search-thread-input" class="form-control" placeholder="Search by Admin ID or name..." style="padding: 0.5rem 0.85rem; font-size: 0.82rem; border-radius: var(--radius-full);">
+                </div>
+                <ul class="chat-threads-list" id="chat-threads-list">
+                    <li style="padding: 2rem 1rem; text-align: center; color: var(--admin-text-muted); font-size: 0.85rem;">
+                        Loading conversations...
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Active Chat Pane -->
+            <div class="chat-main-pane" id="chat-pane-empty">
+                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem; color: var(--admin-text-muted);">
+                    <div style="width: 64px; height: 64px; border-radius: 50%; background: #eff6ff; display: flex; align-items: center; justify-content: center; color: var(--admin-primary); margin-bottom: 1rem; border: 1px solid #bfdbfe;">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    </div>
+                    <h3 style="margin: 0 0 0.5rem 0; color: var(--admin-text-primary); font-size: 1.2rem;">Select an Admin Channel</h3>
+                    <p style="max-width: 360px; font-size: 0.85rem; line-height: 1.5; margin: 0 0 1.25rem 0;">Choose an ongoing discussion from the left or start a new message using an Administrator's ID.</p>
+                    <button type="button" class="btn btn-outline" id="empty-compose-btn" style="border-radius: var(--radius-full); padding: 0.5rem 1.25rem; font-size: 0.85rem;">+ Compose New Message</button>
+                </div>
+            </div>
+
+            <div class="chat-main-pane" id="chat-pane-active" style="display: none;">
+                <!-- Header -->
+                <div class="chat-main-header">
+                    <div style="display: flex; align-items: center; gap: 0.85rem;">
+                        <button type="button" class="chat-back-btn" id="chat-back-to-threads-btn" aria-label="Back to Channels">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                        </button>
+                        <div class="chat-avatar" id="active-recipient-avatar">A</div>
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <h4 id="active-recipient-name" style="margin: 0; font-size: 1.05rem; font-weight: 800; color: var(--admin-text-primary);">Admin</h4>
+                                <span id="active-recipient-id-badge" class="chat-thread-id">ADM-0001</span>
+                            </div>
+                            <p id="active-recipient-email" style="margin: 2px 0 0 0; font-size: 0.78rem; color: var(--admin-text-muted);">admin@enroute.in</p>
+                        </div>
+                    </div>
+                    <div>
+                        <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 700; color: #059669; background: #dcfce7; padding: 3px 10px; border-radius: var(--radius-full);">
+                            <span style="width: 7px; height: 7px; border-radius: 50%; background: #22c55e;"></span>
+                            <span>Direct Relay Active</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Messages Stream -->
+                <div class="chat-messages-body" id="chat-messages-body">
+                    <!-- Dynamic Messages Injected Here -->
+                </div>
+
+                <!-- Input Footer -->
+                <form class="chat-input-area" id="chat-form">
+                    <input type="text" id="chat-input-msg" class="chat-input-box" placeholder="Type a message using enter to send..." autocomplete="off" required>
+                    <button type="submit" class="btn btn-primary" id="chat-send-btn" style="border-radius: var(--radius-full); padding: 0.75rem 1.4rem; display: inline-flex; align-items: center; gap: 6px; font-weight: 700;">
+                        <span>Send</span>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Compose Modal -->
+    <div class="modal-overlay" id="compose-modal">
+        <div class="modal-content" style="max-width: 540px; padding: 1.75rem;">
+            <div class="modal-header">
+                <div>
+                    <h3 style="font-size: 1.25rem; font-weight: 800; margin: 0 0 4px 0;">Compose Admin Message</h3>
+                    <p class="text-secondary" style="font-size: 0.82rem; margin: 0;">Send a direct communication using the recipient's Admin ID.</p>
+                </div>
+                <button type="button" class="close-btn" id="close-compose-btn">&times;</button>
+            </div>
+
+            <form id="compose-form">
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <label class="form-label">Recipient Administrator</label>
+                    <select id="compose-recipient-select" class="form-control" required>
+                        <option value="">Select an Admin or enter Admin ID below...</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <label class="form-label">Or Type Admin ID Directly</label>
+                    <input type="text" id="compose-admin-id-input" class="form-control" placeholder="e.g. ADM-0001 or ADM-8829">
+                    <p class="text-secondary" style="font-size: 0.76rem; margin-top: 4px;">Enter the exact Admin ID of the recipient.</p>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label class="form-label">Message <span style="color: var(--admin-danger);">*</span></label>
+                    <textarea id="compose-message-text" class="form-control" rows="4" placeholder="Hello Architect, regarding the new bus mod liveries..." required></textarea>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+                    <button type="button" class="btn btn-outline" id="cancel-compose-btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="send-compose-btn" style="padding: 0.65rem 1.5rem; font-weight: 700;">Send Message</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="dash-toast" style="position: fixed; bottom: 48px; right: 24px; background: #0f172a; color: #ffffff; padding: 12px 20px; border-radius: var(--radius-full); font-size: 0.9rem; font-weight: 700; box-shadow: var(--shadow-xl); border: 1px solid rgba(255,255,255,0.15); z-index: 10000; display: flex; align-items: center; gap: 8px; opacity: 0; transform: translateY(20px); transition: all 0.3s ease; pointer-events: none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+        <span id="toast-msg">Message sent successfully!</span>
+    </div>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav class="mobile-admin-bottom-nav">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <span>Dashboard</span>
+        </a>
+        <a href="products.html" class="bottom-nav-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            <span>Products</span>
+        </a>
+        <a href="orders.html" class="bottom-nav-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            <span>Orders</span>
+        </a>
+        <a href="messages.html" class="bottom-nav-item active">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            <span>Messages</span>
+        </a>
+        <a href="reports.html" class="bottom-nav-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+            <span>Reports</span>
+        </a>
+        <a href="account.html" class="bottom-nav-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            <span>Account</span>
+        </a>
+    </nav>
+
+    <!-- Logic -->
+    <script type="module">
+        import { requireAdmin } from '../js/admin/admin-auth.js';
+        requireAdmin();
+    </script>
+    <script type="module" src="../js/admin/admin-messages.js"></script>
+    <script type="module" src="../js/admin/admin-ticker.js"></script>
+</body>
+</html>

@@ -3,127 +3,478 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - EnrouteIn</title>
+    <title>Driver Dashboard & Garage - EnrouteIn</title>
 
     <!-- Standard SEO Meta Tags -->
-    <meta name="description" content="EnrouteIn - Premium Game Mods and Addons. Download high-quality mods for your favorite games.">
-    <meta name="keywords" content="gaming, mods, addons, enroute, game modifications">
+    <meta name="description" content="EnrouteIn - Premium Game Mods and Addons. Driver Hub, Garage Fleet, Wishlist, and Downloads.">
+    <meta name="keywords" content="gaming, mods, addons, enroute, game modifications, bussid">
     <meta name="author" content="Enroute">
     <meta name="robots" content="index, follow">
     
-    <!-- Open Graph (Facebook/WhatsApp/Discord) -->
+    <!-- Open Graph -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://yourdomain.com/">
-    <meta property="og:title" content="EnrouteIn - Premium Game Mods">
-    <meta property="og:description" content="Download high-quality mods and addons for your favorite games.">
+    <meta property="og:title" content="Driver Dashboard - EnrouteIn.Store">
+    <meta property="og:description" content="Access your virtual garage, fleet downloads, wishlist, and driver license.">
     <meta property="og:image" content="https://yourdomain.com/assets/images/fevicon.png">
-    
-    <!-- Twitter Cards -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="https://yourdomain.com/">
-    <meta name="twitter:title" content="EnrouteIn - Premium Game Mods">
-    <meta name="twitter:description" content="Download high-quality mods and addons for your favorite games.">
-    <meta name="twitter:image" content="https://yourdomain.com/assets/images/fevicon.png">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
     <!-- CSS -->
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/chatbot.css">
     <style>
-        body { padding-top: 70px; }
+        body { padding-top: 72px; }
 
-        .dashboard-container {
+        .dashboard-layout {
             display: grid;
-            grid-template-columns: 250px 1fr;
+            grid-template-columns: 320px 1fr;
             gap: var(--spacing-8);
             margin-top: var(--spacing-8);
             margin-bottom: var(--spacing-16);
+            align-items: start;
         }
 
-        .sidebar {
-            background: var(--bg-secondary);
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--color-border);
-            padding: var(--spacing-4) 0;
-            height: fit-content;
+        /* Driver Passport / VIP License Card */
+        .driver-passport-card {
+            background: linear-gradient(135deg, #090d16 0%, #172554 100%);
+            color: #ffffff;
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-6);
+            box-shadow: 0 16px 36px rgba(9, 13, 22, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: var(--spacing-6);
         }
 
-        .user-info {
-            padding: 0 var(--spacing-4) var(--spacing-4);
-            border-bottom: 1px solid var(--color-border);
+        .driver-passport-card::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.35) 0%, transparent 65%);
+            pointer-events: none;
+        }
+
+        .passport-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            padding-bottom: var(--spacing-3);
             margin-bottom: var(--spacing-4);
         }
 
-        .user-email {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
+        .passport-title {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #93c5fd;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .passport-chip {
+            width: 28px;
+            height: 22px;
+            background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.4);
+        }
+
+        .passport-body {
+            display: flex;
+            gap: var(--spacing-4);
+            align-items: center;
+            margin-bottom: var(--spacing-4);
+        }
+
+        .passport-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: var(--radius-xl);
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            font-weight: 800;
+            font-family: var(--font-heading);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            flex-shrink: 0;
+        }
+
+        .passport-meta h4 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin: 0 0 2px 0;
+            font-family: var(--font-heading);
+            word-break: break-word;
+        }
+
+        .passport-meta p {
+            font-size: 0.78rem;
+            color: #94a3b8;
+            margin: 0 0 6px 0;
             word-break: break-all;
+        }
+
+        .rank-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-radius: var(--radius-full);
+            background: rgba(37, 99, 235, 0.35);
+            color: #bfdbfe;
+            border: 1px solid rgba(96, 165, 250, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .passport-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: var(--spacing-3);
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            font-size: 0.75rem;
+            color: #cbd5e1;
+        }
+
+        .driver-id-tag {
+            font-family: monospace;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: #60a5fa;
+        }
+
+        .passport-share-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            border-radius: var(--radius-full);
+            padding: 3px 10px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .passport-share-btn:hover {
+            background: #2563eb;
+            border-color: #2563eb;
+        }
+
+        /* Sidebar Nav Track */
+        .sidebar {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-2xl);
+            border: 1px solid var(--color-border);
+            padding: var(--spacing-6);
+            box-shadow: var(--shadow-sm);
         }
 
         .nav-menu {
             list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-2);
+            margin: 0;
+            padding: 0;
         }
 
         .nav-menu li a {
-            display: block;
-            padding: var(--spacing-3) var(--spacing-4);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.85rem 1.15rem;
             color: var(--text-secondary);
-            font-weight: 500;
+            font-weight: 700;
+            font-size: 0.925rem;
+            border-radius: var(--radius-xl);
+            transition: all var(--transition-fast);
+            border: 1px solid transparent;
+            text-decoration: none;
         }
 
-        .nav-menu li a:hover,
-        .nav-menu li a.active {
-            background: rgba(59, 130, 246, 0.1);
+        .nav-menu li a:hover {
+            background: var(--bg-primary);
             color: var(--color-primary);
-            border-right: 3px solid var(--color-primary);
         }
 
+        .nav-menu li a.active {
+            background: var(--color-primary-light);
+            color: var(--color-primary);
+            border: 1px solid rgba(37, 99, 235, 0.25);
+            font-weight: 800;
+        }
+
+        .nav-menu li a svg {
+            flex-shrink: 0;
+        }
+
+        .nav-counter {
+            margin-left: auto;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: var(--radius-full);
+            font-weight: 800;
+            border: 1px solid var(--color-border);
+        }
+
+        .nav-menu li a.active .nav-counter {
+            background: var(--color-primary);
+            color: #ffffff;
+            border-color: var(--color-primary);
+        }
+
+        /* Main Workspace Container */
         .main-content {
             background: var(--bg-secondary);
-            border-radius: var(--radius-lg);
+            border-radius: var(--radius-2xl);
             border: 1px solid var(--color-border);
-            padding: var(--spacing-6);
+            padding: var(--spacing-8);
+            box-shadow: var(--shadow-sm);
+            min-height: 520px;
         }
 
-        .order-card {
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-md);
-            padding: var(--spacing-4);
-            margin-bottom: var(--spacing-4);
+        /* Fleet Storage Radar Bar */
+        .fleet-radar-bar {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.25rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            margin-bottom: var(--spacing-6);
+            flex-wrap: wrap;
+            gap: var(--spacing-4);
         }
 
-        .order-card-info h4 {
-            margin-bottom: var(--spacing-1);
+        .radar-stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
 
-        .empty-state {
-            text-align: center;
-            padding: var(--spacing-12) 0;
+        .radar-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: var(--color-primary-light);
+            color: var(--color-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        /* Garage Showcase Grid */
+        .garage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: var(--spacing-6);
+        }
+
+        .garage-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-xs);
+            transition: all var(--transition-normal);
+        }
+
+        .garage-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--color-border-hover);
+            box-shadow: var(--shadow-md);
+        }
+
+        .garage-media {
+            height: 180px;
+            width: 100%;
+            background: var(--bg-tertiary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .garage-media img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .garage-card:hover .garage-media img {
+            transform: scale(1.05);
+        }
+
+        .garage-body {
+            padding: var(--spacing-5);
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .garage-meta-specs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.4rem;
+            background: var(--bg-secondary);
+            padding: 0.65rem;
+            border-radius: var(--radius-md);
+            margin: var(--spacing-3) 0 var(--spacing-4);
+            font-size: 0.78rem;
             color: var(--text-secondary);
+            border: 1px solid var(--color-border-subtle);
         }
 
-        @media (max-width: 768px) {
-            .dashboard-container {
+        /* Wishlist Grid */
+        .wishlist-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--spacing-4) var(--spacing-5);
+            background: var(--bg-primary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            margin-bottom: var(--spacing-4);
+            gap: var(--spacing-4);
+            flex-wrap: wrap;
+            transition: all var(--transition-fast);
+        }
+
+        .wishlist-card:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Community Voting Hub */
+        .request-input-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-6);
+            margin-bottom: var(--spacing-8);
+        }
+
+        .vote-item-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--spacing-5);
+            background: var(--bg-primary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            margin-bottom: var(--spacing-4);
+            gap: var(--spacing-4);
+            transition: all var(--transition-fast);
+        }
+
+        .vote-item-card:hover {
+            border-color: var(--color-primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .upvote-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 58px;
+            padding: 0.6rem 0.5rem;
+            border-radius: var(--radius-lg);
+            background: var(--bg-secondary);
+            border: 1px solid var(--color-border);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            color: var(--text-primary);
+            font-weight: 800;
+            font-size: 0.95rem;
+        }
+
+        .upvote-btn:hover,
+        .upvote-btn.voted {
+            background: var(--color-primary);
+            color: #ffffff;
+            border-color: var(--color-primary);
+        }
+
+        .upvote-btn svg {
+            width: 16px;
+            height: 16px;
+            margin-bottom: 2px;
+        }
+
+        /* Toast notification */
+        #dash-toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #090d16;
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: var(--radius-full);
+            font-size: 0.9rem;
+            font-weight: 700;
+            box-shadow: var(--shadow-xl);
+            border: 1px solid rgba(255,255,255,0.15);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        #dash-toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 960px) {
+            .dashboard-layout {
                 grid-template-columns: 1fr;
             }
         }
 
-        /* Invoice Styles */
+        /* Invoice Overlay */
         .invoice-wrapper {
             display: none;
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(4px);
+            background: rgba(9, 13, 22, 0.7);
+            backdrop-filter: blur(8px);
             z-index: 9999;
             overflow-y: auto;
-            padding: 2rem;
+            padding: 2rem 1rem;
         }
         .invoice-wrapper.active {
             display: flex;
@@ -132,33 +483,33 @@
         }
         .invoice {
             background: #ffffff;
-            color: #1a1a2e;
-            max-width: 700px;
+            color: #090d16;
+            max-width: 720px;
             width: 100%;
-            border-radius: 16px;
+            border-radius: var(--radius-2xl);
             overflow: hidden;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.3);
-            font-family: 'Inter', sans-serif;
+            box-shadow: var(--shadow-2xl);
+            border: 1px solid var(--color-border);
         }
         .invoice-header {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background: linear-gradient(135deg, #090d16 0%, #1e3a8a 100%);
             color: #fff;
-            padding: 2.5rem 2rem;
+            padding: 2.25rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
         }
-        .invoice-brand h2 { font-size: 1.75rem; font-weight: 800; margin: 0; }
-        .invoice-brand h2 span { color: #3b82f6; }
+        .invoice-brand h2 { font-size: 1.75rem; font-weight: 800; margin: 0; color: #ffffff; font-family: var(--font-heading); }
+        .invoice-brand h2 span { color: #60a5fa; }
         .invoice-badge {
-            background: rgba(59,130,246,0.15);
-            color: #60a5fa;
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border: 1px solid rgba(52, 211, 153, 0.4);
             padding: 0.35rem 1rem;
             border-radius: 20px;
             font-size: 0.8rem;
-            font-weight: 700;
+            font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
         }
         .invoice-body { padding: 2rem; }
         .invoice-meta {
@@ -167,52 +518,46 @@
             gap: 1.5rem;
             margin-bottom: 2rem;
             padding-bottom: 1.5rem;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid var(--color-border);
         }
         .invoice-meta-group h4 {
-            font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em;
-            color: #9ca3af; margin: 0 0 0.35rem 0; font-weight: 700;
+            font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;
+            color: var(--text-muted); margin: 0 0 0.35rem 0; font-weight: 700;
         }
-        .invoice-meta-group p { font-size: 0.9rem; color: #1a1a2e; margin: 0; font-weight: 500; }
+        .invoice-meta-group p { font-size: 0.95rem; color: var(--text-primary); margin: 0; font-weight: 600; }
         .invoice-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; }
         .invoice-table thead th {
-            text-align: left; font-size: 0.7rem; text-transform: uppercase;
-            letter-spacing: 0.1em; color: #9ca3af; padding: 0.75rem 0;
-            border-bottom: 2px solid #e5e7eb; font-weight: 700;
+            text-align: left; font-size: 0.75rem; text-transform: uppercase;
+            letter-spacing: 0.08em; color: var(--text-muted); padding: 0.75rem 0;
+            border-bottom: 2px solid var(--color-border); font-weight: 700;
         }
         .invoice-table thead th:last-child { text-align: right; }
-        .invoice-table tbody td { padding: 1rem 0; border-bottom: 1px solid #f3f4f6; font-size: 0.9rem; }
-        .invoice-table tbody td:last-child { text-align: right; font-weight: 600; }
+        .invoice-table tbody td { padding: 1.1rem 0; border-bottom: 1px solid var(--color-border-subtle); font-size: 0.95rem; }
+        .invoice-table tbody td:last-child { text-align: right; font-weight: 700; color: var(--color-primary); }
         .invoice-totals {
             display: flex; flex-direction: column; align-items: flex-end;
-            gap: 0.5rem; padding-top: 1rem; border-top: 2px solid #1a1a2e;
+            gap: 0.5rem; padding-top: 1rem; border-top: 2px solid var(--text-primary);
         }
-        .invoice-total-row { display: flex; justify-content: space-between; width: 250px; font-size: 0.9rem; }
+        .invoice-total-row { display: flex; justify-content: space-between; width: 260px; font-size: 0.95rem; }
         .invoice-total-row.grand {
-            font-size: 1.25rem; font-weight: 800; color: #1a1a2e;
-            padding-top: 0.5rem; border-top: 1px solid #e5e7eb;
+            font-size: 1.35rem; font-weight: 800; color: var(--text-primary);
+            padding-top: 0.5rem; border-top: 1px solid var(--color-border);
+            font-family: var(--font-heading);
         }
         .invoice-footer {
-            background: #f9fafb; padding: 1.5rem 2rem; text-align: center;
-            font-size: 0.8rem; color: #9ca3af; border-top: 1px solid #e5e7eb;
+            background: var(--bg-secondary); padding: 1.5rem 2rem; text-align: center;
+            font-size: 0.825rem; color: var(--text-muted); border-top: 1px solid var(--color-border);
         }
         .invoice-actions {
             display: flex; gap: 1rem; justify-content: center;
-            padding: 1.5rem 2rem; background: #f9fafb; border-top: 1px solid #e5e7eb;
+            padding: 1.5rem 2rem; background: var(--bg-secondary); border-top: 1px solid var(--color-border);
         }
-        .invoice-actions button {
-            padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600;
-            cursor: pointer; font-size: 0.9rem; border: none;
-            display: flex; align-items: center; gap: 0.5rem;
-        }
-        .btn-print { background: #1a1a2e; color: #fff; }
-        .btn-close-invoice { background: #e5e7eb; color: #1a1a2e; }
 
         @media print {
             body * { visibility: hidden; }
             .invoice-wrapper, .invoice-wrapper * { visibility: visible; }
             .invoice-wrapper { position: absolute; top: 0; left: 0; background: white; padding: 0; }
-            .invoice { box-shadow: none; border-radius: 0; }
+            .invoice { box-shadow: none; border-radius: 0; border: none; }
             .invoice-actions { display: none; }
         }
     </style>
@@ -223,7 +568,10 @@
     <!-- Header -->
     <header class="header">
         <div class="container nav">
-            <a href="index.html" class="logo">EnrouteIn<span>.</span></a>
+            <a href="index.html" class="logo">
+                EnrouteIn<span>.</span>
+                <span class="logo-badge">Store</span>
+            </a>
             <ul class="nav-links">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="products.html">Store</a></li>
@@ -231,31 +579,116 @@
                 <li><a href="contact.html">Support</a></li>
             </ul>
             <div class="nav-actions">
-                <button class="btn btn-outline" id="logout-btn">Logout</button>
+                <button class="btn btn-outline btn-sm" id="logout-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                    <span>Logout</span>
+                </button>
             </div>
         </div>
     </header>
 
-    <div class="container dashboard-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="user-info">
-                <h3>My Profile</h3>
-                <p class="user-email" id="user-email-display">Loading...</p>
-                <div id="admin-link-container" style="display: none; margin-top: 10px;">
-                    <a href="admin/dashboard.html" class="btn btn-accent btn-sm" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">Admin Panel</a>
+    <div class="container" style="margin-top: var(--spacing-6); margin-bottom: var(--spacing-6);">
+        <!-- 🪪 TOP VIP DRIVER PASSPORT HERO BANNER -->
+        <div class="driver-passport-card" id="driver-passport" style="margin-bottom: 0; cursor: pointer;">
+            <div class="passport-header">
+                <span class="passport-title">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    ENROUTE MOTORSPORT AUTHORITY • OFFICIAL VIP DRIVER PASSPORT
+                </span>
+                <div class="passport-chip" title="Verified Driver Security Chip"></div>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--spacing-4);">
+                <div class="passport-body" style="margin-bottom: 0;">
+                    <div class="passport-avatar" id="user-avatar-initial">E</div>
+                    <div class="passport-meta">
+                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            <h4 id="user-name-display" style="font-size: 1.35rem; margin: 0;">Driver</h4>
+                            <span class="rank-pill" id="driver-rank-badge">
+                                <span>🔰</span>
+                                <span id="rank-title">Rookie Driver</span>
+                            </span>
+                        </div>
+                        <p id="user-email-display" style="margin: 2px 0 6px 0; color: #94a3b8; font-size: 0.85rem;">Loading credentials...</p>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 0.72rem; text-transform: uppercase; color: #94a3b8;">License ID:</span>
+                            <span class="driver-id-tag" id="driver-id-code" style="font-size: 0.95rem;">#DRV-8829</span>
+                            <button class="passport-share-btn" id="copy-driver-id-btn" title="Copy Driver ID" style="padding: 2px 8px; font-size: 0.7rem;">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                <span>Copy</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Quick Action 3 Buttons -->
+                <div style="display: flex; gap: var(--spacing-3); align-items: center; flex-wrap: wrap;">
+                    <button type="button" id="top-view-license-btn" class="passport-share-btn" style="background: rgba(255,255,255,0.12); padding: 0.5rem 1rem; font-size: 0.8rem; border-radius: var(--radius-full);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        <span>View License</span>
+                    </button>
+                    <button type="button" id="top-download-btn" class="passport-share-btn" style="background: rgba(255,255,255,0.12); padding: 0.5rem 1rem; font-size: 0.8rem; border-radius: var(--radius-full);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        <span>Download ID</span>
+                    </button>
+                    <button type="button" id="open-share-modal-btn" class="passport-share-btn" style="background: #2563eb; border-color: #3b82f6; padding: 0.5rem 1.15rem; font-size: 0.8rem; border-radius: var(--radius-full); box-shadow: 0 4px 14px rgba(37,99,235,0.4);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                        <span>Share VIP License</span>
+                    </button>
                 </div>
             </div>
-            <ul class="nav-menu">
-                <li><a href="#" class="active" id="tab-purchases">My Purchases</a></li>
-                <li><a href="#" id="tab-orders">Order History</a></li>
-            </ul>
+        </div>
+    </div>
+
+    <div class="container dashboard-layout" style="margin-top: 0;">
+        <!-- Sidebar Navigation -->
+        <aside>
+            <div class="sidebar">
+                <div id="admin-link-container" style="display: none; margin-bottom: var(--spacing-4);">
+                    <a href="admin/dashboard.html" class="btn btn-primary btn-sm" style="width: 100%; justify-content: center;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                        <span>Admin Studio</span>
+                    </a>
+                </div>
+
+                <ul class="nav-menu">
+                    <li>
+                        <a href="#" class="active" id="tab-garage">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C2.1 11.2 2 11.6 2 12v4c0 .6.4 1 1 1h2"></path><circle cx="7" cy="17" r="2"></circle><path d="M9 17h6"></path><circle cx="17" cy="17" r="2"></circle></svg>
+                            <span>My Virtual Garage</span>
+                            <span class="nav-counter" id="garage-counter">0</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" id="tab-wishlist">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                            <span>Garage Wishlist</span>
+                            <span class="nav-counter" id="wishlist-counter">0</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" id="tab-requests">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                            <span>Community Mod Voting</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" id="tab-orders">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                            <span>Order Invoices</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
         </aside>
 
-        <!-- Content -->
+        <!-- Main Content Area -->
         <main class="main-content" id="dashboard-content">
             <!-- Loading State -->
-            <div style="text-align: center; padding: 2rem;">Loading...</div>
+            <div style="text-align: center; padding: 4rem 2rem;">
+                <div style="width: 44px; height: 44px; border: 3px solid var(--color-primary-light); border-top-color: var(--color-primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto var(--spacing-4);"></div>
+                <p class="text-secondary" style="font-weight: 600;">Loading Driver Fleet & Telemetry...</p>
+            </div>
         </main>
     </div>
 
@@ -264,10 +697,51 @@
         <div class="invoice" id="invoice-content"></div>
     </div>
 
+    <!-- VIP Driver ID Share & Preview Modal -->
+    <div class="modal-overlay" id="share-modal">
+        <div class="modal-content" style="max-width: 740px; text-align: center; padding: var(--spacing-6); border-radius: var(--radius-2xl);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-4); border-bottom: 1px solid var(--color-border); padding-bottom: var(--spacing-3);">
+                <div style="text-align: left;">
+                    <h3 style="font-size: 1.25rem; font-weight: 800; margin: 0; color: var(--text-primary); font-family: var(--font-heading);">Official VIP Driver ID Passport</h3>
+                    <p class="text-secondary" style="font-size: 0.8rem; margin: 2px 0 0 0;">Your personalized motorsport simulation credentials.</p>
+                </div>
+                <button type="button" class="close-btn" id="close-share-modal-btn" style="background: var(--bg-tertiary); border: 1px solid var(--color-border); width: 34px; height: 34px; border-radius: 50%; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-primary); transition: all 0.2s ease;" title="Close Window">&times;</button>
+            </div>
+
+            <!-- Canvas Card Preview -->
+            <div style="position: relative; border-radius: var(--radius-xl); overflow: hidden; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12); margin-bottom: var(--spacing-5); border: 1px solid var(--color-border); background: #ffffff;">
+                <canvas id="driver-license-canvas" width="1200" height="675" style="width: 100%; height: auto; display: block; border-radius: var(--radius-xl);"></canvas>
+            </div>
+
+            <!-- Share Buttons Row -->
+            <div style="display: flex; gap: var(--spacing-3); justify-content: center; flex-wrap: wrap;">
+                <button type="button" id="whatsapp-share-btn" class="btn" style="background: #25D366; color: #ffffff; border: none; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.5rem 1.1rem; font-size: 0.825rem; border-radius: var(--radius-full); cursor: pointer;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.155.57 4.178 1.564 5.926l-1.664 6.074 6.26-1.642c1.701.927 3.649 1.442 5.84 1.442 6.627 0 12-5.373 12-12s-5.373-12-12-12z"/></svg>
+                    <span>Share on WhatsApp</span>
+                </button>
+                <button id="download-license-btn" class="btn btn-primary" style="font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.5rem 1.1rem; font-size: 0.825rem; border-radius: var(--radius-full);">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <span>Download ID Image</span>
+                </button>
+                <button id="copy-share-msg-btn" class="btn btn-outline" style="border-radius: var(--radius-full); padding: 0.5rem 1.1rem; font-size: 0.825rem; display: inline-flex; align-items: center; gap: 0.45rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    <span>Copy Text</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="dash-toast">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+        <span id="toast-msg">Copied to clipboard!</span>
+    </div>
+
     <!-- Logic -->
     <script type="module" src="js/firebase-config.js"></script>
     <script type="module" src="js/auth.js"></script>
     <script type="module" src="js/dashboard.js"></script>
     <script src="js/cookie-consent.js"></script>
+    <script src="js/bottom-ticker.js"></script>
 </body>
 </html>

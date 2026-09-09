@@ -4,10 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Account - Enroute Admin</title>
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
     <!-- CSS -->
     <link rel="stylesheet" href="../css/index.css">
     <link rel="stylesheet" href="../css/components.css">
@@ -30,44 +27,161 @@
             <li><a href="orders.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> <span class="nav-text">Orders</span></a></li>
             <li><a href="users.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> <span class="nav-text">Users</span></a></li>
             <li><a href="reports.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg> <span class="nav-text">Reports</span></a></li>
+            <li><a href="messages.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> <span class="nav-text">Messages</span></a></li>
             <li><a href="account.html" class="active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> <span class="nav-text">Account</span></a></li>
         </ul>
     </aside>
 
     <main class="admin-main">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-8);">
+        <!-- 🪪 Top Admin Master Passport Hero Card -->
+        <div class="driver-passport-card" id="admin-passport-hero" style="background: linear-gradient(135deg, #090d16 0%, #1e3a8a 100%); color: #ffffff; border-radius: var(--radius-2xl); padding: 1.5rem 1.75rem; margin-bottom: 2rem; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15); border: 1px solid rgba(255, 255, 255, 0.15);">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.15); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+                <span style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #93c5fd; display: flex; align-items: center; gap: 6px;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    ENROUTE STUDIO ARCHITECT AUTHORITY • OFFICIAL ADMIN PASSPORT
+                </span>
+                <span style="font-size: 0.72rem; font-weight: 800; background: rgba(59, 130, 246, 0.3); border: 1px solid rgba(147, 197, 253, 0.5); padding: 2px 8px; border-radius: 4px; color: #dbeafe;">CLEARANCE: ROOT</span>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.25rem;">
+                <div style="display: flex; align-items: center; gap: 1.25rem;">
+                    <div style="width: 62px; height: 62px; border-radius: var(--radius-xl); background: linear-gradient(135deg, #2563eb, #38bdf8); display: flex; align-items: center; justify-content: center; font-size: 1.75rem; font-weight: 900; color: #ffffff; border: 2px solid rgba(255, 255, 255, 0.35); box-shadow: 0 4px 12px rgba(0,0,0,0.25);" id="admin-avatar-initial">A</div>
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <h3 id="admin-hero-name" style="font-size: 1.35rem; font-weight: 800; margin: 0; color: #ffffff; font-family: 'Space Grotesk', sans-serif;">Admin</h3>
+                            <span id="admin-badge-pill" class="admin-badge-tier admin-badge-tvarit">
+                                <span>🏎️</span>
+                                <span id="admin-badge-name">01 — Tvarit</span>
+                            </span>
+                        </div>
+                        <p id="admin-hero-email" style="margin: 3px 0 6px 0; color: #94a3b8; font-size: 0.85rem;">admin@enroute.in</p>
+                        <div style="display: flex; align-items: center; gap: 12px; font-size: 0.78rem;">
+                            <span>ADMIN ID: <strong id="admin-id-code" style="color: #ef4444; font-family: monospace; font-size: 0.95rem; font-weight: 800;">ADM-0001</strong></span>
+                            <span>•</span>
+                            <span>FLEET DEPLOYED: <strong id="admin-mods-count" style="color: #34d399;">0 Mods</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3 Action Buttons -->
+                <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                    <button type="button" id="admin-view-license-btn" class="btn" style="background: rgba(255,255,255,0.12); color: #ffffff; border: 1px solid rgba(255,255,255,0.25); padding: 0.5rem 1.1rem; font-size: 0.825rem; border-radius: var(--radius-full); font-weight: 700; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        <span>View Admin License</span>
+                    </button>
+                    <button type="button" id="admin-download-btn" class="btn" style="background: rgba(255,255,255,0.12); color: #ffffff; border: 1px solid rgba(255,255,255,0.25); padding: 0.5rem 1.1rem; font-size: 0.825rem; border-radius: var(--radius-full); font-weight: 700; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        <span>Download ID</span>
+                    </button>
+                    <button type="button" id="admin-share-modal-btn" class="btn btn-primary" style="padding: 0.5rem 1.25rem; font-size: 0.825rem; border-radius: var(--radius-full); font-weight: 700; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 14px rgba(37,99,235,0.4);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                        <span>Share Admin Card</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-6);">
             <h1>Account Settings</h1>
         </div>
 
-        <div class="card" style="max-width: 600px; padding: var(--spacing-6);">
+        <div class="card" style="max-width: 680px; padding: 2rem;">
             <form id="account-form">
-                <div class="form-group">
-                    <label class="form-label">Display Name</label>
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <label class="form-label">Administrator Display Name</label>
                     <input type="text" id="admin-name" class="form-control" required>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Email Address</label>
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                    <label class="form-label">Administrator Email</label>
                     <input type="email" id="admin-email" class="form-control" readonly disabled>
-                    <p class="text-secondary" style="font-size: 0.8rem; margin-top: 4px;">Email cannot be changed.</p>
+                    <p class="text-secondary" style="font-size: 0.8rem; margin-top: 4px;">Primary root administrator email address.</p>
                 </div>
 
-                <div style="margin-top: var(--spacing-6);">
-                    <button type="submit" class="btn btn-primary" id="save-account-btn">Save Changes</button>
+                <div style="margin-top: 1.5rem;">
+                    <button type="submit" class="btn btn-primary" id="save-account-btn" style="padding: 0.75rem 1.75rem;">Save Changes</button>
                 </div>
             </form>
 
-            <hr style="margin: var(--spacing-8) 0; border: none; border-top: 1px solid var(--color-border);">
+            <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--admin-border);">
 
-            <h3 style="margin-bottom: var(--spacing-4);">Session</h3>
-            <button class="btn btn-outline" id="account-logout-btn" style="margin-bottom: var(--spacing-8);">Logout from Admin Panel</button>
+            <h3 style="margin-bottom: 1rem;">Session Management</h3>
+            <button class="btn btn-outline" id="account-logout-btn" style="margin-bottom: 2rem;">Logout from Admin Panel</button>
 
-            <div style="border: 1px solid #ef4444; border-radius: var(--radius-md); padding: var(--spacing-6); background-color: rgba(239, 68, 68, 0.05);">
-                <h3 style="color: #ef4444; margin-bottom: var(--spacing-2);">Danger Zone</h3>
-                <p class="text-secondary" style="margin-bottom: var(--spacing-4);">Deleting your account will permanently remove all your data, including all products you have uploaded to the platform. This action cannot be undone.</p>
-                <button class="btn" id="delete-account-btn" style="background-color: #ef4444; color: white; padding: 0.5rem 1rem;">Delete My Account</button>
+            <div style="border: 1px solid #fee2e2; border-radius: var(--radius-xl); padding: 1.5rem; background-color: #fff5f5;">
+                <h3 style="color: #dc2626; margin: 0 0 0.5rem 0;">Danger Zone</h3>
+                <p class="text-secondary" style="margin-bottom: 1.25rem; font-size: 0.9rem;">Deleting your account will permanently remove all your admin credentials and all products you have uploaded. This action cannot be undone.</p>
+                <button class="btn" id="delete-account-btn" style="background-color: #dc2626; color: white; padding: 0.6rem 1.25rem; border-radius: var(--radius-lg); font-weight: 700;">Delete My Account</button>
             </div>
         </div>
     </main>
+
+    <!-- Admin License Modal -->
+    <div class="modal-overlay" id="admin-license-modal">
+        <div class="modal-content" style="max-width: 740px; text-align: center; padding: 1.5rem; border-radius: var(--radius-2xl);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--admin-border); padding-bottom: 0.75rem;">
+                <div style="text-align: left;">
+                    <h3 style="font-size: 1.25rem; font-weight: 800; margin: 0; color: var(--admin-text-primary); font-family: 'Space Grotesk', sans-serif;">Official Admin Master Passport</h3>
+                    <p class="text-secondary" style="font-size: 0.8rem; margin: 2px 0 0 0;">Master 3D Mod Architect & Administrator Identity Card.</p>
+                </div>
+                <button type="button" class="close-btn" id="close-admin-modal-btn" style="background: var(--admin-border-subtle); border: 1px solid var(--admin-border); width: 34px; height: 34px; border-radius: 50%; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--admin-text-primary);" title="Close">&times;</button>
+            </div>
+
+            <!-- Canvas Card Preview -->
+            <div style="position: relative; border-radius: var(--radius-xl); overflow: hidden; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12); margin-bottom: 1.25rem; border: 1px solid var(--admin-border); background: #ffffff;">
+                <canvas id="admin-license-canvas" width="1200" height="780" style="width: 100%; height: auto; display: block; border-radius: var(--radius-xl);"></canvas>
+            </div>
+
+            <!-- Modal Action Buttons -->
+            <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+                <button type="button" id="admin-whatsapp-btn" class="btn" style="background: #25D366; color: #ffffff; border: none; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.5rem 1.1rem; font-size: 0.825rem; border-radius: var(--radius-full); cursor: pointer;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.155.57 4.178 1.564 5.926l-1.664 6.074 6.26-1.642c1.701.927 3.649 1.442 5.84 1.442 6.627 0 12-5.373 12-12s-5.373-12-12-12z"/></svg>
+                    <span>Share on WhatsApp</span>
+                </button>
+                <button type="button" id="admin-modal-download-btn" class="btn btn-primary" style="font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.5rem 1.1rem; font-size: 0.825rem; border-radius: var(--radius-full);">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <span>Download ID Image</span>
+                </button>
+                <button type="button" id="admin-copy-text-btn" class="btn btn-outline" style="border-radius: var(--radius-full); padding: 0.5rem 1.1rem; font-size: 0.825rem; display: inline-flex; align-items: center; gap: 0.45rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    <span>Copy Text</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="dash-toast" style="position: fixed; bottom: 48px; right: 24px; background: #0f172a; color: #ffffff; padding: 12px 20px; border-radius: var(--radius-full); font-size: 0.9rem; font-weight: 700; box-shadow: var(--shadow-xl); border: 1px solid rgba(255,255,255,0.15); z-index: 10000; display: flex; align-items: center; gap: 8px; opacity: 0; transform: translateY(20px); transition: all 0.3s ease; pointer-events: none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+        <span id="toast-msg">Copied to clipboard!</span>
+    </div>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav class="mobile-admin-bottom-nav">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            <span>Dashboard</span>
+        </a>
+        <a href="products.html" class="bottom-nav-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            <span>Products</span>
+        </a>
+        <a href="orders.html" class="bottom-nav-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            <span>Orders</span>
+        </a>
+        <a href="messages.html" class="bottom-nav-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            <span>Messages</span>
+        </a>
+        <a href="reports.html" class="bottom-nav-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+            <span>Reports</span>
+        </a>
+        <a href="account.html" class="bottom-nav-item active">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            <span>Account</span>
+        </a>
+    </nav>
 
     <!-- Logic -->
     <script type="module">
@@ -75,5 +189,6 @@
         requireAdmin();
     </script>
     <script type="module" src="../js/admin/admin-account.js"></script>
+    <script type="module" src="../js/admin/admin-ticker.js"></script>
 </body>
 </html>
