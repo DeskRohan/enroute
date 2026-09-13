@@ -44,26 +44,30 @@ const formatPrice = (price) => {
     }).format(price);
 };
 
-// Google Drive Image URL Converter
+// Google Drive Image URL Converter (Reliable Google UserContent CDN & direct links)
 const getImageUrl = (url) => {
-    if (!url || url.trim() === '') return 'https://via.placeholder.com/400x300?text=No+Image';
+    if (!url || typeof url !== 'string' || url.trim() === '') {
+        return 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=800';
+    }
 
-    // Non-Google Drive URLs — return as-is
-    if (url.startsWith("http") && !url.includes("drive.google.com")) {
-        return url;
+    const cleanUrl = url.trim();
+
+    // Already Google User Content CDN
+    if (cleanUrl.includes('googleusercontent.com/d/')) {
+        return cleanUrl;
     }
 
     let fileId = null;
-
     const patterns = [
-        /\/file\/d\/([a-zA-Z0-9_-]+)/,
-        /open\?id=([a-zA-Z0-9_-]+)/,
-        /uc\?id=([a-zA-Z0-9_-]+)/,
-        /[?&]id=([a-zA-Z0-9_-]+)/
+        /\/file\/d\/([a-zA-Z0-9_-]{20,})/,
+        /[?&]id=([a-zA-Z0-9_-]{20,})/,
+        /\/d\/([a-zA-Z0-9_-]{20,})/,
+        /drive\.google\.com\/.*?\/([a-zA-Z0-9_-]{20,})/,
+        /^([a-zA-Z0-9_-]{25,50})$/
     ];
 
     for (const pattern of patterns) {
-        const match = url.match(pattern);
+        const match = cleanUrl.match(pattern);
         if (match && match[1]) {
             fileId = match[1];
             break;
@@ -71,10 +75,10 @@ const getImageUrl = (url) => {
     }
 
     if (fileId) {
-        return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
+        return `https://lh3.googleusercontent.com/d/${fileId}`;
     }
 
-    return url;
+    return cleanUrl;
 };
 
 // Helper to navigate to product robustly
@@ -120,6 +124,34 @@ const createProductCard = (product) => {
         isWishlisted = currentWish.includes(product.id);
     } catch(e) {}
 
+    const origPrice = product.originalPrice ?? product.price ?? 0;
+    const offerPrice = product.offerPrice;
+    const hasOffer = (offerPrice !== undefined && offerPrice !== null && offerPrice !== '' && Number(offerPrice) < Number(origPrice));
+    const isLimited = product.offerPeriodType === 'limited';
+    const isExpired = isLimited && product.offerExpiryDate && new Date(product.offerExpiryDate) <= new Date();
+    const isOfferActive = hasOffer && !isExpired;
+
+    let priceRowHtml = '';
+    if (isFree) {
+        priceRowHtml = `<span class="price free">FREE</span>`;
+    } else if (isOfferActive) {
+        const discountPct = Math.round(((origPrice - offerPrice) / origPrice) * 100);
+        priceRowHtml = `
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+                <div style="display: flex; align-items: baseline; gap: 6px;">
+                    <span class="price" style="color: var(--color-primary);">${formatPrice(offerPrice)}</span>
+                    <span style="text-decoration: line-through; color: var(--text-muted); font-size: 0.85rem;">${formatPrice(origPrice)}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.25); padding: 1px 6px; border-radius: 4px; font-size: 0.68rem; font-weight: 800;">${discountPct}% OFF</span>
+                    ${isLimited ? `<span style="font-size: 0.68rem; color: #d97706; font-weight: 600;">⚡ Limited Deal</span>` : `<span style="font-size: 0.68rem; color: #059669; font-weight: 600;">⚡ Lifetime Offer</span>`}
+                </div>
+            </div>
+        `;
+    } else {
+        priceRowHtml = `<span class="price">${formatPrice(origPrice)}</span>`;
+    }
+
     return `
         <div class="card product-card">
             <button class="card-wishlist-btn ${isWishlisted ? 'active' : ''}" id="wish-btn-${product.id}" onclick="window.toggleWishlist(event, '${product.id}')" title="Save to Garage Wishlist">
@@ -127,11 +159,11 @@ const createProductCard = (product) => {
             </button>
             <a href="product.html?id=${product.id}" onclick="try{sessionStorage.setItem('viewProductId', '${product.id}');}catch(e){}" style="display: block;">
                 <div class="img-container">
-                    <img src="${getImageUrl(imgUrl)}" alt="${product.name}" loading="lazy">
+                    <img src="${getImageUrl(imgUrl)}" alt="${product.name}" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=800';">
                 </div>
             </a>
             <div class="content">
-                <span class="category-pill">${product.category || 'BUSSID MOD'}</span>
+                <span class="category-pill">${product.category === 'livery' ? 'Vehicle Livery/Skin' : 'Vehicle Mod'}</span>
                 <a href="product.html?id=${product.id}" onclick="try{sessionStorage.setItem('viewProductId', '${product.id}');}catch(e){}">
                     <h3 class="title">${product.name}</h3>
                 </a>
@@ -140,7 +172,7 @@ const createProductCard = (product) => {
                     <span class="uploader-name">${uploader.name}</span>${verificationBadge}
                 </div>
                 <div class="price-row">
-                    <span class="price ${isFree ? 'free' : ''}">${isFree ? 'FREE' : formatPrice(product.price)}</span>
+                    ${priceRowHtml}
                 </div>
                 <a href="product.html?id=${product.id}" onclick="try{sessionStorage.setItem('viewProductId', '${product.id}');}catch(e){}" class="btn btn-primary" style="width: 100%;">
                     <span>View Details</span>

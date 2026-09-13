@@ -48,10 +48,8 @@ onAuthStateChanged(auth, async (user) => {
                 localStorage.setItem('userRole', userData.role);
                 
                 if (dashBtn) {
-                    dashBtn.style.borderRadius = 'var(--radius-full)';
-                    dashBtn.style.aspectRatio = 'auto';
-                    dashBtn.style.padding = '0.5rem 1.25rem';
-                    dashBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px; display:inline-block; vertical-align:middle;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> <span style="display:inline-block; vertical-align:middle;">${userData.name || 'Profile'}</span>`;
+                    dashBtn.title = userData.name ? `${userData.name} (Dashboard)` : 'Dashboard / Profile';
+                    dashBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
                 }
 
                 // First time login - ask for name

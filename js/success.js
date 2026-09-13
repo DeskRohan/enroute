@@ -16,7 +16,7 @@ const formatPrice = (price) => {
     return new Intl.NumberFormat('en-IN', {
         style: 'currency',
         currency: 'INR'
-    }).format(price);
+    }).format(price || 0);
 };
 
 const generateInvoiceNumber = (id) => {
@@ -24,7 +24,7 @@ const generateInvoiceNumber = (id) => {
 };
 
 const loadSuccessData = async (user) => {
-    if (!orderId || !productId) {
+    if (!orderId) {
         mainContent.innerHTML = `
             <h1>Oops!</h1>
             <p class="text-secondary mt-2">Invalid order details.</p>
@@ -38,31 +38,44 @@ const loadSuccessData = async (user) => {
         const orderRef = doc(db, "orders", orderId);
         const orderSnap = await getDoc(orderRef);
 
-        // Fetch Product (to get download link)
-        const productRef = doc(db, "products", productId);
-        const productSnap = await getDoc(productRef);
+        if (!orderSnap.exists()) {
+            throw new Error("Order not found");
+        }
 
-        if (orderSnap.exists() && productSnap.exists()) {
-            const order = orderSnap.data();
-            const product = productSnap.data();
+        const order = orderSnap.data();
 
-            // Verify order belongs to current user
-            if (order.userId !== user.uid) {
-                throw new Error("Unauthorized access");
-            }
+        // Verify order belongs to current user
+        if (order.userId !== user.uid) {
+            throw new Error("Unauthorized access");
+        }
 
-            renderSuccess(order, product, orderId);
-            buildInvoice(order, product, orderId);
-            triggerAutoDownload(product.downloadLink);
+        // Determine items list
+        let orderItems = order.items || [];
 
+        // If legacy single product without items array
+        if (orderItems.length === 0 && productId) {
             try {
-                await updateDoc(productRef, { downloadCount: increment(3) });
-            } catch (err) {
-                console.error("Error updating download count", err);
-            }
+                const productRef = doc(db, "products", productId);
+                const productSnap = await getDoc(productRef);
+                if (productSnap.exists()) {
+                    const pData = productSnap.data();
+                    orderItems = [{
+                        id: productId,
+                        name: pData.name,
+                        price: order.amount,
+                        category: pData.category || 'mod',
+                        downloadLink: pData.downloadLink || pData.downloadUrl || '#'
+                    }];
+                }
+            } catch(e) {}
+        }
 
-        } else {
-            throw new Error("Data not found");
+        renderSuccess(order, orderItems, orderId);
+        buildInvoice(order, orderItems, orderId);
+
+        // Auto download first item if available
+        if (orderItems.length > 0 && orderItems[0].downloadLink) {
+            triggerAutoDownload(orderItems[0].downloadLink);
         }
 
     } catch (error) {
@@ -75,7 +88,36 @@ const loadSuccessData = async (user) => {
     }
 };
 
-const renderSuccess = (order, product, id) => {
+const renderSuccess = (order, items, id) => {
+    const productsText = items.map(i => i.name).join(', ') || order.productName || 'BUSSID Mod';
+
+    let downloadsHtml = '';
+    if (items.length > 1) {
+        downloadsHtml = `
+            <div style="display:flex; flex-direction:column; gap:0.75rem; margin:1.5rem auto; max-width:500px;">
+                ${items.map(item => `
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-secondary); border:1px solid var(--color-border); border-radius:var(--radius-lg); padding:0.75rem 1rem;">
+                        <div style="text-align:left;">
+                            <div style="font-weight:700; font-size:0.95rem; color:var(--text-primary);">${item.name}</div>
+                            <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase;">${item.category === 'livery' ? 'Vehicle Livery' : 'Vehicle Mod'}</div>
+                        </div>
+                        <a href="${item.downloadLink || '#'}" class="btn btn-primary btn-sm" target="_blank" rel="noopener noreferrer" style="white-space:nowrap;">
+                            Download Mod
+                        </a>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    } else if (items.length === 1) {
+        downloadsHtml = `
+            <div style="margin: 1.5rem 0;">
+                <a href="${items[0].downloadLink || '#'}" class="btn btn-primary btn-lg" target="_blank" rel="noopener noreferrer">
+                    Download Mod (${items[0].name})
+                </a>
+            </div>
+        `;
+    }
+
     orderDetailsContainer.innerHTML = `
         <div class="order-details">
             <div class="detail-row">
@@ -83,12 +125,12 @@ const renderSuccess = (order, product, id) => {
                 <span style="font-family: monospace;">${id}</span>
             </div>
             <div class="detail-row">
-                <span class="text-secondary">Product</span>
-                <span>${product.name}</span>
+                <span class="text-secondary">Product${items.length > 1 ? 's' : ''}</span>
+                <span>${productsText}</span>
             </div>
             <div class="detail-row">
                 <span class="text-secondary">Amount Paid</span>
-                <span class="color-primary">${formatPrice(order.amount)}</span>
+                <span class="color-primary" style="font-weight:800;">${formatPrice(order.amount)}</span>
             </div>
             <div class="detail-row">
                 <span class="text-secondary">Payment ID</span>
@@ -97,11 +139,9 @@ const renderSuccess = (order, product, id) => {
         </div>
 
         <div class="download-section">
-            <p class="mb-4">Your download should start automatically.</p>
-            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                <a href="${product.downloadLink || '#'}" class="btn btn-primary btn-lg" target="_blank" rel="noopener noreferrer">
-                    Download Again
-                </a>
+            <p class="mb-2">Your cloud download link${items.length > 1 ? 's are' : ' is'} ready.</p>
+            ${downloadsHtml}
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem;">
                 <button id="view-invoice-btn" class="btn btn-outline btn-lg" style="display: flex; align-items: center; gap: 0.5rem;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                     View Invoice
@@ -114,12 +154,15 @@ const renderSuccess = (order, product, id) => {
     `;
 
     // Attach invoice button listener
-    document.getElementById('view-invoice-btn').addEventListener('click', () => {
-        invoiceWrapper.classList.add('active');
-    });
+    const invBtn = document.getElementById('view-invoice-btn');
+    if (invBtn) {
+        invBtn.addEventListener('click', () => {
+            invoiceWrapper.classList.add('active');
+        });
+    }
 };
 
-const buildInvoice = (order, product, id) => {
+const buildInvoice = (order, items, id) => {
     const invoiceNum = generateInvoiceNumber(id);
     const date = order.createdAt ? new Date(order.createdAt.seconds * 1000) : new Date();
     const formattedDate = date.toLocaleDateString('en-IN', {
@@ -131,6 +174,33 @@ const buildInvoice = (order, product, id) => {
         hour: '2-digit',
         minute: '2-digit'
     });
+
+    let tableRows = '';
+    if (items.length > 0) {
+        tableRows = items.map(item => `
+            <tr>
+                <td>
+                    <strong>${item.name}</strong>
+                    <br><span style="font-size: 0.8rem; color: #9ca3af;">Digital Download License</span>
+                </td>
+                <td style="text-transform: capitalize;">${item.category === 'livery' ? 'Vehicle Livery' : 'Vehicle Mod'}</td>
+                <td>1</td>
+                <td>${formatPrice(item.price)}</td>
+            </tr>
+        `).join('');
+    } else {
+        tableRows = `
+            <tr>
+                <td>
+                    <strong>${order.productName || 'BUSSID Mod'}</strong>
+                    <br><span style="font-size: 0.8rem; color: #9ca3af;">Digital Download License</span>
+                </td>
+                <td style="text-transform: capitalize;">Mod</td>
+                <td>1</td>
+                <td>${formatPrice(order.amount)}</td>
+            </tr>
+        `;
+    }
 
     invoiceContent.innerHTML = `
         <div class="invoice-header">
@@ -176,15 +246,7 @@ const buildInvoice = (order, product, id) => {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>
-                            <strong>${product.name}</strong>
-                            <br><span style="font-size: 0.8rem; color: #9ca3af;">Digital Download License</span>
-                        </td>
-                        <td style="text-transform: capitalize;">${product.category || 'Mod'}</td>
-                        <td>1</td>
-                        <td>${formatPrice(order.amount)}</td>
-                    </tr>
+                    ${tableRows}
                 </tbody>
             </table>
 
@@ -239,8 +301,7 @@ const buildInvoice = (order, product, id) => {
 };
 
 const triggerAutoDownload = (url) => {
-    if (url) {
-        // Slight delay for UX
+    if (url && url !== '#') {
         setTimeout(() => {
             const a = document.createElement('a');
             a.href = url;

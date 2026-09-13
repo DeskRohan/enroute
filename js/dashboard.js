@@ -45,20 +45,41 @@ const formatPrice = (price) => {
     }).format(price || 0);
 };
 
-// Google Drive Image URL Converter
+// Google Drive Image URL Converter (Reliable Google UserContent CDN & direct links)
 const getImageUrl = (url) => {
-    if (!url) return 'https://via.placeholder.com/800x600?text=No+Image';
-    const driveRegex = /drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/;
-    const match = url.match(driveRegex);
-    if (match && match[1]) {
-        return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`;
+    if (!url || typeof url !== 'string' || url.trim() === '') {
+        return 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=800';
     }
-    const driveRegex2 = /drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/;
-    const match2 = url.match(driveRegex2);
-    if (match2 && match2[1]) {
-        return `https://drive.google.com/thumbnail?id=${match2[1]}&sz=w1000`;
+
+    const cleanUrl = url.trim();
+
+    // Already Google User Content CDN
+    if (cleanUrl.includes('googleusercontent.com/d/')) {
+        return cleanUrl;
     }
-    return url;
+
+    let fileId = null;
+    const patterns = [
+        /\/file\/d\/([a-zA-Z0-9_-]{20,})/,
+        /[?&]id=([a-zA-Z0-9_-]{20,})/,
+        /\/d\/([a-zA-Z0-9_-]{20,})/,
+        /drive\.google\.com\/.*?\/([a-zA-Z0-9_-]{20,})/,
+        /^([a-zA-Z0-9_-]{25,50})$/
+    ];
+
+    for (const pattern of patterns) {
+        const match = cleanUrl.match(pattern);
+        if (match && match[1]) {
+            fileId = match[1];
+            break;
+        }
+    }
+
+    if (fileId) {
+        return `https://lh3.googleusercontent.com/d/${fileId}`;
+    }
+
+    return cleanUrl;
 };
 
 const formatDate = (timestamp) => {
@@ -812,7 +833,7 @@ const renderGarageTab = () => {
         garageCardsHtml += `
             <div class="garage-card">
                 <div class="garage-media">
-                    <img src="${getImageUrl(primaryImg)}" alt="${p.name}" loading="lazy">
+                    <img src="${getImageUrl(primaryImg)}" alt="${p.name}" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=800';">
                     <span style="position: absolute; top: 10px; left: 10px; background: rgba(9, 13, 22, 0.75); backdrop-filter: blur(4px); color: #fff; font-size: 0.7rem; font-weight: 800; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">
                         ${p.category || 'MOD'}
                     </span>
@@ -958,7 +979,7 @@ const renderWishlistTab = async () => {
                 itemsHtml += `
                     <div class="wishlist-card">
                         <div style="display: flex; align-items: center; gap: 1rem;">
-                            <img src="${getImageUrl(pImg)}" alt="${p.name}" style="width: 72px; height: 52px; object-fit: cover; border-radius: var(--radius-md); border: 1px solid var(--color-border);">
+                            <img src="${getImageUrl(pImg)}" alt="${p.name}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=800';" style="width: 72px; height: 52px; object-fit: cover; border-radius: var(--radius-md); border: 1px solid var(--color-border);">
                             <div>
                                 <h4 style="font-size: 1.05rem; font-weight: 700; margin: 0 0 3px 0; color: var(--text-primary);">${p.name}</h4>
                                 <span style="font-size: 0.78rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">${p.category || 'Mod'}</span>

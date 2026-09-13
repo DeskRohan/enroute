@@ -14,28 +14,30 @@ const formatPrice = (price) => {
     }).format(price || 0);
 };
 
-// Google Drive Image URL Converter
+// Google Drive Image URL Converter (Reliable Google UserContent CDN & direct links)
 function getImageUrl(url) {
-    if (!url || url.trim() === "") {
-        return "https://via.placeholder.com/800x600?text=No+Image";
+    if (!url || typeof url !== 'string' || url.trim() === '') {
+        return 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=800';
     }
 
-    // Non-Google Drive URLs — return as-is
-    if (url.startsWith("http") && !url.includes("drive.google.com")) {
-        return url;
+    const cleanUrl = url.trim();
+
+    // Already Google User Content CDN
+    if (cleanUrl.includes('googleusercontent.com/d/')) {
+        return cleanUrl;
     }
 
     let fileId = null;
-
     const patterns = [
-        /\/file\/d\/([a-zA-Z0-9_-]+)/,
-        /open\?id=([a-zA-Z0-9_-]+)/,
-        /uc\?id=([a-zA-Z0-9_-]+)/,
-        /[?&]id=([a-zA-Z0-9_-]+)/
+        /\/file\/d\/([a-zA-Z0-9_-]{20,})/,
+        /[?&]id=([a-zA-Z0-9_-]{20,})/,
+        /\/d\/([a-zA-Z0-9_-]{20,})/,
+        /drive\.google\.com\/.*?\/([a-zA-Z0-9_-]{20,})/,
+        /^([a-zA-Z0-9_-]{25,50})$/
     ];
 
     for (const pattern of patterns) {
-        const match = url.match(pattern);
+        const match = cleanUrl.match(pattern);
         if (match && match[1]) {
             fileId = match[1];
             break;
@@ -43,10 +45,10 @@ function getImageUrl(url) {
     }
 
     if (fileId) {
-        return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
+        return `https://lh3.googleusercontent.com/d/${fileId}`;
     }
 
-    return url;
+    return cleanUrl;
 }
 
 const loadProduct = async () => {
@@ -127,7 +129,44 @@ const loadProduct = async () => {
 
             const totalDownloads = Math.max(dbOrderCount, (product.downloadCount || 0));
 
-            renderProduct(product, productId, uploader, totalDownloads);
+            // Load linked variant products
+            let linkedVariants = [];
+            if (product.variants && Array.isArray(product.variants) && product.variants.length > 0) {
+                try {
+                    const variantPromises = product.variants.map(async (v) => {
+                        const vId = (typeof v === 'object' && v !== null) ? v.id : v;
+                        const customLabel = (typeof v === 'object' && v !== null) ? v.label : '';
+                        if (!vId || vId === productId) return null;
+                        try {
+                            const vDocRef = doc(db, "products", vId);
+                            const vDocSnap = await getDoc(vDocRef);
+                            if (vDocSnap.exists()) {
+                                const vData = vDocSnap.data();
+                                return {
+                                    id: vId,
+                                    name: customLabel || vData.variantName || vData.name,
+                                    price: vData.price,
+                                    originalPrice: vData.originalPrice,
+                                    offerPrice: vData.offerPrice,
+                                    offerPeriodType: vData.offerPeriodType,
+                                    offerExpiryDate: vData.offerExpiryDate,
+                                    pricingType: vData.pricingType,
+                                    image: vData.image || (vData.images && vData.images[0])
+                                };
+                            }
+                        } catch (err) {
+                            console.warn("Error fetching variant product:", vId, err);
+                        }
+                        return null;
+                    });
+                    const results = await Promise.all(variantPromises);
+                    linkedVariants = results.filter(v => v !== null);
+                } catch (vErr) {
+                    console.warn("Could not load product variants:", vErr);
+                }
+            }
+
+            renderProduct(product, productId, uploader, totalDownloads, linkedVariants);
         } else {
             productContainer.innerHTML = `
                 <div class="text-center mt-8">
@@ -158,10 +197,17 @@ const loadProduct = async () => {
     }
 };
 
-const renderProduct = (product, id, uploader, totalDownloads = 0) => {
+const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants = []) => {
     document.title = `${product.name || 'Product'} - EnrouteIn.Store`;
 
     const isFree = product.pricingType === 'free' || product.price === 0;
+    const origPrice = product.originalPrice ?? product.price ?? 0;
+    const offerPrice = product.offerPrice;
+    const hasOffer = (!isFree && offerPrice !== undefined && offerPrice !== null && offerPrice !== '' && Number(offerPrice) < Number(origPrice));
+    const isLimited = product.offerPeriodType === 'limited';
+    const isExpired = isLimited && product.offerExpiryDate && new Date(product.offerExpiryDate) <= new Date();
+    const isOfferActive = hasOffer && !isExpired;
+    const currentPrice = isFree ? 0 : (isOfferActive ? Number(offerPrice) : Number(origPrice));
 
     const handleBuyNow = () => {
         if (isFree) {
@@ -171,25 +217,97 @@ const renderProduct = (product, id, uploader, totalDownloads = 0) => {
         }
 
         const user = auth.currentUser;
-
         if (!user) {
             alert('Please login to purchase.');
-            window.location.href =
-                `login.html?redirect=product.html?id=${id}`;
+            window.location.href = `login.html?redirect=product.html?id=${id}`;
             return;
         }
 
-        // Show CAPTCHA modal
-        showCaptchaModal(() => {
+        // Direct Buy Now redirects straight to checkout for this product
+        try {
+            sessionStorage.setItem('checkoutMode', 'single');
             sessionStorage.setItem(
                 'checkoutProduct',
                 JSON.stringify({
                     id,
-                    ...product
+                    ...product,
+                    price: currentPrice,
+                    originalPrice: origPrice,
+                    offerPrice: isOfferActive ? offerPrice : null,
+                    isOfferActive
                 })
             );
-            window.location.href = 'checkout.html';
-        });
+        } catch(e) {}
+        window.location.href = 'checkout.html';
+    };
+
+    const updateCartButtonState = () => {
+        if (isFree) return;
+        const cart = (window.EnrouteCart && window.EnrouteCart.getCart) ? window.EnrouteCart.getCart() : JSON.parse(localStorage.getItem('enroute_cart') || '[]');
+        const isInCart = cart.some(item => item.id === id);
+
+        const addCartBtnEl = document.getElementById('add-to-cart-btn');
+        const stickyAddCartBtnEl = document.getElementById('sticky-add-cart-btn');
+
+        if (isInCart) {
+            if (addCartBtnEl) {
+                addCartBtnEl.innerHTML = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path><polyline points="13 9 16 12 13 15"></polyline><line x1="9" y1="12" x2="16" y2="12"></line></svg>
+                    <span>Go to Cart</span>
+                `;
+                addCartBtnEl.classList.add('in-cart-btn');
+                addCartBtnEl.title = 'View Cart';
+            }
+            if (stickyAddCartBtnEl) {
+                stickyAddCartBtnEl.innerHTML = `
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path><polyline points="13 9 16 12 13 15"></polyline><line x1="9" y1="12" x2="16" y2="12"></line></svg>
+                    <span>Go to Cart</span>
+                `;
+                stickyAddCartBtnEl.classList.add('in-cart-btn');
+                stickyAddCartBtnEl.title = 'View Cart';
+            }
+        } else {
+            if (addCartBtnEl) {
+                addCartBtnEl.innerHTML = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                    <span>Add to Cart</span>
+                `;
+                addCartBtnEl.classList.remove('in-cart-btn');
+                addCartBtnEl.title = 'Add to Cart';
+            }
+            if (stickyAddCartBtnEl) {
+                stickyAddCartBtnEl.innerHTML = `
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                    <span>Add to Cart</span>
+                `;
+                stickyAddCartBtnEl.classList.remove('in-cart-btn');
+                stickyAddCartBtnEl.title = 'Add to Cart';
+            }
+        }
+    };
+
+    const handleAddToCartOrGoToCart = () => {
+        const cart = (window.EnrouteCart && window.EnrouteCart.getCart) ? window.EnrouteCart.getCart() : JSON.parse(localStorage.getItem('enroute_cart') || '[]');
+        const isInCart = cart.some(item => item.id === id);
+
+        if (isInCart) {
+            if (window.EnrouteCart) {
+                window.EnrouteCart.openCart();
+            }
+        } else {
+            const productPayload = {
+                id,
+                ...product,
+                price: currentPrice,
+                originalPrice: origPrice,
+                offerPrice: isOfferActive ? offerPrice : null,
+                isOfferActive
+            };
+            if (window.EnrouteCart) {
+                window.EnrouteCart.addToCart(productPayload);
+            }
+            updateCartButtonState();
+        }
     };
 
     window.showCaptchaModal = (onSuccess) => {
@@ -492,7 +610,7 @@ const renderProduct = (product, id, uploader, totalDownloads = 0) => {
             <div class="thumbnail-strip" style="margin-top: var(--spacing-4);">
                 ${images.map((imgUrl, idx) => `
                     <div class="thumbnail-item ${idx === 0 ? 'active' : ''}" data-idx="${idx}">
-                        <img src="${imgUrl}" alt="${product.name} Thumbnail ${idx + 1}">
+                        <img src="${imgUrl}" alt="${product.name} Thumbnail ${idx + 1}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=800';">
                     </div>
                 `).join('')}
             </div>
@@ -556,6 +674,72 @@ const renderProduct = (product, id, uploader, totalDownloads = 0) => {
     // Verified badge for uploader
     const verificationBadge = uploader.isVerified ? `<img src="assets/images/varified.png" title="Verified Admin" style="height: 1.15em; vertical-align: middle; margin-left: 4px; display: inline-block;">` : '';
 
+    // Build Minimalist Product Variants Selector (placed below image showcase)
+    let variantsHtml = '';
+    if (linkedVariants && linkedVariants.length > 0) {
+        const allVariantsList = [
+            {
+                id: id,
+                name: product.variantName || product.name,
+                finalPrice: isFree ? 'FREE' : formatPrice(currentPrice),
+                origPriceFormatted: (isOfferActive && origPrice) ? formatPrice(origPrice) : null,
+                discountPct: isOfferActive ? Math.round(((origPrice - offerPrice) / origPrice) * 100) : 0,
+                isCurrent: true
+            },
+            ...linkedVariants.map(v => {
+                const vIsFree = v.pricingType === 'free' || v.price === 0;
+                const vOrigPrice = v.originalPrice ?? v.price ?? 0;
+                const vOfferPrice = v.offerPrice;
+                const vHasOffer = (!vIsFree && vOfferPrice !== undefined && vOfferPrice !== null && vOfferPrice !== '' && Number(vOfferPrice) < Number(vOrigPrice));
+                const vIsLimited = v.offerPeriodType === 'limited';
+                const vIsExpired = vIsLimited && v.offerExpiryDate && new Date(v.offerExpiryDate) <= new Date();
+                const vIsOfferActive = vHasOffer && !vIsExpired;
+                const vEffectivePrice = vIsOfferActive ? vOfferPrice : (v.price ?? vOrigPrice);
+
+                return {
+                    id: v.id,
+                    name: v.name,
+                    finalPrice: vIsFree ? 'FREE' : formatPrice(vEffectivePrice),
+                    origPriceFormatted: (vIsOfferActive && vOrigPrice) ? formatPrice(vOrigPrice) : null,
+                    discountPct: vIsOfferActive ? Math.round(((vOrigPrice - vOfferPrice) / vOrigPrice) * 100) : 0,
+                    isCurrent: false
+                };
+            })
+        ];
+
+        variantsHtml = `
+            <div class="product-variants-minimal" style="margin-top: var(--spacing-4);">
+                <div class="variants-minimal-header">
+                    <span class="variants-minimal-title">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                        Available Editions & Variants
+                    </span>
+                    <span class="variants-minimal-count">${allVariantsList.length} Options</span>
+                </div>
+                <div class="variants-minimal-grid">
+                    ${allVariantsList.map(v => {
+                        if (v.isCurrent) {
+                            return `
+                                <div class="variant-pill active" title="Currently Selected">
+                                    <span class="variant-pill-dot"></span>
+                                    <span>${v.name}</span>
+                                    <span class="variant-pill-price">${v.finalPrice}</span>
+                                </div>
+                            `;
+                        } else {
+                            return `
+                                <a href="product.html?id=${v.id}" onclick="try{sessionStorage.setItem('viewProductId', '${v.id}');}catch(e){}" class="variant-pill" title="Switch to ${v.name}">
+                                    <span>${v.name}</span>
+                                    <span class="variant-pill-price" style="color: var(--text-secondary);">${v.finalPrice}</span>
+                                </a>
+                            `;
+                        }
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    }
+
     productContainer.innerHTML = `
         <nav class="breadcrumb" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: var(--spacing-6); font-size: 0.85rem; color: var(--text-secondary);">
             <a href="index.html" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 0.35rem;">
@@ -571,9 +755,13 @@ const renderProduct = (product, id, uploader, totalDownloads = 0) => {
         <div class="product-grid">
             <div class="product-gallery">
                 <div class="main-image-wrapper">
-                    <img id="main-product-image" src="${images[0]}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/800x600?text=Image+Not+Found'">
+                    <img id="main-product-image" src="${images[0]}" alt="${product.name}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=800';">
                 </div>
                 ${thumbnailsHtml}
+                
+                <!-- Minimal Variants Placed Directly Below Images -->
+                ${variantsHtml}
+
                 ${summaryCardHtml}
 
                 <!-- Mod Description Section -->
@@ -590,7 +778,7 @@ const renderProduct = (product, id, uploader, totalDownloads = 0) => {
             <div class="product-info">
                 <div class="product-info-container">
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
-                        <span class="category-pill">${product.category || 'BUSSID MOD'}</span>
+                        <span class="category-pill">${product.category === 'livery' ? 'Vehicle Livery/Skin' : 'Vehicle Mod'}</span>
                         <span class="trust-badge"><span style="color: #f59e0b;">★</span> Verified Mod</span>
                     </div>
                     <h1 style="margin-bottom: 0.75rem; font-size: 2rem; font-family: var(--font-heading);">${product.name || 'Unnamed Product'}</h1>
@@ -599,16 +787,59 @@ const renderProduct = (product, id, uploader, totalDownloads = 0) => {
                         <strong style="color: var(--text-primary); margin-left: 0.35rem;">${uploader.name}</strong>${verificationBadge}
                     </div>
 
-                    <div class="product-price" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.75rem; padding: 1.15rem 1.35rem; background: var(--bg-secondary); border-radius: var(--radius-xl); border: 1px solid var(--color-border);">
-                        <div>
-                            <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); display: block; margin-bottom: 0.2rem;">Price</span>
-                            <span style="font-size: 2.25rem; font-weight: 800; font-family: var(--font-heading); color: var(--color-primary);">${isFree ? 'FREE' : formatPrice(product.price)}</span>
+                    ${isFree ? `
+                        <div class="product-price" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.75rem; padding: 1.15rem 1.35rem; background: var(--bg-secondary); border-radius: var(--radius-xl); border: 1px solid var(--color-border);">
+                            <div>
+                                <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); display: block; margin-bottom: 0.2rem;">Price</span>
+                                <span style="font-size: 2.25rem; font-weight: 800; font-family: var(--font-heading); color: var(--color-success);">FREE</span>
+                            </div>
+                            <span style="font-size: 0.875rem; font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 0.45rem; background: var(--color-primary-light); padding: 0.5rem 1.15rem; border-radius: var(--radius-full); border: 1px solid rgba(37, 99, 235, 0.2);">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                ${totalDownloads} Downloads
+                            </span>
                         </div>
-                        <span style="font-size: 0.875rem; font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 0.45rem; background: var(--color-primary-light); padding: 0.5rem 1.15rem; border-radius: var(--radius-full); border: 1px solid rgba(37, 99, 235, 0.2);">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                            ${totalDownloads} Downloads
-                        </span>
-                    </div>
+                    ` : (isOfferActive ? `
+                        <div class="product-price" style="display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 1.75rem; padding: 1.25rem 1.35rem; background: var(--bg-secondary); border-radius: var(--radius-xl); border: 1px solid var(--color-border);">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <div>
+                                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                                        <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">Offer Price</span>
+                                        <span style="background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 2px 8px; border-radius: var(--radius-full); font-size: 0.72rem; font-weight: 800;">SAVE ${Math.round(((origPrice - offerPrice) / origPrice) * 100)}%</span>
+                                    </div>
+                                    <div style="display: flex; align-items: baseline; gap: 0.75rem;">
+                                        <span style="font-size: 2.25rem; font-weight: 800; font-family: var(--font-heading); color: var(--color-primary);">${formatPrice(offerPrice)}</span>
+                                        <span style="font-size: 1.25rem; font-weight: 600; text-decoration: line-through; color: var(--text-muted);">${formatPrice(origPrice)}</span>
+                                    </div>
+                                </div>
+                                <span style="font-size: 0.875rem; font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 0.45rem; background: var(--color-primary-light); padding: 0.5rem 1.15rem; border-radius: var(--radius-full); border: 1px solid rgba(37, 99, 235, 0.2);">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                    ${totalDownloads} Downloads
+                                </span>
+                            </div>
+                            ${isLimited ? `
+                                <div style="display: flex; align-items: center; gap: 0.5rem; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); padding: 0.5rem 0.85rem; border-radius: var(--radius-md); font-size: 0.82rem; color: #b45309; font-weight: 600;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                    <span>Limited Time Deal &bull; Offer valid until <strong>${new Date(product.offerExpiryDate).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</strong></span>
+                                </div>
+                            ` : `
+                                <div style="display: flex; align-items: center; gap: 0.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); padding: 0.5rem 0.85rem; border-radius: var(--radius-md); font-size: 0.82rem; color: #065f46; font-weight: 600;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                                    <span>Lifetime Promotional Offer &bull; Permanent special price for this mod</span>
+                                </div>
+                            `}
+                        </div>
+                    ` : `
+                        <div class="product-price" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.75rem; padding: 1.15rem 1.35rem; background: var(--bg-secondary); border-radius: var(--radius-xl); border: 1px solid var(--color-border);">
+                            <div>
+                                <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); display: block; margin-bottom: 0.2rem;">Price</span>
+                                <span style="font-size: 2.25rem; font-weight: 800; font-family: var(--font-heading); color: var(--color-primary);">${formatPrice(origPrice)}</span>
+                            </div>
+                            <span style="font-size: 0.875rem; font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 0.45rem; background: var(--color-primary-light); padding: 0.5rem 1.15rem; border-radius: var(--radius-full); border: 1px solid rgba(37, 99, 235, 0.2);">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                ${totalDownloads} Downloads
+                            </span>
+                        </div>
+                    `)}
 
                     <div class="specs-grid">
                         ${specsHtml}
@@ -631,14 +862,21 @@ const renderProduct = (product, id, uploader, totalDownloads = 0) => {
                         </div>
 
                         <div style="display: flex; gap: var(--spacing-3); width: 100%;">
-                            <button id="buy-btn" class="btn btn-primary btn-lg" style="flex: 1; font-size:1.05rem; padding:0.95rem; display:flex; align-items:center; justify-content:center; gap:0.5rem; border-radius: var(--radius-xl);">
-                                ${isFree ? 
-                                `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                                 <span>Free Instant Download</span>` :
-                                `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-                                 <span>Buy Now & Download</span>`
-                                }
-                            </button>
+                            ${!isFree ? `
+                                <button id="add-to-cart-btn" class="btn btn-outline btn-lg" style="flex: 1; font-size: 0.98rem; padding: 0.9rem; border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; gap: 0.5rem;" title="Add to Cart">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                                    <span>Add to Cart</span>
+                                </button>
+                                <button id="buy-btn" class="btn btn-primary btn-lg" style="flex: 1.25; font-size: 1rem; padding: 0.9rem; border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; gap: 0.5rem;" title="Buy Now & Download">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                    <span>Buy Now</span>
+                                </button>
+                            ` : `
+                                <button id="buy-btn" class="btn btn-primary btn-lg" style="flex: 1; font-size: 1.05rem; padding: 0.95rem; border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                    <span>Free Instant Download</span>
+                                </button>
+                            `}
                             <button id="detail-wishlist-btn" class="btn btn-outline" style="padding: 0 1.15rem; border-radius: var(--radius-xl);" title="Save to Garage Wishlist">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                             </button>
@@ -662,13 +900,87 @@ const renderProduct = (product, id, uploader, totalDownloads = 0) => {
                 </div>
             </div>
         </div>
+
+        <!-- Responsive Sticky Bottom Action Bar (Mobile & Tablet) -->
+        <div class="product-sticky-bottom-bar" id="product-sticky-bottom-bar">
+            <div class="sticky-bar-price-wrap">
+                ${isFree ? `
+                    <span class="sticky-bar-price free">FREE</span>
+                ` : (isOfferActive ? `
+                    <div style="display: flex; align-items: baseline; gap: 6px;">
+                        <span class="sticky-bar-price">${formatPrice(offerPrice)}</span>
+                        <span class="sticky-bar-orig-price">${formatPrice(origPrice)}</span>
+                    </div>
+                    <span class="sticky-bar-discount">SAVE ${Math.round(((origPrice - offerPrice) / origPrice) * 100)}%</span>
+                ` : `
+                    <span class="sticky-bar-price">${formatPrice(origPrice)}</span>
+                `)}
+            </div>
+            <div class="sticky-bar-actions">
+                ${!isFree ? `
+                    <button id="sticky-add-cart-btn" class="btn btn-outline" title="Add to Cart">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                        <span>Add to Cart</span>
+                    </button>
+                    <button id="sticky-buy-btn" class="btn btn-primary" title="Buy Now">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        <span>Buy Now</span>
+                    </button>
+                ` : `
+                    <button id="sticky-free-btn" class="btn btn-primary" style="width: 100%;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        <span>Free Download</span>
+                    </button>
+                `}
+            </div>
+        </div>
+
         <div id="related-mods-container"></div>
     `;
 
+    // Move the sticky bottom bar from productContainer to document.body for bulletproof fixed viewport docking.
+    // First, remove any previously mounted sticky bar (from a prior product load).
+    const oldStickyBar = document.body.querySelector(':scope > .product-sticky-bottom-bar');
+    if (oldStickyBar) oldStickyBar.remove();
+
+    // Now grab the one that was just created inside productContainer.innerHTML and move it to body.
+    const stickyBarEl = document.getElementById('product-sticky-bottom-bar');
+    if (stickyBarEl) {
+        document.body.appendChild(stickyBarEl);
+    }
+
+    // Attach Desktop & Sticky Action Handlers
     const buyBtnEl = document.getElementById('buy-btn');
     if (buyBtnEl) {
         buyBtnEl.addEventListener('click', handleBuyNow);
     }
+
+    const addCartBtnEl = document.getElementById('add-to-cart-btn');
+    if (addCartBtnEl) {
+        addCartBtnEl.addEventListener('click', handleAddToCartOrGoToCart);
+    }
+
+    const stickyBuyBtnEl = document.getElementById('sticky-buy-btn');
+    if (stickyBuyBtnEl) {
+        stickyBuyBtnEl.addEventListener('click', handleBuyNow);
+    }
+
+    const stickyAddCartBtnEl = document.getElementById('sticky-add-cart-btn');
+    if (stickyAddCartBtnEl) {
+        stickyAddCartBtnEl.addEventListener('click', handleAddToCartOrGoToCart);
+    }
+
+    const stickyFreeBtnEl = document.getElementById('sticky-free-btn');
+    if (stickyFreeBtnEl) {
+        stickyFreeBtnEl.addEventListener('click', handleBuyNow);
+    }
+
+    // Set initial button state (Add to Cart vs Go to Cart)
+    updateCartButtonState();
+
+    // Listen for cart modifications to sync button label
+    window.addEventListener('enroute-cart-updated', updateCartButtonState);
+    window.addEventListener('storage', updateCartButtonState);
 
     const detailWishBtn = document.getElementById('detail-wishlist-btn');
     if (detailWishBtn) {
@@ -731,7 +1043,7 @@ const renderProduct = (product, id, uploader, totalDownloads = 0) => {
                         gridHtml += `
                             <a href="product.html?id=${rp.id}" class="product-card" style="text-decoration: none; color: inherit; display: block;">
                                 <div class="product-img-wrapper">
-                                    <img src="${rpImg}" alt="${rp.name}">
+                                    <img src="${rpImg}" alt="${rp.name}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=800';">
                                 </div>
                                 <div class="product-card-body">
                                     <h3 class="product-title" style="margin-bottom: 0.5rem;">${rp.name}</h3>
@@ -762,4 +1074,8 @@ const renderProduct = (product, id, uploader, totalDownloads = 0) => {
     }
 };
 
-document.addEventListener('DOMContentLoaded', loadProduct);
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadProduct);
+} else {
+    loadProduct();
+}

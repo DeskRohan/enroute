@@ -101,21 +101,59 @@
                             <label class="form-label">Category <span style="color:var(--admin-danger)">*</span></label>
                             <select id="p-category" class="form-control" required>
                                 <option value="mod">Vehicle Mod</option>
-                                <option value="livery">Custom Livery Skin</option>
-                                <option value="map">Terrain & Route Map</option>
+                                <option value="livery">Vehicle Livery/Skin</option>
                             </select>
                         </div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr; gap: 1.15rem;">
-                        <div class="form-group" id="price-group">
-                            <label class="form-label">Price in INR (₹) <span style="color:var(--admin-danger)">*</span></label>
-                            <input type="number" id="p-price" class="form-control" placeholder="299" min="0" required>
+                    <div id="price-group">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.15rem; margin-bottom: 1.15rem;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label">Original Price (₹) <span style="color:var(--admin-danger)">*</span></label>
+                                <input type="number" id="p-original-price" class="form-control" placeholder="e.g., 499" min="0" step="any" required>
+                                <span class="text-secondary" style="font-size: 0.75rem; margin-top: 0.25rem; display: block;">Standard list price</span>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label">Offer / Sale Price (₹) <span style="font-size: 0.8rem; font-weight: normal; color: var(--admin-text-secondary);">(Optional)</span></label>
+                                <input type="number" id="p-offer-price" class="form-control" placeholder="e.g., 299" min="0" step="any">
+                                <span class="text-secondary" style="font-size: 0.75rem; margin-top: 0.25rem; display: block;">Discounted price for drivers</span>
+                            </div>
                         </div>
-                        <div class="form-group" id="channel-link-group" style="display: none;">
-                            <label class="form-label">YouTube Verification Channel Link <span style="color:var(--admin-danger)">*</span></label>
-                            <input type="url" id="p-channel-link" class="form-control" placeholder="https://youtube.com/@YourChannel">
+
+                        <!-- Offer Duration / Time Period Type -->
+                        <div class="form-group" id="offer-period-container" style="margin-bottom: 0;">
+                            <label class="form-label">Offer Time Period</label>
+                            <div class="status-options-grid" style="grid-template-columns: 1fr 1fr; margin-top: 0.35rem;">
+                                <label class="status-option-card active" id="offer-lifetime-card">
+                                    <input type="radio" name="p-offer-period" id="p-offer-lifetime" value="lifetime" checked style="display: none;">
+                                    <div class="status-indicator" style="background: #3b82f6; box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);"></div>
+                                    <div class="status-info">
+                                        <span class="status-title">Lifetime Offer</span>
+                                        <span class="status-desc">Permanent promotional price (no expiration)</span>
+                                    </div>
+                                </label>
+                                <label class="status-option-card" id="offer-limited-card">
+                                    <input type="radio" name="p-offer-period" id="p-offer-limited" value="limited" style="display: none;">
+                                    <div class="status-indicator" style="background: #f59e0b; box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);"></div>
+                                    <div class="status-info">
+                                        <span class="status-title">Limited Time (Date Select)</span>
+                                        <span class="status-desc">Auto-reverts to original price after target date</span>
+                                    </div>
+                                </label>
+                            </div>
                         </div>
+
+                        <!-- Offer End Date & Time Picker -->
+                        <div class="form-group" id="offer-expiry-group" style="display: none; animation: slideDown 0.3s ease-out forwards; margin-top: 1rem; margin-bottom: 0;">
+                            <label class="form-label">Offer Valid Until (Date & Time) <span style="color:var(--admin-danger)">*</span></label>
+                            <input type="datetime-local" id="p-offer-expiry" class="form-control">
+                            <span class="text-secondary" style="font-size: 0.75rem; margin-top: 0.25rem; display: block;">Mod price will automatically return to original price after this date.</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="channel-link-group" style="display: none;">
+                        <label class="form-label">YouTube Verification Channel Link <span style="color:var(--admin-danger)">*</span></label>
+                        <input type="url" id="p-channel-link" class="form-control" placeholder="https://youtube.com/@YourChannel">
                     </div>
                 </div>
 
@@ -132,10 +170,10 @@
                         <label class="form-label">Product Showcase Images (Google Drive / Direct URLs)</label>
                         <p class="text-secondary" style="font-size: 0.8rem; margin-bottom: 0.5rem;">Slot 1 will serve as primary catalog banner and thumbnail.</p>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.15rem;">
-                            <input type="url" id="p-image-1" class="form-control" placeholder="Image 1 URL (Primary Cover) *" required>
-                            <input type="url" id="p-image-2" class="form-control" placeholder="Image 2 URL (Exterior Angle)">
-                            <input type="url" id="p-image-3" class="form-control" placeholder="Image 3 URL (Cockpit Interior)">
-                            <input type="url" id="p-image-4" class="form-control" placeholder="Image 4 URL (Night Lights/Details)">
+                            <input type="text" id="p-image-1" class="form-control" placeholder="Image 1 URL (Primary Cover) *" required>
+                            <input type="text" id="p-image-2" class="form-control" placeholder="Image 2 URL (Exterior Angle)">
+                            <input type="text" id="p-image-3" class="form-control" placeholder="Image 3 URL (Cockpit Interior)">
+                            <input type="text" id="p-image-4" class="form-control" placeholder="Image 4 URL (Night Lights/Details)">
                         </div>
                     </div>
 
@@ -150,13 +188,46 @@
                     </div>
                 </div>
 
-                <!-- Section 3: Telemetry & Mechanical Specs -->
+                <!-- Section 3: Product Variants & Linked Editions -->
+                <div class="form-section-card">
+                    <div class="form-section-header">
+                        <div class="form-section-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                        </div>
+                        <div class="form-section-title">3. Product Variants & Linked Editions</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Variant / Edition Title for THIS Product</label>
+                        <input type="text" id="p-variant-name" class="form-control" placeholder="e.g., Standard 4x2 Coach, Sleeper AC, Base Model (Optional)">
+                        <span class="text-secondary" style="font-size: 0.75rem; margin-top: 0.25rem; display: block;">Label shown on the variant pill for this product. Defaults to product name if blank.</span>
+                    </div>
+
+                    <div class="form-group" style="border: 1px solid var(--admin-border); padding: 1.25rem; border-radius: var(--radius-xl); background: #ffffff; margin-bottom: 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                            <div>
+                                <label class="form-label" style="font-size: 0.9rem; margin-bottom: 0.2rem; color: var(--admin-primary); font-weight: 800;">Linked Product Variants</label>
+                                <p class="text-secondary" style="font-size: 0.8rem; margin-bottom: 0;">Add published products from your catalog as selectable variants for this mod.</p>
+                            </div>
+                            <button type="button" class="btn btn-outline btn-sm" id="add-variant-row-btn" style="display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 700; border-color: var(--admin-primary); color: var(--admin-primary); background: var(--admin-primary-light);">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                Add Variant
+                            </button>
+                        </div>
+
+                        <div id="p-variants-list" style="display: flex; flex-direction: column; gap: 0.75rem; max-height: 260px; overflow-y: auto; padding-right: 0.25rem;">
+                            <!-- Dynamic variant rows injected here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: Telemetry & Mechanical Specs -->
                 <div class="form-section-card">
                     <div class="form-section-header">
                         <div class="form-section-icon">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
                         </div>
-                        <div class="form-section-title">3. Vehicle Telemetry & Engineering Specs</div>
+                        <div class="form-section-title">4. Vehicle Telemetry & Engineering Specs</div>
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.15rem;">
@@ -204,13 +275,13 @@
                     </div>
                 </div>
 
-                <!-- Section 4: Release Status & Deployment -->
+                <!-- Section 5: Release Status & Deployment -->
                 <div class="form-section-card">
                     <div class="form-section-header">
                         <div class="form-section-icon">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5l7 7-7 7"></path></svg>
                         </div>
-                        <div class="form-section-title">4. Storefront Release State</div>
+                        <div class="form-section-title">5. Storefront Release State</div>
                     </div>
 
                     <div class="form-group">
@@ -241,13 +312,13 @@
                     </div>
                 </div>
 
-                <!-- Section 5: Editorial Content & Related Addons -->
+                <!-- Section 6: Editorial Content & Related Addons -->
                 <div class="form-section-card">
                     <div class="form-section-header">
                         <div class="form-section-icon">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                         </div>
-                        <div class="form-section-title">5. Editorial Manifesto & Compatibility</div>
+                        <div class="form-section-title">6. Editorial Manifesto & Compatibility</div>
                     </div>
 
                     <div class="form-group">
