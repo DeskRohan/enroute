@@ -1,5 +1,5 @@
 import { db } from '../firebase-config.js';
-import { collection, getDocs, doc, setDoc, deleteDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { collection, getDocs, doc, setDoc, deleteDoc, serverTimestamp, query, orderBy, where, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // DOM
 const tableBody = document.getElementById('products-table-body');
@@ -57,6 +57,7 @@ const fScheduledDate = document.getElementById('p-scheduled-date');
 
 let allProducts = [];
 let currentEditingId = null;
+let currentEditingAddedBy = null; // Preserve original uploader on edit
 
 const formatPrice = (price) => {
     return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(price || 0);
@@ -331,6 +332,7 @@ const closeModal = () => {
     fVariantName.value = '';
     variantsList.innerHTML = '';
     currentEditingId = null;
+    currentEditingAddedBy = null;
     fImage1.value = '';
     fImage2.value = '';
     fImage3.value = '';
@@ -433,6 +435,7 @@ const handleEdit = (e) => {
     const product = allProducts.find(p => p.id === id);
     if (product) {
         fId.value = product.id;
+        currentEditingAddedBy = product.addedBy || null; // Preserve original uploader
         fName.value = product.name;
         fCategory.value = product.category;
         fVariantName.value = product.variantName || '';
@@ -633,8 +636,14 @@ productForm.addEventListener('submit', async (e) => {
 
     const adminEmail = localStorage.getItem('adminEmail');
     if (!fId.value) {
-        productData.createdAt = serverTimestamp(); // Only set on create
+        // New product: set creation timestamp and uploader
+        productData.createdAt = serverTimestamp();
         productData.addedBy = adminEmail || 'unknown';
+    } else {
+        // Editing existing product: always preserve original uploader
+        // This ensures that even when the main admin edits a product,
+        // the product stays attributed to the original uploader
+        productData.addedBy = currentEditingAddedBy || adminEmail || 'unknown';
     }
 
     try {
@@ -649,6 +658,366 @@ productForm.addEventListener('submit', async (e) => {
         saveBtn.textContent = 'Save Product';
     }
 });
+
+// =====================================================
+// Transfer Mods Feature (Multi-Step Wizard)
+// =====================================================
+const transferModal = document.getElementById('transfer-modal');
+const transferBtn = document.getElementById('transfer-mods-btn');
+const closeTransferBtn = document.getElementById('close-transfer-modal-btn');
+const transferCancelBtn = document.getElementById('transfer-cancel-btn');
+const transferNext1Btn = document.getElementById('transfer-next-1-btn');
+const transferNext2Btn = document.getElementById('transfer-next-2-btn');
+const transferBack2Btn = document.getElementById('transfer-back-2-btn');
+const transferBack3Btn = document.getElementById('transfer-back-3-btn');
+const transferConfirmBtn = document.getElementById('transfer-confirm-btn');
+const transferProductsList = document.getElementById('transfer-products-list');
+const transferAdminsList = document.getElementById('transfer-admins-list');
+const transferSummary = document.getElementById('transfer-summary');
+const transferSelectedCount = document.getElementById('transfer-selected-count');
+const transferModalTitle = document.getElementById('transfer-modal-title');
+const transferModalDesc = document.getElementById('transfer-modal-desc');
+
+let transferSelectedProducts = [];
+let transferSelectedAdmin = null;
+let transferAvailableAdmins = [];
+
+const openTransferModal = async () => {
+    // Reset state
+    transferSelectedProducts = [];
+    transferSelectedAdmin = null;
+    showTransferStep(1);
+
+    // Load products for current admin
+    const adminEmail = localStorage.getItem('adminEmail');
+    const isSuperAdmin = adminEmail === 'admin@enroute.in';
+
+    // Get products belonging to this admin (or all for super admin)
+    let transferableProducts = [];
+    if (isSuperAdmin) {
+        transferableProducts = [...allProducts];
+    } else {
+        transferableProducts = allProducts.filter(p => p.addedBy === adminEmail);
+    }
+
+    if (transferableProducts.length === 0) {
+        transferProductsList.innerHTML = `
+            <div style="text-align: center; padding: 2.5rem 1rem; color: #94a3b8;">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 0.75rem; opacity: 0.5;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                <p style="font-weight: 600; margin: 0;">No products available to transfer.</p>
+            </div>
+        `;
+        transferNext1Btn.disabled = true;
+    } else {
+        let html = '';
+        transferableProducts.forEach(p => {
+            const isFree = (p.price === 0 || p.pricingType === 'free');
+            const priceText = isFree ? 'FREE' : `₹${p.originalPrice ?? p.price ?? 0}`;
+            const imgUrl = getImageUrl(p.image || (p.images && p.images[0]) || '');
+            const uploaderLabel = p.addedBy && p.addedBy !== adminEmail ? `<span style="font-size:0.7rem; color:#f59e0b; font-weight:600;">by ${p.addedBy}</span>` : '';
+            html += `
+                <label style="display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 0.85rem; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; cursor: pointer; transition: all 0.15s ease;" onmouseenter="this.style.borderColor='#8b5cf6'; this.style.background='rgba(139,92,246,0.04)'" onmouseleave="if(!this.querySelector('input').checked){this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';}">
+                    <input type="checkbox" class="transfer-product-cb" value="${p.id}" style="width: 17px; height: 17px; accent-color: #8b5cf6; cursor: pointer; flex-shrink: 0;">
+                    <img src="${imgUrl}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=800';" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; flex-shrink: 0;">
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="font-weight: 700; font-size: 0.85rem; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name}</div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1px;">
+                            <span style="font-size: 0.75rem; color: #64748b;">${p.category === 'livery' ? 'Livery' : 'Mod'}</span>
+                            <span style="font-size: 0.75rem; font-weight: 700; color: ${isFree ? '#059669' : '#8b5cf6'};">${priceText}</span>
+                            ${uploaderLabel}
+                        </div>
+                    </div>
+                </label>
+            `;
+        });
+        transferProductsList.innerHTML = html;
+    }
+
+    updateTransferCount();
+    transferModal.classList.add('active');
+
+    // Attach checkbox listeners
+    document.querySelectorAll('.transfer-product-cb').forEach(cb => {
+        cb.addEventListener('change', () => {
+            const label = cb.closest('label');
+            if (cb.checked) {
+                label.style.borderColor = '#8b5cf6';
+                label.style.background = 'rgba(139,92,246,0.04)';
+            } else {
+                label.style.borderColor = '#e2e8f0';
+                label.style.background = '#f8fafc';
+            }
+            updateTransferCount();
+        });
+    });
+};
+
+const updateTransferCount = () => {
+    const checked = document.querySelectorAll('.transfer-product-cb:checked');
+    transferSelectedCount.textContent = `${checked.length} selected`;
+    transferNext1Btn.disabled = checked.length === 0;
+};
+
+const closeTransferModal = () => {
+    transferModal.classList.remove('active');
+    transferSelectedProducts = [];
+    transferSelectedAdmin = null;
+};
+
+const showTransferStep = (step) => {
+    document.getElementById('transfer-step-1').style.display = step === 1 ? 'block' : 'none';
+    document.getElementById('transfer-step-2').style.display = step === 2 ? 'block' : 'none';
+    document.getElementById('transfer-step-3').style.display = step === 3 ? 'block' : 'none';
+
+    // Update step indicator visuals
+    const step2Circle = document.getElementById('transfer-step-2-circle');
+    const step2Label = document.getElementById('transfer-step-2-label');
+    const step3Circle = document.getElementById('transfer-step-3-circle');
+    const step3Label = document.getElementById('transfer-step-3-label');
+    const line12 = document.getElementById('transfer-line-1-2');
+    const line23 = document.getElementById('transfer-line-2-3');
+
+    // Step 2
+    if (step >= 2) {
+        step2Circle.style.background = '#8b5cf6'; step2Circle.style.color = '#fff';
+        step2Label.style.color = '#8b5cf6';
+        line12.style.background = '#8b5cf6';
+    } else {
+        step2Circle.style.background = '#e2e8f0'; step2Circle.style.color = '#94a3b8';
+        step2Label.style.color = '#94a3b8';
+        line12.style.background = '#e2e8f0';
+    }
+
+    // Step 3
+    if (step >= 3) {
+        step3Circle.style.background = '#8b5cf6'; step3Circle.style.color = '#fff';
+        step3Label.style.color = '#8b5cf6';
+        line23.style.background = '#8b5cf6';
+    } else {
+        step3Circle.style.background = '#e2e8f0'; step3Circle.style.color = '#94a3b8';
+        step3Label.style.color = '#94a3b8';
+        line23.style.background = '#e2e8f0';
+    }
+
+    // Update title/desc
+    if (step === 1) {
+        transferModalTitle.textContent = 'Transfer Mods';
+        transferModalDesc.textContent = 'Select the products you want to transfer to another admin.';
+    } else if (step === 2) {
+        transferModalTitle.textContent = 'Select Target Admin';
+        transferModalDesc.textContent = 'Choose the admin who will receive ownership of the selected mods.';
+    } else if (step === 3) {
+        transferModalTitle.textContent = 'Confirm Transfer';
+        transferModalDesc.textContent = 'Review the transfer details below before confirming.';
+    }
+};
+
+const loadAdminsForTransfer = async () => {
+    const adminEmail = localStorage.getItem('adminEmail');
+    transferAdminsList.innerHTML = `<div style="text-align:center; padding:2rem; color:#94a3b8;">Loading admins...</div>`;
+
+    try {
+        const q = query(collection(db, "users"), where("role", "==", "admin"));
+        const snapshot = await getDocs(q);
+        transferAvailableAdmins = [];
+
+        snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            // Exclude current admin from the list
+            if (data.email && data.email !== adminEmail) {
+                transferAvailableAdmins.push({
+                    id: docSnap.id,
+                    email: data.email,
+                    name: data.name || data.email.split('@')[0],
+                    isVerified: data.isVerified || false
+                });
+            }
+        });
+
+        if (transferAvailableAdmins.length === 0) {
+            transferAdminsList.innerHTML = `
+                <div style="text-align: center; padding: 2.5rem 1rem; color: #94a3b8;">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 0.75rem; opacity: 0.5;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                    <p style="font-weight: 600; margin: 0;">No other admins found to transfer to.</p>
+                </div>
+            `;
+            transferNext2Btn.disabled = true;
+            return;
+        }
+
+        let html = '';
+        transferAvailableAdmins.forEach(admin => {
+            const initial = admin.name.charAt(0).toUpperCase();
+            const verifiedBadge = admin.isVerified
+                ? `<img src="../assets/images/varified.png" style="height: 14px; vertical-align: middle; margin-left: 2px;" title="Verified Admin">`
+                : '';
+            html += `
+                <label style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0.85rem; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; cursor: pointer; transition: all 0.15s ease;" onmouseenter="this.style.borderColor='#8b5cf6'; this.style.background='rgba(139,92,246,0.04)'" onmouseleave="if(!this.querySelector('input').checked){this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';}">
+                    <input type="radio" name="transfer-admin" class="transfer-admin-radio" value="${admin.email}" style="width: 17px; height: 17px; accent-color: #8b5cf6; cursor: pointer; flex-shrink: 0;">
+                    <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #8b5cf6, #6366f1); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; flex-shrink: 0;">${initial}</div>
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="font-weight: 700; font-size: 0.88rem; color: #1e293b; display: flex; align-items: center; gap: 0.25rem;">
+                            ${admin.name} ${verifiedBadge}
+                        </div>
+                        <div style="font-size: 0.75rem; color: #64748b; margin-top: 1px;">${admin.email}</div>
+                    </div>
+                </label>
+            `;
+        });
+        transferAdminsList.innerHTML = html;
+
+        // Attach radio listeners
+        document.querySelectorAll('.transfer-admin-radio').forEach(radio => {
+            radio.addEventListener('change', () => {
+                transferSelectedAdmin = radio.value;
+                transferNext2Btn.disabled = false;
+
+                // Visual feedback for selected admin
+                document.querySelectorAll('.transfer-admin-radio').forEach(r => {
+                    const label = r.closest('label');
+                    if (r.checked) {
+                        label.style.borderColor = '#8b5cf6';
+                        label.style.background = 'rgba(139,92,246,0.04)';
+                    } else {
+                        label.style.borderColor = '#e2e8f0';
+                        label.style.background = '#f8fafc';
+                    }
+                });
+            });
+        });
+
+    } catch (error) {
+        console.error("Error loading admins:", error);
+        transferAdminsList.innerHTML = `<div style="text-align:center; padding:2rem; color:#ef4444;">Failed to load admins.</div>`;
+    }
+};
+
+const renderTransferSummary = () => {
+    const selectedIds = Array.from(document.querySelectorAll('.transfer-product-cb:checked')).map(cb => cb.value);
+    const selectedProducts = allProducts.filter(p => selectedIds.includes(p.id));
+    const targetAdmin = transferAvailableAdmins.find(a => a.email === transferSelectedAdmin);
+
+    let productsListHtml = selectedProducts.map(p => {
+        const isFree = (p.price === 0 || p.pricingType === 'free');
+        return `<div style="display: flex; justify-content: space-between; align-items: center; padding: 0.35rem 0; border-bottom: 1px solid #f1f5f9;">
+            <span style="font-weight: 600; font-size: 0.82rem; color: #1e293b;">${p.name}</span>
+            <span style="font-size: 0.75rem; font-weight: 700; color: ${isFree ? '#059669' : '#8b5cf6'};">${isFree ? 'FREE' : '₹' + (p.originalPrice ?? p.price)}</span>
+        </div>`;
+    }).join('');
+
+    const verifiedBadge = targetAdmin && targetAdmin.isVerified
+        ? `<img src="../assets/images/varified.png" style="height: 13px; vertical-align: middle; margin-left: 2px;">`
+        : '';
+
+    transferSummary.innerHTML = `
+        <div style="margin-bottom: 1rem;">
+            <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Products to Transfer (${selectedProducts.length})</div>
+            ${productsListHtml}
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.65rem; padding: 0.75rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #8b5cf6, #6366f1); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; flex-shrink: 0;">${targetAdmin ? targetAdmin.name.charAt(0).toUpperCase() : '?'}</div>
+            <div>
+                <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em;">Transferring To</div>
+                <div style="font-weight: 700; font-size: 0.88rem; color: #1e293b;">${targetAdmin ? targetAdmin.name : 'Unknown'} ${verifiedBadge}</div>
+                <div style="font-size: 0.75rem; color: #64748b;">${targetAdmin ? targetAdmin.email : ''}</div>
+            </div>
+        </div>
+    `;
+};
+
+const executeTransfer = async () => {
+    transferConfirmBtn.disabled = true;
+    transferConfirmBtn.textContent = 'Transferring...';
+
+    const selectedIds = Array.from(document.querySelectorAll('.transfer-product-cb:checked')).map(cb => cb.value);
+
+    try {
+        const updatePromises = selectedIds.map(productId =>
+            updateDoc(doc(db, "products", productId), {
+                addedBy: transferSelectedAdmin
+            })
+        );
+        await Promise.all(updatePromises);
+
+        closeTransferModal();
+        loadProducts(); // Reload products table
+
+        // Show success toast
+        const toast = document.createElement('div');
+        toast.style.cssText = "position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #059669; color: white; padding: 12px 24px; border-radius: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 99999; animation: slideDownToast 0.3s ease; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; font-size: 0.9rem;";
+        toast.textContent = `✓ ${selectedIds.length} mod${selectedIds.length > 1 ? 's' : ''} transferred successfully!`;
+        document.body.appendChild(toast);
+
+        // Add toast animation if not already present
+        if (!document.getElementById('transfer-toast-styles')) {
+            const style = document.createElement('style');
+            style.id = 'transfer-toast-styles';
+            style.innerHTML = `@keyframes slideDownToast { from { opacity: 0; transform: translate(-50%, -20px); } to { opacity: 1; transform: translate(-50%, 0); } }`;
+            document.head.appendChild(style);
+        }
+
+        setTimeout(() => toast.remove(), 3500);
+
+    } catch (error) {
+        console.error("Error transferring products:", error);
+        alert("Failed to transfer products. Please try again.");
+    } finally {
+        transferConfirmBtn.disabled = false;
+        transferConfirmBtn.textContent = 'Confirm Transfer';
+    }
+};
+
+// Transfer Modal Event Listeners
+if (transferBtn) {
+    transferBtn.addEventListener('click', openTransferModal);
+}
+if (closeTransferBtn) {
+    closeTransferBtn.addEventListener('click', closeTransferModal);
+}
+if (transferCancelBtn) {
+    transferCancelBtn.addEventListener('click', closeTransferModal);
+}
+
+// Step 1 → Step 2
+if (transferNext1Btn) {
+    transferNext1Btn.addEventListener('click', async () => {
+        transferSelectedProducts = Array.from(document.querySelectorAll('.transfer-product-cb:checked')).map(cb => cb.value);
+        if (transferSelectedProducts.length === 0) return;
+
+        showTransferStep(2);
+        transferNext2Btn.disabled = true;
+        transferSelectedAdmin = null;
+        await loadAdminsForTransfer();
+    });
+}
+
+// Step 2 → Step 3
+if (transferNext2Btn) {
+    transferNext2Btn.addEventListener('click', () => {
+        if (!transferSelectedAdmin) return;
+        showTransferStep(3);
+        renderTransferSummary();
+    });
+}
+
+// Step 2 ← Back to Step 1
+if (transferBack2Btn) {
+    transferBack2Btn.addEventListener('click', () => {
+        showTransferStep(1);
+    });
+}
+
+// Step 3 ← Back to Step 2
+if (transferBack3Btn) {
+    transferBack3Btn.addEventListener('click', () => {
+        showTransferStep(2);
+    });
+}
+
+// Confirm Transfer
+if (transferConfirmBtn) {
+    transferConfirmBtn.addEventListener('click', executeTransfer);
+}
 
 // Init
 document.addEventListener('DOMContentLoaded', loadProducts);

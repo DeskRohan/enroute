@@ -37,7 +37,13 @@
     <main class="admin-main">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
             <h1>Manage Products</h1>
-            <button class="btn btn-primary" id="add-product-btn">+ Add Product</button>
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+                <button class="btn btn-outline" id="transfer-mods-btn" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; border-color: #8b5cf6; color: #8b5cf6;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"></path><line x1="4" y1="20" x2="21" y2="3"></line><path d="M21 16v5h-5"></path><line x1="15" y1="15" x2="21" y2="21"></line></svg>
+                    Transfer Mods
+                </button>
+                <button class="btn btn-primary" id="add-product-btn">+ Add Product</button>
+            </div>
         </div>
 
         <div class="table-container">
@@ -345,6 +351,88 @@
                     <button type="submit" class="btn btn-primary" id="save-product-btn" style="padding: 0.75rem 2rem;">Save Product</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Transfer Mods Modal (Multi-Step Wizard) -->
+    <div class="modal-overlay" id="transfer-modal">
+        <div class="modal-content" style="max-width: 580px;">
+            <div class="modal-header">
+                <div>
+                    <h3 id="transfer-modal-title" style="margin-bottom: 0.25rem;">Transfer Mods</h3>
+                    <p class="text-secondary" style="font-size: 0.85rem; margin: 0;" id="transfer-modal-desc">Select the products you want to transfer to another admin.</p>
+                </div>
+                <button class="close-btn" id="close-transfer-modal-btn">&times;</button>
+            </div>
+
+            <!-- Step Indicator -->
+            <div id="transfer-step-indicator" style="display: flex; align-items: center; gap: 0; margin-bottom: 1.5rem; padding: 0 0.25rem;">
+                <div class="transfer-step-dot active" data-step="1" style="display: flex; align-items: center; gap: 0.4rem;">
+                    <div style="width: 28px; height: 28px; border-radius: 50%; background: #8b5cf6; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800;">1</div>
+                    <span style="font-size: 0.78rem; font-weight: 700; color: #8b5cf6;">Select Mods</span>
+                </div>
+                <div style="flex: 1; height: 2px; background: #e2e8f0; margin: 0 0.5rem;" id="transfer-line-1-2"></div>
+                <div class="transfer-step-dot" data-step="2" style="display: flex; align-items: center; gap: 0.4rem;">
+                    <div style="width: 28px; height: 28px; border-radius: 50%; background: #e2e8f0; color: #94a3b8; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800;" id="transfer-step-2-circle">2</div>
+                    <span style="font-size: 0.78rem; font-weight: 700; color: #94a3b8;" id="transfer-step-2-label">Select Admin</span>
+                </div>
+                <div style="flex: 1; height: 2px; background: #e2e8f0; margin: 0 0.5rem;" id="transfer-line-2-3"></div>
+                <div class="transfer-step-dot" data-step="3" style="display: flex; align-items: center; gap: 0.4rem;">
+                    <div style="width: 28px; height: 28px; border-radius: 50%; background: #e2e8f0; color: #94a3b8; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800;" id="transfer-step-3-circle">3</div>
+                    <span style="font-size: 0.78rem; font-weight: 700; color: #94a3b8;" id="transfer-step-3-label">Confirm</span>
+                </div>
+            </div>
+
+            <!-- Step 1: Select Products -->
+            <div id="transfer-step-1">
+                <div style="margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                        <label class="form-label" style="margin-bottom: 0; font-size: 0.9rem; font-weight: 800; color: #1e293b;">Your Products</label>
+                        <span id="transfer-selected-count" style="font-size: 0.78rem; font-weight: 700; color: #8b5cf6; background: rgba(139,92,246,0.1); padding: 2px 10px; border-radius: 20px;">0 selected</span>
+                    </div>
+                    <div id="transfer-products-list" style="max-height: 340px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; padding-right: 0.25rem;">
+                        <!-- Product checkboxes injected by JS -->
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
+                    <button type="button" class="btn btn-outline" id="transfer-cancel-btn">Cancel</button>
+                    <button type="button" class="btn" id="transfer-next-1-btn" disabled style="background: #8b5cf6; color: #fff; padding: 0.65rem 1.75rem; font-weight: 700;">Next →</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Select Target Admin -->
+            <div id="transfer-step-2" style="display: none;">
+                <div style="margin-bottom: 1rem;">
+                    <label class="form-label" style="margin-bottom: 0.75rem; font-size: 0.9rem; font-weight: 800; color: #1e293b;">Transfer To</label>
+                    <div id="transfer-admins-list" style="max-height: 340px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; padding-right: 0.25rem;">
+                        <!-- Admin radio buttons injected by JS -->
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: space-between; gap: 0.75rem; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
+                    <button type="button" class="btn btn-outline" id="transfer-back-2-btn">← Back</button>
+                    <button type="button" class="btn" id="transfer-next-2-btn" disabled style="background: #8b5cf6; color: #fff; padding: 0.65rem 1.75rem; font-weight: 700;">Next →</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Confirmation -->
+            <div id="transfer-step-3" style="display: none;">
+                <div style="background: #fef3c7; border: 1px solid #fbbf24; border-radius: 12px; padding: 1rem 1.15rem; margin-bottom: 1.25rem;">
+                    <div style="display: flex; align-items: flex-start; gap: 0.65rem;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                        <div>
+                            <p style="font-weight: 800; color: #92400e; margin: 0 0 0.35rem; font-size: 0.9rem;">Are you sure?</p>
+                            <p style="font-size: 0.82rem; color: #78350f; margin: 0; line-height: 1.45;">This action will permanently reassign ownership of the selected mods. Revenue and order attribution will move to the new admin.</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="transfer-summary" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem; margin-bottom: 1rem;">
+                    <!-- Summary injected by JS -->
+                </div>
+                <div style="display: flex; justify-content: space-between; gap: 0.75rem; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
+                    <button type="button" class="btn btn-outline" id="transfer-back-3-btn">← Back</button>
+                    <button type="button" class="btn" id="transfer-confirm-btn" style="background: #dc2626; color: #fff; padding: 0.65rem 1.75rem; font-weight: 700;">Confirm Transfer</button>
+                </div>
+            </div>
         </div>
     </div>
 
