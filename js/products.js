@@ -113,6 +113,7 @@ window.toggleWishlist = (e, id) => {
 const createProductCard = (product) => {
     const imgUrl = (product.images && product.images.length > 0) ? product.images[0] : product.image;
     const isFree = (product.price === 0 || product.pricingType === 'free');
+    const isOutOfStock = Boolean(product.outOfStock);
     
     // Uploader details
     const uploader = adminsMap[product.addedBy] || { name: 'Admin', isVerified: false };
@@ -132,7 +133,14 @@ const createProductCard = (product) => {
     const isOfferActive = hasOffer && !isExpired;
 
     let priceRowHtml = '';
-    if (isFree) {
+    if (isOutOfStock) {
+        priceRowHtml = `
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                <span style="font-size: 0.85rem; font-weight: 800; color: #dc2626; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); padding: 3px 8px; border-radius: 6px;">OUT OF STOCK</span>
+                <span class="price" style="color: var(--text-muted); text-decoration: line-through; font-size: 0.95rem;">${isFree ? 'FREE' : formatPrice(origPrice)}</span>
+            </div>
+        `;
+    } else if (isFree) {
         priceRowHtml = `<span class="price free">FREE</span>`;
     } else if (isOfferActive) {
         const discountPct = Math.round(((origPrice - offerPrice) / origPrice) * 100);
@@ -152,14 +160,33 @@ const createProductCard = (product) => {
         priceRowHtml = `<span class="price">${formatPrice(origPrice)}</span>`;
     }
 
+    const outOfStockBadgeHtml = isOutOfStock ? `
+        <div style="position: absolute; top: 10px; left: 10px; background: rgba(220, 38, 38, 0.95); backdrop-filter: blur(4px); color: #ffffff; padding: 3px 9px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; z-index: 3; box-shadow: 0 2px 6px rgba(0,0,0,0.25); display: flex; align-items: center; gap: 4px;">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: #ffffff;"></span> Out of Stock
+        </div>
+    ` : '';
+
+    const actionButtonHtml = isOutOfStock ? `
+        <a href="product.html?id=${product.id}" onclick="try{sessionStorage.setItem('viewProductId', '${product.id}');}catch(e){}" class="btn btn-outline" style="width: 100%; border-color: #ef4444; color: #ef4444; background: rgba(239, 68, 68, 0.05); font-weight: 700;">
+            <span>Unavailable</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+        </a>
+    ` : `
+        <a href="product.html?id=${product.id}" onclick="try{sessionStorage.setItem('viewProductId', '${product.id}');}catch(e){}" class="btn btn-primary" style="width: 100%;">
+            <span>View Details</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </a>
+    `;
+
     return `
-        <div class="card product-card">
+        <div class="card product-card ${isOutOfStock ? 'product-card-out-of-stock' : ''}" style="position: relative;">
+            ${outOfStockBadgeHtml}
             <button class="card-wishlist-btn ${isWishlisted ? 'active' : ''}" id="wish-btn-${product.id}" onclick="window.toggleWishlist(event, '${product.id}')" title="Save to Garage Wishlist">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="${isWishlisted ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
             </button>
             <a href="product.html?id=${product.id}" onclick="try{sessionStorage.setItem('viewProductId', '${product.id}');}catch(e){}" style="display: block;">
-                <div class="img-container">
-                    <img src="${getImageUrl(imgUrl)}" alt="${product.name}" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=800';">
+                <div class="img-container" style="position: relative;">
+                    <img src="${getImageUrl(imgUrl)}" alt="${product.name}" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=800';" style="${isOutOfStock ? 'filter: grayscale(85%) opacity(0.85);' : ''}">
                 </div>
             </a>
             <div class="content">
@@ -174,10 +201,7 @@ const createProductCard = (product) => {
                 <div class="price-row">
                     ${priceRowHtml}
                 </div>
-                <a href="product.html?id=${product.id}" onclick="try{sessionStorage.setItem('viewProductId', '${product.id}');}catch(e){}" class="btn btn-primary" style="width: 100%;">
-                    <span>View Details</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                </a>
+                ${actionButtonHtml}
             </div>
         </div>
     `;
@@ -207,12 +231,13 @@ const renderProducts = (products, container) => {
 export const loadFeaturedProducts = async () => {
     if (!featuredContainer) return;
     try {
-        const q = query(collection(db, "products"), orderBy("createdAt", "desc"), limit(10));
+        const q = query(collection(db, "products"), orderBy("createdAt", "desc"), limit(15));
         const snapshot = await getDocs(q);
         let products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         
-        // Filter out scheduled products in the future
+        // Filter out scheduled products in the future, and out-of-stock products
         products = products.filter(p => {
+            if (p.outOfStock) return false;
             if (p.status === 'scheduled') {
                 return p.scheduledDate && new Date(p.scheduledDate) <= new Date();
             }

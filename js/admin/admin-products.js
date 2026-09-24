@@ -223,7 +223,34 @@ const updateVariantsEmptyState = () => {
     }
 };
 
+const checkAdminOnlineStatus = async () => {
+    const adminEmail = localStorage.getItem('adminEmail');
+    const banner = document.getElementById('admin-offline-banner');
+    if (!banner || !adminEmail) return;
+
+    if (adminEmail === 'admin@enroute.in') {
+        banner.style.display = 'none';
+        return;
+    }
+
+    try {
+        const uq = query(collection(db, "users"), where("email", "==", adminEmail));
+        const snap = await getDocs(uq);
+        if (!snap.empty) {
+            const userData = snap.docs[0].data();
+            if (userData.isOnline === false) {
+                banner.style.display = 'flex';
+            } else {
+                banner.style.display = 'none';
+            }
+        }
+    } catch (err) {
+        console.warn('Could not check admin online status:', err);
+    }
+};
+
 const loadProducts = async () => {
+    checkAdminOnlineStatus();
     tableBody.innerHTML = `<tr><td colspan="7" class="text-center">Loading...</td></tr>`;
     try {
         const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
@@ -257,7 +284,12 @@ const renderTable = () => {
         `;
 
         let statusHtml = '';
-        if (product.status === 'scheduled') {
+        if (product.outOfStock) {
+            statusHtml = '<span class="badge" style="background: rgba(239, 68, 68, 0.12); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.3); font-weight: 800;">Out of Stock</span>';
+            if (product.status === 'scheduled') {
+                statusHtml += '<br><span class="badge badge-secondary" style="font-size: 0.65rem; margin-top: 3px;">Scheduled</span>';
+            }
+        } else if (product.status === 'scheduled') {
             const isFuture = product.scheduledDate && new Date(product.scheduledDate) > new Date();
             if (isFuture) {
                 const formattedTime = new Date(product.scheduledDate).toLocaleString('en-IN', {

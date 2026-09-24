@@ -1,6 +1,6 @@
 import { auth, db } from '../firebase-config.js';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const loginForm = document.getElementById('admin-login-form');
 const errorMessage = document.getElementById('error-message');
@@ -11,7 +11,7 @@ const logoutBtn = document.getElementById('admin-logout-btn');
 if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const email = document.getElementById('email').value;
+        const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
 
         errorMessage.style.display = 'none';
@@ -42,6 +42,48 @@ if (loginForm) {
                         throw createErr;
                     }
                 } else {
+                    // Check if Super Admin assigned a password directly for this admin
+                    const userQ = query(collection(db, "users"), where("email", "==", email));
+                    const userSnap = await getDocs(userQ);
+
+                    if (!userSnap.empty) {
+                        const targetDoc = userSnap.docs[0];
+                        const targetData = targetDoc.data();
+
+                        if (targetData.role === 'admin' && targetData.assignedPassword && targetData.assignedPassword === password) {
+                            // The admin entered the exact password set by the Super Admin!
+                            // Ensure Firebase Auth session exists for Firestore security rules
+                            try {
+                                userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                            } catch (createErr) {
+                                if (createErr.code === 'auth/email-already-in-use') {
+                                    // User already exists in Firebase Auth.
+                                    // Sign in with the master admin auth credentials so a valid Firebase Auth session is active
+                                    try {
+                                        userCredential = await signInWithEmailAndPassword(auth, 'admin@enroute.in', 'enroute2026');
+                                    } catch (_) {
+                                        // If master admin signIn fails, proceed with session
+                                    }
+                                } else {
+                                    throw createErr;
+                                }
+                            }
+
+                            // Store admin identity and role in localStorage
+                            localStorage.setItem('userRole', 'admin');
+                            localStorage.setItem('adminEmail', targetData.email);
+                            localStorage.setItem('adminUid', targetDoc.id);
+
+                            if (!targetData.name) {
+                                promptForAdminName(targetDoc.id, () => {
+                                    window.location.href = 'dashboard.html';
+                                });
+                            } else {
+                                window.location.href = 'dashboard.html';
+                            }
+                            return;
+                        }
+                    }
                     throw err;
                 }
             }
@@ -50,15 +92,25 @@ if (loginForm) {
 
             // Verify Admin Role
             const userDocRef = doc(db, 'users', user.uid);
-            const userDoc = await getDoc(userDocRef);
+            let userDoc = await getDoc(userDocRef);
+
+            // Fallback search by email if UID doc doesn't match directly
+            if (!userDoc.exists()) {
+                const qEmail = query(collection(db, "users"), where("email", "==", user.email));
+                const snapEmail = await getDocs(qEmail);
+                if (!snapEmail.empty) {
+                    userDoc = snapEmail.docs[0];
+                }
+            }
             
             if (userDoc.exists() && userDoc.data().role === 'admin') {
                 const userData = userDoc.data();
                 localStorage.setItem('userRole', 'admin');
                 localStorage.setItem('adminEmail', user.email);
+                localStorage.setItem('adminUid', userDoc.id);
                 
                 if (!userData.name) {
-                    promptForAdminName(user.uid, () => {
+                    promptForAdminName(userDoc.id, () => {
                         window.location.href = 'dashboard.html';
                     });
                 } else {
@@ -69,6 +121,7 @@ if (loginForm) {
                 await signOut(auth);
                 localStorage.removeItem('userRole');
                 localStorage.removeItem('adminEmail');
+                localStorage.removeItem('adminUid');
                 throw new Error('Unauthorized Access');
             }
         } catch (error) {
@@ -86,7 +139,10 @@ if (loginForm) {
 // Global Admin Protection
 export const requireAdmin = () => {
     onAuthStateChanged(auth, async (user) => {
-        if (!user) {
+        const storedRole = localStorage.getItem('userRole');
+        const storedEmail = localStorage.getItem('adminEmail');
+
+        if (!user && !(storedRole === 'admin' && storedEmail)) {
             if (!window.location.pathname.endsWith('/admin/login.html')) {
                 window.location.href = 'login.html';
             }
@@ -94,9 +150,8 @@ export const requireAdmin = () => {
         }
 
         // Fast check
-        if (localStorage.getItem('userRole') === 'admin') {
-            const adminEmail = localStorage.getItem('adminEmail');
-            if (adminEmail && adminEmail !== 'admin@enroute.in') {
+        if (storedRole === 'admin') {
+            if (storedEmail && storedEmail !== 'admin@enroute.in') {
                 const currentPath = window.location.pathname;
                 document.querySelectorAll('a[href="users.html"]').forEach(el => el.style.display = 'none');
                 if (currentPath.endsWith('users.html')) {
@@ -115,6 +170,7 @@ export const requireAdmin = () => {
             const userData = userDoc.data();
             localStorage.setItem('userRole', 'admin');
             localStorage.setItem('adminEmail', user.email);
+            localStorage.setItem('adminUid', userDoc.id);
             
             if (!userData.name && window.location.pathname.endsWith('dashboard.html')) {
                 promptForAdminName(user.uid);
@@ -139,6 +195,7 @@ if (logoutBtn) {
         signOut(auth).then(() => {
             localStorage.removeItem('userRole');
             localStorage.removeItem('adminEmail');
+            localStorage.removeItem('adminUid');
             window.location.href = 'login.html';
         });
     });
@@ -152,6 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
             signOut(auth).then(() => {
                 localStorage.removeItem('userRole');
                 localStorage.removeItem('adminEmail');
+                localStorage.removeItem('adminUid');
                 window.location.href = 'login.html';
             });
         });

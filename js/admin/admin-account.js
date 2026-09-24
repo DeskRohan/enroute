@@ -587,36 +587,56 @@ function getShareText() {
 
 // Initialize Auth & Data
 onAuthStateChanged(auth, async (user) => {
-    if (user) {
+    const storedAdminEmail = localStorage.getItem('adminEmail');
+    const storedAdminUid = localStorage.getItem('adminUid');
+
+    if (user || (localStorage.getItem('userRole') === 'admin' && storedAdminEmail)) {
         currentUser = user;
-        currentAdminEmail = user.email;
-        emailInput.value = user.email;
-        currentAdminId = getAdminCode(user.uid);
+        currentAdminEmail = storedAdminEmail || (user ? user.email : '');
+        emailInput.value = currentAdminEmail;
+        currentAdminId = getAdminCode(storedAdminUid || (user ? user.uid : 'ADM-0001'));
         
         try {
-            const userDoc = await getDoc(doc(db, 'users', user.uid));
-            if (userDoc.exists() && userDoc.data().name) {
-                currentAdminName = userDoc.data().name;
+            let userData = null;
+            let targetDocId = storedAdminUid || (user ? user.uid : null);
+
+            if (storedAdminEmail && user && user.email !== storedAdminEmail) {
+                const uq = query(collection(db, 'users'), where('email', '==', storedAdminEmail));
+                const usnap = await getDocs(uq);
+                if (!usnap.empty) {
+                    userData = usnap.docs[0].data();
+                    targetDocId = usnap.docs[0].id;
+                }
+            } else if (user) {
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                if (userDoc.exists()) {
+                    userData = userDoc.data();
+                    targetDocId = user.uid;
+                }
+            }
+
+            if (userData && userData.name) {
+                currentAdminName = userData.name;
                 nameInput.value = currentAdminName;
-            } else if (user.displayName) {
+            } else if (user && user.displayName) {
                 currentAdminName = user.displayName;
                 nameInput.value = currentAdminName;
-            } else {
-                currentAdminName = user.email.split('@')[0];
+            } else if (currentAdminEmail) {
+                currentAdminName = currentAdminEmail.split('@')[0];
                 nameInput.value = currentAdminName;
             }
 
             // Count uploaded products
-            const q = query(collection(db, "products"), where("addedBy", "==", user.email));
+            const q = query(collection(db, "products"), where("addedBy", "==", currentAdminEmail));
             const snapshot = await getDocs(q);
             currentModsCount = snapshot.size;
 
             // Calculate Creator Badge (Level 5 for admin@enroute.in)
-            currentBadge = computeAdminBadge(currentModsCount, user.email);
+            currentBadge = computeAdminBadge(currentModsCount, currentAdminEmail);
 
             // Update Hero Card Elements
             if (heroName) heroName.textContent = currentAdminName;
-            if (heroEmail) heroEmail.textContent = user.email;
+            if (heroEmail) heroEmail.textContent = currentAdminEmail;
             if (heroInitial) heroInitial.textContent = currentAdminName.charAt(0).toUpperCase();
             if (idCodeEl) idCodeEl.textContent = currentAdminId;
             if (modsCountEl) modsCountEl.textContent = `${currentModsCount} Mod${currentModsCount === 1 ? '' : 's'}`;
@@ -690,7 +710,9 @@ if (licenseModal) {
 // Update Name
 accountForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (!currentUser) return;
+    const storedAdminUid = localStorage.getItem('adminUid');
+    const targetUid = storedAdminUid || (currentUser ? currentUser.uid : null);
+    if (!targetUid) return;
     
     const newName = nameInput.value.trim();
     const btn = document.getElementById('save-account-btn');
@@ -698,7 +720,7 @@ accountForm.addEventListener('submit', async (e) => {
     btn.textContent = 'Saving...';
     
     try {
-        await updateDoc(doc(db, 'users', currentUser.uid), {
+        await updateDoc(doc(db, 'users', targetUid), {
             name: newName
         });
         currentAdminName = newName;

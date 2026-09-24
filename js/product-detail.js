@@ -207,9 +207,14 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
     const isLimited = product.offerPeriodType === 'limited';
     const isExpired = isLimited && product.offerExpiryDate && new Date(product.offerExpiryDate) <= new Date();
     const isOfferActive = hasOffer && !isExpired;
-    const currentPrice = isFree ? 0 : (isOfferActive ? Number(offerPrice) : Number(origPrice));
+    const isOutOfStock = Boolean(product.outOfStock);
 
     const handleBuyNow = () => {
+        if (isOutOfStock) {
+            alert('This product is currently out of stock.');
+            return;
+        }
+
         if (isFree) {
             sessionStorage.setItem('unlockProductId', id);
             window.location.href = `sub2unlock.html?id=${id}`;
@@ -778,6 +783,17 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
 
             <div class="product-info">
                 <div class="product-info-container">
+                    ${isOutOfStock ? `
+                        <div style="background: #fef2f2; border: 1.5px solid #fecaca; border-radius: var(--radius-xl); padding: 1.15rem 1.35rem; margin-bottom: 1.25rem; display: flex; align-items: flex-start; gap: 0.85rem;">
+                            <div style="width: 36px; height: 36px; border-radius: 10px; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                            </div>
+                            <div>
+                                <h4 style="margin: 0 0 0.25rem; color: #991b1b; font-size: 0.98rem; font-weight: 800;">Currently Out of Stock</h4>
+                                <p style="margin: 0; color: #b91c1c; font-size: 0.84rem; line-height: 1.45;">The creator of this mod has temporarily set their store offline or this item is out of stock. Purchases and downloads are temporarily disabled.</p>
+                            </div>
+                        </div>
+                    ` : ''}
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
                         <span class="category-pill">${product.category === 'livery' ? 'Vehicle Livery/Skin' : 'Vehicle Mod'}</span>
                         <span class="trust-badge"><span style="color: #f59e0b;">★</span> Verified Mod</span>
@@ -863,7 +879,12 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
                         </div>
 
                         <div style="display: flex; gap: var(--spacing-3); width: 100%;">
-                            ${!isFree ? `
+                            ${isOutOfStock ? `
+                                <button class="btn btn-secondary btn-lg" disabled style="flex: 1; font-size: 0.98rem; padding: 0.9rem; border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; gap: 0.5rem; opacity: 0.65; cursor: not-allowed; background: #f1f5f9; color: #64748b; border: 1.5px solid #cbd5e1; font-weight: 700;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                                    <span>Currently Unavailable (Out of Stock)</span>
+                                </button>
+                            ` : (!isFree ? `
                                 <button id="add-to-cart-btn" class="btn btn-outline btn-lg" style="flex: 1; font-size: 0.98rem; padding: 0.9rem; border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; gap: 0.5rem;" title="Add to Cart">
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
                                     <span>Add to Cart</span>
@@ -877,7 +898,7 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
                                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                                     <span>Free Instant Download</span>
                                 </button>
-                            `}
+                            `)}
                             <button id="detail-wishlist-btn" class="btn btn-outline" style="padding: 0 1.15rem; border-radius: var(--radius-xl);" title="Save to Garage Wishlist">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                             </button>
@@ -918,7 +939,11 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
                 `)}
             </div>
             <div class="sticky-bar-actions">
-                ${!isFree ? `
+                ${isOutOfStock ? `
+                    <button class="btn btn-secondary" disabled style="width: 100%; opacity: 0.65; cursor: not-allowed; background: #e2e8f0; color: #64748b; border: 1px solid #cbd5e1; font-weight: 700; padding: 0.65rem 1rem;">
+                        Out of Stock
+                    </button>
+                ` : (!isFree ? `
                     <button id="sticky-add-cart-btn" class="btn btn-outline" title="Add to Cart">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
                         <span>Add to Cart</span>
@@ -932,7 +957,7 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                         <span>Free Download</span>
                     </button>
-                `}
+                `)}
             </div>
         </div>
 
