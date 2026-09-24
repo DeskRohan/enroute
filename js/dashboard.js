@@ -850,10 +850,10 @@ const renderGarageTab = () => {
                     </div>
 
                     <div style="display: flex; gap: var(--spacing-3); margin-top: auto;">
-                        <a href="${p.downloadLink || '#'}" target="_blank" class="btn btn-primary btn-sm" style="flex: 1; justify-content: center;">
+                        <button type="button" class="btn btn-primary btn-sm garage-download-btn" data-url="${p.downloadLink || '#'}" data-name="${(p.name || '').replace(/"/g, '&quot;')}" style="flex: 1; justify-content: center;">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                             <span>Download Mod</span>
-                        </a>
+                        </button>
                         <a href="product.html?id=${p.id}" class="btn btn-outline btn-sm" title="View Specs">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
                         </a>
@@ -909,6 +909,63 @@ const renderGarageTab = () => {
             ${garageCardsHtml}
         </div>
     `;
+
+    // Attach direct download listener to each vehicle card
+    contentArea.querySelectorAll('.garage-download-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const url = btn.getAttribute('data-url');
+            if (!url || url === '#' || url === 'undefined') {
+                showToast('Download link is not available.');
+                return;
+            }
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path></svg>
+                <span>Preparing...</span>
+            `;
+
+            try {
+                if (url.includes('sharemods.com') || /^[a-z0-9]{12}$/i.test(url.trim())) {
+                    const apiBase = (window.location.hostname === 'localhost' && window.location.port !== '3001') ? 'http://localhost:3001' : '';
+                    const res = await fetch(`${apiBase}/api/direct-download?url=${encodeURIComponent(url)}`);
+                    const data = await res.json();
+                    if (data.ok && data.directUrl) {
+                        btn.innerHTML = `<span>✓ Downloading!</span>`;
+                        const a = document.createElement('a');
+                        a.href = data.directUrl;
+                        if (data.filename) a.download = data.filename;
+                        a.style.display = 'none';
+                        document.body.appendChild(a);
+                        a.click();
+                        setTimeout(() => {
+                            document.body.removeChild(a);
+                            btn.disabled = false;
+                            btn.innerHTML = originalHtml;
+                        }, 3000);
+                        return;
+                    }
+                }
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = '';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                }, 1000);
+            } catch (err) {
+                console.error('Garage download error:', err);
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+                const fallbackUrl = (window.location.hostname === 'localhost' && window.location.port !== '3001' ? 'http://localhost:3001' : '') + `/api/direct-download?download=1&url=${encodeURIComponent(url)}`;
+                window.location.href = fallbackUrl;
+            }
+        });
+    });
 };
 
 // ----------------------------------------------------

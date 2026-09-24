@@ -101,9 +101,10 @@ const renderSuccess = (order, items, id) => {
                             <div style="font-weight:700; font-size:0.95rem; color:var(--text-primary);">${item.name}</div>
                             <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase;">${item.category === 'livery' ? 'Vehicle Livery' : 'Vehicle Mod'}</div>
                         </div>
-                        <a href="${item.downloadLink || '#'}" class="btn btn-primary btn-sm" target="_blank" rel="noopener noreferrer" style="white-space:nowrap;">
-                            Download Mod
-                        </a>
+                        <button type="button" class="btn btn-primary btn-sm direct-download-btn" data-url="${item.downloadLink || '#'}" data-name="${item.name.replace(/"/g, '&quot;')}" style="white-space:nowrap; display:inline-flex; align-items:center; gap:6px;">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                            <span>Download Mod</span>
+                        </button>
                     </div>
                 `).join('')}
             </div>
@@ -111,9 +112,10 @@ const renderSuccess = (order, items, id) => {
     } else if (items.length === 1) {
         downloadsHtml = `
             <div style="margin: 1.5rem 0;">
-                <a href="${items[0].downloadLink || '#'}" class="btn btn-primary btn-lg" target="_blank" rel="noopener noreferrer">
-                    Download Mod (${items[0].name})
-                </a>
+                <button type="button" class="btn btn-primary btn-lg direct-download-btn" data-url="${items[0].downloadLink || '#'}" data-name="${items[0].name.replace(/"/g, '&quot;')}" style="display:inline-flex; align-items:center; gap:8px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    <span>Download Mod (${items[0].name})</span>
+                </button>
             </div>
         `;
     }
@@ -152,6 +154,16 @@ const renderSuccess = (order, items, id) => {
             </div>
         </div>
     `;
+
+    // Attach direct download button listeners
+    document.querySelectorAll('.direct-download-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const downloadUrl = btn.getAttribute('data-url');
+            const modName = btn.getAttribute('data-name') || '';
+            triggerDirectDownload(downloadUrl, modName, btn);
+        });
+    });
 
     // Attach invoice button listener
     const invBtn = document.getElementById('view-invoice-btn');
@@ -300,17 +312,97 @@ const buildInvoice = (order, items, id) => {
     });
 };
 
+const triggerDirectDownload = async (url, productName = '', btnEl = null) => {
+    if (!url || url === '#' || url === 'undefined') {
+        alert('Download link is not available. Please check your garage or contact support.');
+        return;
+    }
+
+    let originalHtml = '';
+    if (btnEl) {
+        originalHtml = btnEl.innerHTML;
+        btnEl.disabled = true;
+        btnEl.innerHTML = `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path></svg>
+            <span>Preparing Download...</span>
+        `;
+    }
+
+    try {
+        // If it's a cloud storage / mod link, resolve the direct binary download URL
+        if (url.includes('sharemods.com') || /^[a-z0-9]{12}$/i.test(url.trim())) {
+            const apiBase = (window.location.hostname === 'localhost' && window.location.port !== '3001')
+                ? 'http://localhost:3001'
+                : '';
+
+            const res = await fetch(`${apiBase}/api/direct-download?url=${encodeURIComponent(url)}`);
+            const data = await res.json();
+
+            if (data.ok && data.directUrl) {
+                if (btnEl) {
+                    btnEl.innerHTML = `
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <span>Download Starting...</span>
+                    `;
+                }
+
+                // Trigger in-browser direct file download without navigating away
+                const a = document.createElement('a');
+                a.href = data.directUrl;
+                if (data.filename) a.download = data.filename;
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    if (btnEl) {
+                        btnEl.disabled = false;
+                        btnEl.innerHTML = originalHtml;
+                    }
+                }, 3000);
+                return;
+            } else {
+                throw new Error(data.error || 'Failed to resolve direct download link');
+            }
+        }
+
+        // Generic direct URL download
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = '';
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+            document.body.removeChild(a);
+            if (btnEl) {
+                btnEl.disabled = false;
+                btnEl.innerHTML = originalHtml;
+            }
+        }, 1000);
+    } catch (err) {
+        console.error('Direct download error:', err);
+        if (btnEl) {
+            btnEl.disabled = false;
+            btnEl.innerHTML = originalHtml;
+        }
+        // Fallback: trigger download via redirect endpoint
+        const fallbackUrl = (window.location.hostname === 'localhost' && window.location.port !== '3001' ? 'http://localhost:3001' : '') + `/api/direct-download?download=1&url=${encodeURIComponent(url)}`;
+        const fallbackAnchor = document.createElement('a');
+        fallbackAnchor.href = fallbackUrl;
+        fallbackAnchor.style.display = 'none';
+        document.body.appendChild(fallbackAnchor);
+        fallbackAnchor.click();
+        setTimeout(() => document.body.removeChild(fallbackAnchor), 2000);
+    }
+};
+
 const triggerAutoDownload = (url) => {
     if (url && url !== '#') {
         setTimeout(() => {
-            const a = document.createElement('a');
-            a.href = url;
-            a.target = '_blank';
-            a.download = '';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }, 1500);
+            const firstBtn = document.querySelector('.direct-download-btn');
+            triggerDirectDownload(url, '', firstBtn);
+        }, 1200);
     }
 };
 

@@ -234,7 +234,8 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
                     price: currentPrice,
                     originalPrice: origPrice,
                     offerPrice: isOfferActive ? offerPrice : null,
-                    isOfferActive
+                    isOfferActive,
+                    downloadSource: product.downloadSource || ((product.downloadLink || '').includes('sharemods.com') ? 'sharemods' : 'manual')
                 })
             );
         } catch(e) {}

@@ -238,7 +238,8 @@ checkoutForm.addEventListener('submit', async (e) => {
                         price: item.price,
                         originalPrice: item.originalPrice ?? item.price,
                         category: item.category || 'mod',
-                        downloadLink: item.downloadLink || item.downloadUrl || ''
+                        downloadLink: item.downloadLink || item.downloadUrl || '',
+                        downloadSource: item.downloadSource || ((item.downloadLink || item.downloadUrl || '').includes('sharemods.com') ? 'sharemods' : 'manual')
                     }));
 
                     // Save Order to Firestore

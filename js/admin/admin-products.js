@@ -1,5 +1,21 @@
 import { db } from '../firebase-config.js';
 import { collection, getDocs, doc, setDoc, deleteDoc, serverTimestamp, query, orderBy, where, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { ENV } from '../.env.js';
+
+// ShareMods API Configuration
+const SHAREMODS_API_KEY = (ENV && ENV.SHAREMODS_API_KEY) ? ENV.SHAREMODS_API_KEY : '';
+
+function getShareModsApiKey() {
+    let key = (typeof SHAREMODS_API_KEY === 'string') ? SHAREMODS_API_KEY : '';
+    if (!key && typeof ENV !== 'undefined' && ENV.SHAREMODS_API_KEY) {
+        key = ENV.SHAREMODS_API_KEY;
+    }
+    if (key.includes('key=')) {
+        const match = key.match(/key=([a-zA-Z0-9]+)/);
+        if (match) return match[1];
+    }
+    return key.trim();
+}
 
 // DOM
 const tableBody = document.getElementById('products-table-body');
@@ -10,6 +26,12 @@ const cancelBtn = document.getElementById('cancel-modal-btn');
 const productForm = document.getElementById('product-form');
 const modalTitle = document.getElementById('modal-title');
 const saveBtn = document.getElementById('save-product-btn');
+
+// Bohemian Multi-Step Wizard DOM
+const wizardPrevBtn = document.getElementById('wizard-prev-btn');
+const wizardNextBtn = document.getElementById('wizard-next-btn');
+const wizardStepTrackerText = document.getElementById('wizard-step-tracker-text');
+const wizardBody = document.getElementById('boho-wizard-body');
 
 // Form Inputs
 const fId = document.getElementById('product-id');
@@ -32,6 +54,22 @@ const fImage2 = document.getElementById('p-image-2');
 const fImage3 = document.getElementById('p-image-3');
 const fImage4 = document.getElementById('p-image-4');
 const fDownload = document.getElementById('p-download');
+const fDownloadSource = document.getElementById('p-download-source');
+
+// ShareMods Upload DOM
+const shareModsUploadZone = document.getElementById('sharemods-upload-zone');
+const shareModsFileInput = document.getElementById('sharemods-file-input');
+const shareModsUploadContent = document.getElementById('sharemods-upload-content');
+const shareModsUploadProgress = document.getElementById('sharemods-upload-progress');
+const shareModsUploadSuccess = document.getElementById('sharemods-upload-success');
+const shareModsFileName = document.getElementById('sharemods-file-name');
+const shareModsFileSize = document.getElementById('sharemods-file-size');
+const shareModsProgressBar = document.getElementById('sharemods-progress-bar');
+const shareModsProgressLabel = document.getElementById('sharemods-progress-label');
+const shareModsProgressPercent = document.getElementById('sharemods-progress-percent');
+const shareModsSuccessFilename = document.getElementById('sharemods-success-filename');
+const shareModsRemoveFile = document.getElementById('sharemods-remove-file');
+const shareModsReuploadBtn = document.getElementById('sharemods-reupload-btn');
 const fVersion = document.getElementById('p-version');
 const fBrand = document.getElementById('p-brand');
 const fEngine = document.getElementById('p-engine');
@@ -58,6 +96,8 @@ const fScheduledDate = document.getElementById('p-scheduled-date');
 let allProducts = [];
 let currentEditingId = null;
 let currentEditingAddedBy = null; // Preserve original uploader on edit
+let shareModsUploadedUrl = ''; // Holds the ShareMods download URL after successful upload
+let shareModsCurrentXHR = null; // Reference to active upload XHR for cancellation
 
 const formatPrice = (price) => {
     return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(price || 0);
@@ -297,6 +337,176 @@ const renderTable = () => {
     document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', handleDelete));
 };
 
+// =====================================================
+// Bohemian Multi-Step Product Wizard Controller
+// =====================================================
+let currentWizardStep = 1;
+const TOTAL_WIZARD_STEPS = 4;
+const WIZARD_STEP_TITLES = {
+    1: 'Identity & Pricing',
+    2: 'Media & Cloud',
+    3: 'Specs & Variants',
+    4: 'Story & Launch'
+};
+
+function getWizardPanes() {
+    return document.querySelectorAll('.boho-step-pane');
+}
+
+function getWizardStepItems() {
+    return document.querySelectorAll('.boho-step-item');
+}
+
+function getWizardStepDividers() {
+    return document.querySelectorAll('.boho-step-divider');
+}
+
+function validateWizardStep(step) {
+    if (step === 1) {
+        if (!fName.value.trim()) {
+            alert('Please enter a Product Name in Step 1.');
+            fName.focus();
+            return false;
+        }
+        if (fPricingType.value === 'free') {
+            if (!fChannelLink.value.trim()) {
+                alert('Please enter a YouTube Channel / Download Link for this free mod in Step 1.');
+                fChannelLink.focus();
+                return false;
+            }
+        } else {
+            const price = parseFloat(fOriginalPrice.value);
+            if (isNaN(price) || price < 0) {
+                alert('Please enter a valid Original Price in Step 1.');
+                fOriginalPrice.focus();
+                return false;
+            }
+            if (fOfferLimitedInput && fOfferLimitedInput.checked && !fOfferExpiryDate.value) {
+                alert('Please specify an Expiry Date for the limited time offer in Step 1.');
+                fOfferExpiryDate.focus();
+                return false;
+            }
+        }
+    } else if (step === 2) {
+        const downloadLink = (shareModsUploadedUrl || fDownload.value).trim();
+        if (!downloadLink) {
+            alert('Please upload your mod file before proceeding from Step 2.');
+            if (shareModsUploadZone) {
+                shareModsUploadZone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            return false;
+        }
+        if (!fImage1.value.trim()) {
+            alert('Please provide at least the Primary Cover Image URL (Slot 1) in Step 2.');
+            fImage1.focus();
+            return false;
+        }
+    } else if (step === 3) {
+        // Step 3 (Specs & Variants) is optional
+        return true;
+    } else if (step === 4) {
+        if (!fDesc.value.trim()) {
+            alert('Please enter the Mod Documentation & Installation Guide in Step 4.');
+            fDesc.focus();
+            return false;
+        }
+    }
+    return true;
+}
+
+function goToWizardStep(stepNumber) {
+    if (stepNumber < 1 || stepNumber > TOTAL_WIZARD_STEPS) return;
+    currentWizardStep = stepNumber;
+
+    const panes = getWizardPanes();
+    const items = getWizardStepItems();
+    const dividers = getWizardStepDividers();
+
+    // 1. Show matching pane
+    panes.forEach(pane => {
+        const paneStep = parseInt(pane.getAttribute('data-step'), 10);
+        if (paneStep === currentWizardStep) {
+            pane.classList.add('active');
+        } else {
+            pane.classList.remove('active');
+        }
+    });
+
+    // 2. Update Stepper Header
+    items.forEach(item => {
+        const itemStep = parseInt(item.getAttribute('data-step'), 10);
+        item.classList.remove('active', 'completed');
+        if (itemStep === currentWizardStep) {
+            item.classList.add('active');
+        } else if (itemStep < currentWizardStep) {
+            item.classList.add('completed');
+        }
+    });
+
+    dividers.forEach(div => {
+        const afterStep = parseInt(div.getAttribute('data-after'), 10);
+        if (afterStep < currentWizardStep) {
+            div.classList.add('completed');
+        } else {
+            div.classList.remove('completed');
+        }
+    });
+
+    // 3. Update Footer Buttons
+    if (wizardPrevBtn) {
+        wizardPrevBtn.style.display = (currentWizardStep > 1) ? 'inline-flex' : 'none';
+    }
+    if (wizardNextBtn) {
+        wizardNextBtn.style.display = (currentWizardStep < TOTAL_WIZARD_STEPS) ? 'inline-flex' : 'none';
+    }
+    if (saveBtn) {
+        saveBtn.style.display = (currentWizardStep === TOTAL_WIZARD_STEPS) ? 'inline-flex' : 'none';
+    }
+
+    // 4. Update Tracker Pill
+    if (wizardStepTrackerText) {
+        wizardStepTrackerText.textContent = `Step ${currentWizardStep} of ${TOTAL_WIZARD_STEPS} • ${WIZARD_STEP_TITLES[currentWizardStep] || ''}`;
+    }
+
+    // 5. Scroll wizard body to top
+    if (wizardBody) {
+        wizardBody.scrollTop = 0;
+    }
+}
+
+// Wizard navigation button listeners
+if (wizardNextBtn) {
+    wizardNextBtn.addEventListener('click', () => {
+        if (!validateWizardStep(currentWizardStep)) return;
+        goToWizardStep(currentWizardStep + 1);
+    });
+}
+
+if (wizardPrevBtn) {
+    wizardPrevBtn.addEventListener('click', () => {
+        goToWizardStep(currentWizardStep - 1);
+    });
+}
+
+// Allow clicking completed or immediate steps in header stepper
+document.addEventListener('click', (e) => {
+    const item = e.target.closest('.boho-step-item');
+    if (!item) return;
+    const targetStep = parseInt(item.getAttribute('data-step'), 10);
+    if (isNaN(targetStep) || targetStep === currentWizardStep) return;
+
+    if (targetStep > currentWizardStep) {
+        // Validate intermediate steps before jumping forward
+        for (let s = currentWizardStep; s < targetStep; s++) {
+            if (!validateWizardStep(s)) {
+                goToWizardStep(s);
+                return;
+            }
+        }
+    }
+    goToWizardStep(targetStep);
+});
+
 const openModal = (isEdit = false, currentId = null) => {
     modalTitle.textContent = isEdit ? 'Edit Product' : 'Add Product';
     currentEditingId = currentId;
@@ -318,8 +528,10 @@ const openModal = (isEdit = false, currentId = null) => {
     if (!isEdit) {
         variantsList.innerHTML = '';
         updateVariantsEmptyState();
+        resetShareModsUpload();
     }
 
+    goToWizardStep(1);
     modal.classList.add('active');
 };
 
@@ -353,6 +565,10 @@ const closeModal = () => {
     fScheduleDatetimeGroup.style.display = 'none';
     fScheduledDate.required = false;
     fScheduledDate.value = '';
+
+    // Reset ShareMods Upload UI
+    resetShareModsUpload();
+    goToWizardStep(1);
 };
 
 // Handlers
@@ -371,14 +587,6 @@ if (addVariantRowBtn) {
         variantsList.appendChild(newRow);
     });
 }
-
-// Handlers
-addBtn.addEventListener('click', () => {
-    openModal(false);
-});
-
-closeBtn.addEventListener('click', closeModal);
-cancelBtn.addEventListener('click', closeModal);
 
 // Offer Period selection logic
 fOfferLifetimeCard.addEventListener('click', () => {
@@ -535,6 +743,38 @@ const handleEdit = (e) => {
             });
         }
         updateVariantsEmptyState();
+
+        // Setup ShareMods upload state for editing
+        const hasShareModsLink = product.downloadSource === 'sharemods' || 
+            (product.downloadLink && product.downloadLink.includes('sharemods.com'));
+
+        if (hasShareModsLink) {
+            shareModsUploadedUrl = product.downloadLink;
+            if (fDownloadSource) fDownloadSource.value = 'sharemods';
+            if (shareModsUploadContent) shareModsUploadContent.style.display = 'none';
+            if (shareModsUploadProgress) shareModsUploadProgress.style.display = 'none';
+            if (shareModsUploadSuccess) shareModsUploadSuccess.style.display = 'block';
+            
+            let displayFilename = product.name ? `${product.name} (Mod Archive)` : 'Uploaded Mod File';
+            try {
+                const parts = product.downloadLink.split('/');
+                const lastPart = parts[parts.length - 1];
+                if (lastPart && lastPart.endsWith('.html')) {
+                    displayFilename = decodeURIComponent(lastPart.replace('.html', ''));
+                } else if (lastPart) {
+                    displayFilename = decodeURIComponent(lastPart);
+                }
+            } catch (_) {}
+            
+            if (shareModsSuccessFilename) shareModsSuccessFilename.textContent = displayFilename;
+            if (shareModsUploadZone) {
+                shareModsUploadZone.classList.add('has-file');
+                shareModsUploadZone.style.borderColor = 'var(--boho-sage)';
+                shareModsUploadZone.style.background = 'var(--boho-sage-light)';
+            }
+        } else {
+            resetShareModsUpload();
+        }
     }
 };
 
@@ -554,8 +794,24 @@ const handleDelete = async (e) => {
 
 productForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    // Validate all wizard steps thoroughly before saving
+    for (let s = 1; s <= TOTAL_WIZARD_STEPS; s++) {
+        if (!validateWizardStep(s)) {
+            goToWizardStep(s);
+            return;
+        }
+    }
+
+    const finalDownloadLink = shareModsUploadedUrl || fDownload.value.trim();
+    if (!finalDownloadLink) {
+        alert('Please upload your mod file in Step 2.');
+        goToWizardStep(2);
+        return;
+    }
+
     saveBtn.disabled = true;
-    saveBtn.textContent = 'Saving...';
+    saveBtn.innerHTML = `<span>Saving...</span>`;
 
     const productId = fId.value || generateId();
     const selectedRelated = Array.from(document.querySelectorAll('.related-mod-checkbox:checked')).map(cb => cb.value);
@@ -617,7 +873,8 @@ productForm.addEventListener('submit', async (e) => {
         channelLink: isFreePricing ? fChannelLink.value : '',
         images: [fImage1.value, fImage2.value, fImage3.value, fImage4.value].filter(url => url.trim() !== ''),
         image: fImage1.value, // Keep primary image for backwards compatibility
-        downloadLink: fDownload.value,
+        downloadLink: (shareModsUploadedUrl || fDownload.value).trim(),
+        downloadSource: (shareModsUploadedUrl || ((fDownload.value || '').includes('sharemods.com'))) ? 'sharemods' : 'manual',
         version: fVersion.value,
         brand: fBrand.value,
         engine: fEngine.value,
@@ -655,7 +912,7 @@ productForm.addEventListener('submit', async (e) => {
         alert("Failed to save product.");
     } finally {
         saveBtn.disabled = false;
-        saveBtn.textContent = 'Save Product';
+        saveBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg><span>Save Product</span>`;
     }
 });
 
@@ -1018,6 +1275,298 @@ if (transferBack3Btn) {
 if (transferConfirmBtn) {
     transferConfirmBtn.addEventListener('click', executeTransfer);
 }
+
+// =====================================================
+// ShareMods File Upload Integration
+// =====================================================
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+function resetShareModsUpload() {
+    // Cancel any in-progress upload
+    if (shareModsCurrentXHR) {
+        shareModsCurrentXHR.abort();
+        shareModsCurrentXHR = null;
+    }
+    shareModsUploadedUrl = '';
+    if (shareModsFileInput) shareModsFileInput.value = '';
+    if (fDownloadSource) fDownloadSource.value = '';
+    
+    // Reset UI states
+    if (shareModsUploadContent) shareModsUploadContent.style.display = 'block';
+    if (shareModsUploadProgress) shareModsUploadProgress.style.display = 'none';
+    if (shareModsUploadSuccess) shareModsUploadSuccess.style.display = 'none';
+    if (shareModsUploadZone) {
+        shareModsUploadZone.classList.remove('has-file');
+        shareModsUploadZone.style.borderColor = 'rgba(37, 99, 235, 0.35)';
+        shareModsUploadZone.style.background = '#f8fafc';
+    }
+}
+
+async function uploadToShareMods(file) {
+    const apiKey = getShareModsApiKey();
+    if (!apiKey) {
+        alert('ShareMods API key is not configured. Please add it in js/.env or js/.env.js');
+        resetShareModsUpload();
+        return;
+    }
+
+    // Max file size check (200MB)
+    const MAX_SIZE = 200 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+        alert(`File is too large (${formatFileSize(file.size)}). Maximum upload size is 200MB.`);
+        resetShareModsUpload();
+        return;
+    }
+
+    // Show progress UI
+    shareModsUploadContent.style.display = 'none';
+    shareModsUploadProgress.style.display = 'block';
+    shareModsUploadSuccess.style.display = 'none';
+    shareModsUploadZone.classList.add('has-file');
+    shareModsUploadZone.style.borderColor = 'var(--boho-clay)';
+    shareModsUploadZone.style.background = 'var(--boho-clay-light)';
+
+    shareModsFileName.textContent = file.name;
+    shareModsFileSize.textContent = formatFileSize(file.size);
+    shareModsProgressBar.style.width = '0%';
+    shareModsProgressPercent.textContent = '0%';
+    shareModsProgressLabel.textContent = 'Connecting to Storage Server...';
+    shareModsProgressLabel.style.color = 'var(--boho-clay)';
+
+    try {
+        // Step 1: Get upload server URL and session ID
+        let uploadServerUrl = '';
+        let sessId = '';
+
+        // 1a. Try our serverless proxy /api/sharemods-server (available on Vercel / full dev servers)
+        try {
+            const apiRes = await fetch(`/api/sharemods-server?key=${encodeURIComponent(apiKey)}`);
+            if (apiRes.ok) {
+                const apiData = await apiRes.json();
+                if (apiData.uploadServerUrl) {
+                    uploadServerUrl = apiData.uploadServerUrl;
+                    sessId = apiData.sessId || '';
+                }
+            }
+        } catch (e) {
+            console.warn('Backend proxy /api/sharemods-server unreachable:', e);
+        }
+
+        // 1b. If running under npx serve on port 3000, query local server.js on port 3001
+        if (!uploadServerUrl || !sessId) {
+            try {
+                const localRes = await fetch(`http://localhost:3001/api/sharemods-server?key=${encodeURIComponent(apiKey)}`);
+                if (localRes.ok) {
+                    const localData = await localRes.json();
+                    if (localData.uploadServerUrl) {
+                        uploadServerUrl = localData.uploadServerUrl;
+                        sessId = localData.sessId || '';
+                    }
+                }
+            } catch (_) {}
+        }
+
+        // 1c. Direct fallback if API route completely unavailable
+        if (!uploadServerUrl) {
+            uploadServerUrl = 'https://bio7.sharemods.com/cgi-bin/upload.cgi';
+        }
+
+        shareModsProgressLabel.textContent = 'Uploading Mod File...';
+
+        // Step 2: Upload file directly to storage server (supports CORS Origin: *)
+        const formData = new FormData();
+        if (sessId) {
+            formData.append('sess_id', sessId);
+        }
+        formData.append('key', apiKey);
+        formData.append('file_0', file);
+
+        const downloadUrl = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            shareModsCurrentXHR = xhr;
+
+            xhr.upload.addEventListener('progress', (e) => {
+                if (e.lengthComputable) {
+                    const percent = Math.round((e.loaded / e.total) * 100);
+                    shareModsProgressBar.style.width = `${percent}%`;
+                    shareModsProgressPercent.textContent = `${percent}%`;
+                    if (percent >= 100) {
+                        shareModsProgressLabel.textContent = 'Finalizing Mod File...';
+                    }
+                }
+            });
+
+            xhr.addEventListener('load', () => {
+                shareModsCurrentXHR = null;
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    const responseText = xhr.responseText;
+                    let fileCode = null;
+                    let fileUrl = null;
+
+                    try {
+                        const data = JSON.parse(responseText);
+                        if (Array.isArray(data) && data[0]) {
+                            fileCode = data[0].file_code;
+                            fileUrl = data[0].url || data[0].download_url;
+                        } else if (data.file_code) {
+                            fileCode = data.file_code;
+                        } else if (data.result) {
+                            if (typeof data.result === 'string') {
+                                if (data.result.startsWith('http')) {
+                                    fileUrl = data.result;
+                                } else {
+                                    fileCode = data.result;
+                                }
+                            } else if (data.result.file_code) {
+                                fileCode = data.result.file_code;
+                            } else if (data.result.url) {
+                                fileUrl = data.result.url;
+                            }
+                        } else if (data.files && data.files[0]) {
+                            const f = data.files[0];
+                            fileUrl = f.url || f.download_url;
+                            fileCode = f.file_code;
+                        }
+                    } catch (_) {
+                        // XML or plain text fallback
+                        const parser = new DOMParser();
+                        const xml = parser.parseFromString(responseText, 'text/xml');
+                        const urlNode = xml.querySelector('url') || xml.querySelector('download_url');
+                        const codeNode = xml.querySelector('file_code');
+                        if (urlNode) {
+                            fileUrl = urlNode.textContent;
+                        } else if (codeNode) {
+                            fileCode = codeNode.textContent;
+                        }
+                    }
+
+                    // Canonical ShareMods download page link (never causes "no such file with this filename" error)
+                    if (!fileUrl && fileCode) {
+                        fileUrl = `https://sharemods.com/${fileCode}`;
+                    }
+
+                    if (fileUrl) {
+                        resolve(fileUrl);
+                    } else if (responseText.trim().startsWith('http')) {
+                        resolve(responseText.trim());
+                    } else {
+                        reject(new Error('Could not extract download URL from ShareMods response: ' + responseText.substring(0, 100)));
+                    }
+                } else {
+                    reject(new Error(`ShareMods upload failed with status ${xhr.status}`));
+                }
+            });
+
+            xhr.addEventListener('error', () => {
+                shareModsCurrentXHR = null;
+                reject(new Error('Network error during ShareMods upload.'));
+            });
+
+            xhr.addEventListener('abort', () => {
+                shareModsCurrentXHR = null;
+                reject(new Error('Upload cancelled.'));
+            });
+
+            xhr.open('POST', uploadServerUrl, true);
+            xhr.send(formData);
+        });
+
+        // Step 3: Upload succeeded — update UI
+        shareModsUploadedUrl = downloadUrl;
+        fDownload.value = downloadUrl;
+        if (fDownloadSource) fDownloadSource.value = 'sharemods';
+
+        shareModsUploadProgress.style.display = 'none';
+        shareModsUploadSuccess.style.display = 'block';
+        shareModsSuccessFilename.textContent = file.name;
+        shareModsUploadZone.style.borderColor = 'var(--boho-sage)';
+        shareModsUploadZone.style.background = 'var(--boho-sage-light)';
+
+        console.log('ShareMods upload success:', downloadUrl);
+
+    } catch (error) {
+        console.error('ShareMods upload error:', error);
+        shareModsProgressLabel.textContent = 'Upload failed!';
+        shareModsProgressLabel.style.color = '#ef4444';
+        shareModsProgressPercent.textContent = '';
+        shareModsProgressBar.style.width = '100%';
+        shareModsProgressBar.style.background = '#ef4444';
+
+        setTimeout(() => {
+            resetShareModsUpload();
+        }, 3500);
+
+        alert(`ShareMods Upload Error: ${error.message}`);
+    }
+}
+
+// ShareMods Upload Event Listeners
+if (shareModsUploadZone) {
+    // Click to open file picker
+    shareModsUploadZone.addEventListener('click', (e) => {
+        // Don't trigger file picker if clicking remove or re-upload buttons
+        if (e.target.closest('#sharemods-remove-file') || e.target.closest('#sharemods-reupload-btn')) return;
+        if (shareModsUploadSuccess && shareModsUploadSuccess.style.display === 'block') return;
+        shareModsFileInput.click();
+    });
+
+    // Drag and drop support
+    shareModsUploadZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        shareModsUploadZone.style.borderColor = 'var(--boho-clay)';
+        shareModsUploadZone.style.background = 'var(--boho-clay-light)';
+    });
+
+    shareModsUploadZone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!shareModsUploadZone.classList.contains('has-file')) {
+            shareModsUploadZone.style.borderColor = 'rgba(37, 99, 235, 0.35)';
+            shareModsUploadZone.style.background = '#f8fafc';
+        }
+    });
+
+    shareModsUploadZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            uploadToShareMods(files[0]);
+        }
+    });
+}
+
+if (shareModsFileInput) {
+    shareModsFileInput.addEventListener('change', () => {
+        if (shareModsFileInput.files.length > 0) {
+            uploadToShareMods(shareModsFileInput.files[0]);
+        }
+    });
+}
+
+if (shareModsRemoveFile) {
+    shareModsRemoveFile.addEventListener('click', (e) => {
+        e.stopPropagation();
+        resetShareModsUpload();
+    });
+}
+
+if (shareModsReuploadBtn) {
+    shareModsReuploadBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        resetShareModsUpload();
+        shareModsFileInput.click();
+    });
+}
+
 
 // Init
 document.addEventListener('DOMContentLoaded', loadProducts);

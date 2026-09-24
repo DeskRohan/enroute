@@ -100,12 +100,61 @@ btnSubscribe.addEventListener('click', () => {
 
 btnGetLink.addEventListener('click', async () => {
     if (targetDownloadLink && targetDownloadLink !== '#') {
-        window.open(targetDownloadLink, '_blank');
+        const originalText = btnGetLink.innerHTML;
+        btnGetLink.disabled = true;
+        btnGetLink.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path></svg>
+            <span>Preparing Mod Download...</span>
+        `;
+
         try {
             const docRef = doc(db, "products", productId);
             await updateDoc(docRef, { downloadCount: increment(1) });
         } catch (err) {
             console.error("Error updating count", err);
+        }
+
+        try {
+            if (targetDownloadLink.includes('sharemods.com') || /^[a-z0-9]{12}$/i.test(targetDownloadLink.trim())) {
+                const apiBase = (window.location.hostname === 'localhost' && window.location.port !== '3001')
+                    ? 'http://localhost:3001'
+                    : '';
+                const res = await fetch(`${apiBase}/api/direct-download?url=${encodeURIComponent(targetDownloadLink)}`);
+                const data = await res.json();
+                if (data.ok && data.directUrl) {
+                    btnGetLink.innerHTML = `<span>✓ Download Started!</span>`;
+                    const a = document.createElement('a');
+                    a.href = data.directUrl;
+                    if (data.filename) a.download = data.filename;
+                    a.style.display = 'none';
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(() => {
+                        document.body.removeChild(a);
+                        btnGetLink.disabled = false;
+                        btnGetLink.innerHTML = originalText;
+                    }, 3500);
+                    return;
+                }
+            }
+
+            // Fallback
+            const a = document.createElement('a');
+            a.href = targetDownloadLink;
+            a.download = '';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                btnGetLink.disabled = false;
+                btnGetLink.innerHTML = originalText;
+            }, 1000);
+        } catch (e) {
+            console.error('Download error:', e);
+            btnGetLink.disabled = false;
+            btnGetLink.innerHTML = originalText;
+            const fallbackUrl = (window.location.hostname === 'localhost' && window.location.port !== '3001' ? 'http://localhost:3001' : '') + `/api/direct-download?download=1&url=${encodeURIComponent(targetDownloadLink)}`;
+            window.location.href = fallbackUrl;
         }
     } else {
         alert("No download link is available for this mod.");

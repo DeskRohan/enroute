@@ -122,6 +122,7 @@ export const EnrouteCart = {
             category: product.category || 'mod',
             image: (product.images && product.images.length > 0) ? product.images[0] : (product.image || ''),
             downloadLink: product.downloadLink || product.downloadUrl || '',
+            downloadSource: product.downloadSource || ((product.downloadLink || product.downloadUrl || '').includes('sharemods.com') ? 'sharemods' : 'manual'),
             quantity: 1 // Fixed at 1 unit for digital licenses
         };
 

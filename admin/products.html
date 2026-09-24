@@ -11,7 +11,482 @@
     <link rel="stylesheet" href="../css/components.css">
     <link rel="stylesheet" href="../css/admin.css">
     <link rel="icon" type="image/png" href="../assets/images/fevicon.png">
+
+    <style id="boho-theme-styles">
+        /* ====================================================
+           Web Blue Theme for Add/Edit Product Multi-Step Wizard
+           ==================================================== */
+        :root {
+            /* Web Blue Theme Design Tokens */
+            --theme-blue: #2563eb;
+            --theme-blue-hover: #1d4ed8;
+            --theme-blue-light: #eff6ff;
+            --theme-blue-subtle: rgba(37, 99, 235, 0.12);
+            --theme-blue-glow: rgba(37, 99, 235, 0.25);
+            --theme-blue-border: rgba(37, 99, 235, 0.35);
+
+            --theme-success: #059669;
+            --theme-success-light: #ecfdf5;
+            --theme-warning: #f59e0b;
+            --theme-warning-light: #fef3c7;
+
+            /* Neutral Slate Palette */
+            --theme-bg-modal: #ffffff;
+            --theme-bg-canvas: #f8fafc;
+            --theme-border: #e2e8f0;
+            --theme-border-strong: #cbd5e1;
+            --theme-text-dark: #0f172a;
+            --theme-text-secondary: #475569;
+            --theme-text-muted: #94a3b8;
+
+            /* Mappings for Wizard Components */
+            --boho-clay: var(--theme-blue);
+            --boho-clay-hover: var(--theme-blue-hover);
+            --boho-clay-light: var(--theme-blue-light);
+            --boho-clay-glow: var(--theme-blue-glow);
+            --boho-sage: var(--theme-success);
+            --boho-sage-light: var(--theme-success-light);
+            --boho-sand: var(--theme-bg-modal);
+            --boho-oat: var(--theme-bg-canvas);
+            --boho-border: var(--theme-border);
+            --boho-border-strong: var(--theme-border-strong);
+            --boho-espresso: var(--theme-text-dark);
+            --boho-warm-brown: var(--theme-text-secondary);
+            --boho-muted: var(--theme-text-muted);
+        }
+
+        #product-modal .modal-content.boho-modal-content {
+            background: #ffffff;
+            max-width: 860px;
+            border-radius: 20px;
+            border: 1px solid var(--theme-border);
+            box-shadow: 0 20px 60px -15px rgba(15, 23, 42, 0.16), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+            padding: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+        }
+
+        .boho-modal-header {
+            padding: 1.35rem 2rem 1.15rem 2rem;
+            background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+            border-bottom: 1px solid var(--theme-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            position: relative;
+        }
+
+        .boho-badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1px solid rgba(37, 99, 235, 0.22);
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.35rem;
+        }
+
+        .boho-modal-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--theme-text-dark);
+            margin: 0;
+            letter-spacing: -0.01em;
+        }
+
+        .boho-modal-desc {
+            font-size: 0.82rem;
+            color: var(--theme-text-secondary);
+            margin: 0.2rem 0 0 0;
+        }
+
+        /* Stepper Navigation */
+        .boho-stepper-wrap {
+            background: #ffffff;
+            border-bottom: 1px solid var(--theme-border);
+            padding: 0.85rem 1.75rem;
+        }
+
+        .boho-stepper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            gap: 0.25rem;
+        }
+
+        .boho-step-item {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            padding: 0.4rem 0.65rem;
+            border-radius: 999px;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .boho-step-item:hover {
+            background: var(--boho-oat);
+        }
+
+        .boho-step-circle {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--boho-oat);
+            color: var(--boho-muted);
+            border: 1px solid var(--boho-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 800;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .boho-step-check {
+            display: none;
+        }
+
+        .boho-step-item.active .boho-step-circle {
+            background: linear-gradient(135deg, var(--boho-clay), var(--boho-clay-hover));
+            color: #ffffff;
+            border-color: var(--boho-clay);
+            box-shadow: 0 0 0 3px var(--boho-clay-glow);
+        }
+
+        .boho-step-item.completed .boho-step-circle {
+            background: var(--boho-sage);
+            color: #ffffff;
+            border-color: var(--boho-sage);
+        }
+
+        .boho-step-item.completed .boho-step-num {
+            display: none;
+        }
+
+        .boho-step-item.completed .boho-step-check {
+            display: inline;
+        }
+
+        .boho-step-text-wrap {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+
+        .boho-step-mini-tag {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--boho-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            line-height: 1;
+        }
+
+        .boho-step-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--boho-warm-brown);
+            white-space: nowrap;
+            line-height: 1.3;
+        }
+
+        .boho-step-item.active .boho-step-label {
+            color: var(--boho-clay);
+        }
+
+        .boho-step-divider {
+            flex: 1;
+            height: 2px;
+            background: var(--boho-border);
+            margin: 0 0.35rem;
+            border-radius: 2px;
+            transition: background 0.3s ease;
+        }
+
+        .boho-step-divider.completed {
+            background: var(--boho-sage);
+        }
+
+        /* Wizard Form Body */
+        .boho-wizard-body {
+            padding: 1.5rem 2rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .boho-step-pane {
+            display: none;
+        }
+
+        .boho-step-pane.active {
+            display: block;
+            animation: bohoFadeSlide 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes bohoFadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Boho Card */
+        .boho-card {
+            background: #ffffff;
+            border: 1px solid var(--boho-border);
+            border-radius: 18px;
+            padding: 1.35rem 1.5rem;
+            margin-bottom: 1.15rem;
+            box-shadow: 0 2px 12px -2px rgba(80, 50, 30, 0.04);
+        }
+
+        .boho-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.1rem;
+            border-bottom: 1px solid var(--boho-border);
+        }
+
+        .boho-card-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1px solid rgba(37, 99, 235, 0.18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .boho-card-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--boho-espresso);
+            letter-spacing: -0.01em;
+            margin: 0;
+        }
+
+        .boho-card-desc {
+            font-size: 0.76rem;
+            color: var(--boho-muted);
+            margin: 2px 0 0 0;
+        }
+
+        /* Boho Form Controls */
+        .boho-modal-content .form-label {
+            color: var(--boho-warm-brown) !important;
+            font-size: 0.76rem !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.04em !important;
+            margin-bottom: 0.35rem !important;
+        }
+
+        .boho-modal-content .form-control {
+            background: #f8fafc !important;
+            border: 1.5px solid var(--boho-border) !important;
+            border-radius: 10px !important;
+            color: var(--boho-espresso) !important;
+            padding: 0.65rem 0.85rem !important;
+            font-size: 0.88rem !important;
+            transition: all 0.2s ease !important;
+        }
+
+        .boho-modal-content .form-control:focus {
+            border-color: var(--boho-clay) !important;
+            background: #ffffff !important;
+            box-shadow: 0 0 0 3px var(--boho-clay-glow) !important;
+            outline: none !important;
+        }
+
+        /* Status cards in Boho */
+        .boho-modal-content .status-option-card {
+            border: 1.5px solid var(--boho-border) !important;
+            background: #f8fafc !important;
+            border-radius: 12px !important;
+            padding: 0.85rem 1rem !important;
+            transition: all 0.2s ease !important;
+        }
+
+        .boho-modal-content .status-option-card:hover {
+            border-color: #93c5fd !important;
+            background: #eff6ff !important;
+        }
+
+        .boho-modal-content .status-option-card.active {
+            border-color: var(--boho-clay) !important;
+            background: var(--boho-clay-light) !important;
+            box-shadow: 0 0 0 1px var(--boho-clay) !important;
+        }
+
+        /* Image preview slots in Boho */
+        .boho-image-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.85rem;
+        }
+
+        .boho-image-slot {
+            display: flex;
+            gap: 0.65rem;
+            align-items: center;
+            background: #f8fafc;
+            border: 1px solid var(--boho-border);
+            border-radius: 12px;
+            padding: 0.5rem 0.65rem;
+        }
+
+        .boho-image-thumb {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            background: #f1f5f9;
+            border: 1px solid var(--boho-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--boho-muted);
+            overflow: hidden;
+            flex-shrink: 0;
+            font-size: 0.7rem;
+        }
+
+        .boho-image-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Sticky Wizard Footer */
+        .boho-wizard-footer {
+            padding: 0.9rem 2rem;
+            background: #ffffff;
+            border-top: 1px solid var(--boho-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .boho-step-pill-tracker {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #f1f5f9;
+            border: 1px solid var(--boho-border);
+            padding: 5px 14px;
+            border-radius: 999px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            color: var(--boho-warm-brown);
+        }
+
+        .boho-step-indicator-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--boho-clay);
+        }
+
+        .boho-btn-next {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--boho-clay), var(--boho-clay-hover));
+            color: #ffffff !important;
+            border: none;
+            border-radius: 12px;
+            padding: 0.72rem 1.6rem;
+            font-weight: 700;
+            font-size: 0.88rem;
+            cursor: pointer;
+            box-shadow: 0 4px 14px var(--boho-clay-glow);
+            transition: all 0.2s ease;
+        }
+
+        .boho-btn-next:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+        }
+
+        .boho-btn-prev {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: #ffffff;
+            color: var(--boho-warm-brown) !important;
+            border: 1.5px solid var(--boho-border);
+            border-radius: 12px;
+            padding: 0.72rem 1.35rem;
+            font-weight: 700;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .boho-btn-prev:hover {
+            background: var(--boho-oat);
+            border-color: var(--boho-border-strong);
+            color: var(--boho-espresso) !important;
+        }
+
+        .boho-btn-save {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, #059669, #047857);
+            color: #ffffff !important;
+            border: none;
+            border-radius: 12px;
+            padding: 0.72rem 1.85rem;
+            font-weight: 800;
+            font-size: 0.88rem;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(5, 150, 105, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .boho-btn-save:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(5, 150, 105, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .boho-step-text-wrap {
+                display: none;
+            }
+            .boho-modal-header, .boho-stepper-wrap, .boho-wizard-body, .boho-wizard-footer {
+                padding-left: 1.25rem;
+                padding-right: 1.25rem;
+            }
+            .boho-image-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
+
 
 <body>
 
@@ -68,287 +543,503 @@
         </div>
     </main>
 
-    <!-- Product Modal -->
+    <!-- Product Modal (Bohemian Multi-Step Wizard) -->
     <div class="modal-overlay" id="product-modal">
-        <div class="modal-content">
-            <div class="modal-header">
+        <div class="modal-content boho-modal-content">
+            <!-- Bohemian Header -->
+            <div class="boho-modal-header">
                 <div>
-                    <h3 id="modal-title" style="margin-bottom: 0.25rem;">Add Product</h3>
-                    <p class="text-secondary" style="font-size: 0.85rem; margin: 0;">Configure vehicle specs, media assets, pricing telemetry & release state.</p>
+                    <div class="boho-badge-pill">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                        <span>Product Studio</span>
+                    </div>
+                    <h3 id="modal-title" class="boho-modal-title">Craft Product</h3>
+                    <p class="boho-modal-desc">Configure vehicle specs, media assets, pricing telemetry & release state.</p>
                 </div>
-                <button class="close-btn" id="close-modal-btn">&times;</button>
+                <button class="close-btn" id="close-modal-btn" type="button" title="Close">&times;</button>
             </div>
-            <form id="product-form">
+
+            <!-- Bohemian Stepper Bar -->
+            <div class="boho-stepper-wrap">
+                <div class="boho-stepper" id="boho-wizard-stepper">
+                    <button type="button" class="boho-step-item active" data-step="1">
+                        <div class="boho-step-circle">
+                            <span class="boho-step-num">1</span>
+                            <span class="boho-step-check">✓</span>
+                        </div>
+                        <div class="boho-step-text-wrap">
+                            <span class="boho-step-mini-tag">Step 1</span>
+                            <span class="boho-step-label">Identity & Pricing</span>
+                        </div>
+                    </button>
+
+                    <div class="boho-step-divider" data-after="1"></div>
+
+                    <button type="button" class="boho-step-item" data-step="2">
+                        <div class="boho-step-circle">
+                            <span class="boho-step-num">2</span>
+                            <span class="boho-step-check">✓</span>
+                        </div>
+                        <div class="boho-step-text-wrap">
+                            <span class="boho-step-mini-tag">Step 2</span>
+                            <span class="boho-step-label">Media & Cloud</span>
+                        </div>
+                    </button>
+
+                    <div class="boho-step-divider" data-after="2"></div>
+
+                    <button type="button" class="boho-step-item" data-step="3">
+                        <div class="boho-step-circle">
+                            <span class="boho-step-num">3</span>
+                            <span class="boho-step-check">✓</span>
+                        </div>
+                        <div class="boho-step-text-wrap">
+                            <span class="boho-step-mini-tag">Step 3</span>
+                            <span class="boho-step-label">Specs & Variants</span>
+                        </div>
+                    </button>
+
+                    <div class="boho-step-divider" data-after="3"></div>
+
+                    <button type="button" class="boho-step-item" data-step="4">
+                        <div class="boho-step-circle">
+                            <span class="boho-step-num">4</span>
+                            <span class="boho-step-check">✓</span>
+                        </div>
+                        <div class="boho-step-text-wrap">
+                            <span class="boho-step-mini-tag">Step 4</span>
+                            <span class="boho-step-label">Story & Launch</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Form Body with Step Panes -->
+            <form id="product-form" novalidate style="display: flex; flex-direction: column; flex: 1; overflow: hidden; margin: 0;">
                 <input type="hidden" id="product-id">
 
-                <!-- Section 1: Mod Core & Pricing -->
-                <div class="form-section-card">
-                    <div class="form-section-header">
-                        <div class="form-section-icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                        </div>
-                        <div class="form-section-title">1. Mod Identity & Commercial Access</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Product Name <span style="color:var(--admin-danger)">*</span></label>
-                        <input type="text" id="p-name" class="form-control" placeholder="e.g., BharatBenz 1617 Sleeper Coach 2026" required>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.15rem;">
-                        <div class="form-group">
-                            <label class="form-label">Pricing Type <span style="color:var(--admin-danger)">*</span></label>
-                            <select id="p-pricing-type" class="form-control" required>
-                                <option value="paid">Commercial (Paid Mod)</option>
-                                <option value="free">Community Free (Sub2Unlock Gate)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Category <span style="color:var(--admin-danger)">*</span></label>
-                            <select id="p-category" class="form-control" required>
-                                <option value="mod">Vehicle Mod</option>
-                                <option value="livery">Vehicle Livery/Skin</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div id="price-group">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.15rem; margin-bottom: 1.15rem;">
-                            <div class="form-group" style="margin-bottom: 0;">
-                                <label class="form-label">Original Price (₹) <span style="color:var(--admin-danger)">*</span></label>
-                                <input type="number" id="p-original-price" class="form-control" placeholder="e.g., 499" min="0" step="any" required>
-                                <span class="text-secondary" style="font-size: 0.75rem; margin-top: 0.25rem; display: block;">Standard list price</span>
-                            </div>
-                            <div class="form-group" style="margin-bottom: 0;">
-                                <label class="form-label">Offer / Sale Price (₹) <span style="font-size: 0.8rem; font-weight: normal; color: var(--admin-text-secondary);">(Optional)</span></label>
-                                <input type="number" id="p-offer-price" class="form-control" placeholder="e.g., 299" min="0" step="any">
-                                <span class="text-secondary" style="font-size: 0.75rem; margin-top: 0.25rem; display: block;">Discounted price for drivers</span>
-                            </div>
-                        </div>
-
-                        <!-- Offer Duration / Time Period Type -->
-                        <div class="form-group" id="offer-period-container" style="margin-bottom: 0;">
-                            <label class="form-label">Offer Time Period</label>
-                            <div class="status-options-grid" style="grid-template-columns: 1fr 1fr; margin-top: 0.35rem;">
-                                <label class="status-option-card active" id="offer-lifetime-card">
-                                    <input type="radio" name="p-offer-period" id="p-offer-lifetime" value="lifetime" checked style="display: none;">
-                                    <div class="status-indicator" style="background: #3b82f6; box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);"></div>
-                                    <div class="status-info">
-                                        <span class="status-title">Lifetime Offer</span>
-                                        <span class="status-desc">Permanent promotional price (no expiration)</span>
-                                    </div>
-                                </label>
-                                <label class="status-option-card" id="offer-limited-card">
-                                    <input type="radio" name="p-offer-period" id="p-offer-limited" value="limited" style="display: none;">
-                                    <div class="status-indicator" style="background: #f59e0b; box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);"></div>
-                                    <div class="status-info">
-                                        <span class="status-title">Limited Time (Date Select)</span>
-                                        <span class="status-desc">Auto-reverts to original price after target date</span>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Offer End Date & Time Picker -->
-                        <div class="form-group" id="offer-expiry-group" style="display: none; animation: slideDown 0.3s ease-out forwards; margin-top: 1rem; margin-bottom: 0;">
-                            <label class="form-label">Offer Valid Until (Date & Time) <span style="color:var(--admin-danger)">*</span></label>
-                            <input type="datetime-local" id="p-offer-expiry" class="form-control">
-                            <span class="text-secondary" style="font-size: 0.75rem; margin-top: 0.25rem; display: block;">Mod price will automatically return to original price after this date.</span>
-                        </div>
-                    </div>
-
-                    <div class="form-group" id="channel-link-group" style="display: none;">
-                        <label class="form-label">YouTube Verification Channel Link <span style="color:var(--admin-danger)">*</span></label>
-                        <input type="url" id="p-channel-link" class="form-control" placeholder="https://youtube.com/@YourChannel">
-                    </div>
-                </div>
-
-                <!-- Section 2: Media & Cloud Distribution -->
-                <div class="form-section-card">
-                    <div class="form-section-header">
-                        <div class="form-section-icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                        </div>
-                        <div class="form-section-title">2. Media Hub & Cloud Download</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Product Showcase Images (Google Drive / Direct URLs)</label>
-                        <p class="text-secondary" style="font-size: 0.8rem; margin-bottom: 0.5rem;">Slot 1 will serve as primary catalog banner and thumbnail.</p>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.15rem;">
-                            <input type="text" id="p-image-1" class="form-control" placeholder="Image 1 URL (Primary Cover) *" required>
-                            <input type="text" id="p-image-2" class="form-control" placeholder="Image 2 URL (Exterior Angle)">
-                            <input type="text" id="p-image-3" class="form-control" placeholder="Image 3 URL (Cockpit Interior)">
-                            <input type="text" id="p-image-4" class="form-control" placeholder="Image 4 URL (Night Lights/Details)">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Cloud Download URL (Google Drive, MediaFire, Mega) <span style="color:var(--admin-danger)">*</span></label>
-                        <input type="url" id="p-download" class="form-control" placeholder="https://drive.google.com/file/d/..." required>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">YouTube Cinematic Showcase Video (Optional)</label>
-                        <input type="url" id="p-youtube" class="form-control" placeholder="https://youtube.com/watch?v=...">
-                    </div>
-                </div>
-
-                <!-- Section 3: Product Variants & Linked Editions -->
-                <div class="form-section-card">
-                    <div class="form-section-header">
-                        <div class="form-section-icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
-                        </div>
-                        <div class="form-section-title">3. Product Variants & Linked Editions</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Variant / Edition Title for THIS Product</label>
-                        <input type="text" id="p-variant-name" class="form-control" placeholder="e.g., Standard 4x2 Coach, Sleeper AC, Base Model (Optional)">
-                        <span class="text-secondary" style="font-size: 0.75rem; margin-top: 0.25rem; display: block;">Label shown on the variant pill for this product. Defaults to product name if blank.</span>
-                    </div>
-
-                    <div class="form-group" style="border: 1px solid var(--admin-border); padding: 1.25rem; border-radius: var(--radius-xl); background: #ffffff; margin-bottom: 0;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                            <div>
-                                <label class="form-label" style="font-size: 0.9rem; margin-bottom: 0.2rem; color: var(--admin-primary); font-weight: 800;">Linked Product Variants</label>
-                                <p class="text-secondary" style="font-size: 0.8rem; margin-bottom: 0;">Add published products from your catalog as selectable variants for this mod.</p>
-                            </div>
-                            <button type="button" class="btn btn-outline btn-sm" id="add-variant-row-btn" style="display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 700; border-color: var(--admin-primary); color: var(--admin-primary); background: var(--admin-primary-light);">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                Add Variant
-                            </button>
-                        </div>
-
-                        <div id="p-variants-list" style="display: flex; flex-direction: column; gap: 0.75rem; max-height: 260px; overflow-y: auto; padding-right: 0.25rem;">
-                            <!-- Dynamic variant rows injected here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Section 4: Telemetry & Mechanical Specs -->
-                <div class="form-section-card">
-                    <div class="form-section-header">
-                        <div class="form-section-icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
-                        </div>
-                        <div class="form-section-title">4. Vehicle Telemetry & Engineering Specs</div>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.15rem;">
-                        <div class="form-group">
-                            <label class="form-label">Compatible Game Version</label>
-                            <input type="text" id="p-version" class="form-control" placeholder="e.g., BUSSID v4.0 - v4.3">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Manufacturer / Chassis Brand</label>
-                            <input type="text" id="p-brand" class="form-control" placeholder="e.g., BharatBenz, Volvo, Scania">
-                        </div>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.15rem;">
-                        <div class="form-group">
-                            <label class="form-label">Powertrain / Engine Output</label>
-                            <input type="text" id="p-engine" class="form-control" placeholder="e.g., 460 HP Euro 6 Turbo Diesel">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">3D Polygon Density</label>
-                            <select id="p-polygons" class="form-control">
-                                <option value="">Select Geometry Profile...</option>
-                                <option value="Ultra High-Poly">Ultra High-Poly (Photorealistic Master)</option>
-                                <option value="High-Poly">High-Poly (Balanced Fidelity)</option>
-                                <option value="Optimized">Optimized (Low-End Mobile Friendly)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.15rem;">
-                        <div class="form-group">
-                            <label class="form-label">Archive File Size</label>
-                            <input type="text" id="p-size" class="form-control" placeholder="e.g., 84.5 MB (.bussidmod)">
-                        </div>
-                        <div style="display: flex; gap: 1.5rem; align-items: center; padding-top: 1.25rem;">
-                            <div class="form-group" style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0;">
-                                <input type="checkbox" id="p-interior" style="width: 18px; height: 18px; accent-color: var(--admin-primary); cursor: pointer;">
-                                <label class="form-label" for="p-interior" style="margin-bottom: 0; cursor: pointer; font-size: 0.9rem;">Includes Detailed Interior</label>
-                            </div>
-                            <div class="form-group" style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0;">
-                                <input type="checkbox" id="p-featured" style="width: 18px; height: 18px; accent-color: var(--admin-primary); cursor: pointer;">
-                                <label class="form-label" for="p-featured" style="margin-bottom: 0; cursor: pointer; font-size: 0.9rem;">Featured on Spotlight</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Section 5: Release Status & Deployment -->
-                <div class="form-section-card">
-                    <div class="form-section-header">
-                        <div class="form-section-icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M12 5l7 7-7 7"></path></svg>
-                        </div>
-                        <div class="form-section-title">5. Storefront Release State</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Catalog Visibility</label>
-                        <div class="status-options-grid">
-                            <label class="status-option-card active" id="status-live-card">
-                                <input type="radio" name="p-status" id="p-status-live" value="live" checked style="display: none;">
-                                <div class="status-indicator live"></div>
-                                <div class="status-info">
-                                    <span class="status-title">Live Storefront</span>
-                                    <span class="status-desc">Instantly buyable and visible across entire marketplace</span>
+                <div class="boho-wizard-body" id="boho-wizard-body">
+                    <!-- ==============================================
+                         STEP 1: Mod Identity & Commercial Access
+                         ============================================== -->
+                    <div class="boho-step-pane active" id="boho-pane-1" data-step="1">
+                        <div class="boho-card">
+                            <div class="boho-card-header">
+                                <div class="boho-card-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                                 </div>
-                            </label>
-                            <label class="status-option-card" id="status-scheduled-card">
-                                <input type="radio" name="p-status" id="p-status-scheduled" value="scheduled" style="display: none;">
-                                <div class="status-indicator scheduled"></div>
-                                <div class="status-info">
-                                    <span class="status-title">Scheduled Release</span>
-                                    <span class="status-desc">Auto-unlock in the catalog at a future timestamp</span>
+                                <div>
+                                    <div class="boho-card-title">Mod Classification & Title</div>
+                                    <div class="boho-card-desc">Define product name, category and commercial licensing mode</div>
                                 </div>
-                            </label>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 1.15rem;">
+                                <label class="form-label">Product Name <span style="color:var(--boho-clay)">*</span></label>
+                                <input type="text" id="p-name" class="form-control" placeholder="e.g., BharatBenz 1617 Sleeper Coach 2026" required>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.15rem;">
+                                <div class="form-group">
+                                    <label class="form-label">Pricing Type <span style="color:var(--boho-clay)">*</span></label>
+                                    <select id="p-pricing-type" class="form-control" required>
+                                        <option value="paid">Commercial (Paid Mod)</option>
+                                        <option value="free">Community Free (Sub2Unlock Gate)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Category <span style="color:var(--boho-clay)">*</span></label>
+                                    <select id="p-category" class="form-control" required>
+                                        <option value="mod">Vehicle Mod</option>
+                                        <option value="livery">Vehicle Livery / Skin</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Commercial Pricing Block -->
+                        <div class="boho-card" id="price-group">
+                            <div class="boho-card-header">
+                                <div class="boho-card-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                                </div>
+                                <div>
+                                    <div class="boho-card-title">Commercial Pricing & Offers</div>
+                                    <div class="boho-card-desc">Set base catalog rate and optional promotional discounts</div>
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.15rem; margin-bottom: 1.15rem;">
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label class="form-label">Original Price (₹) <span style="color:var(--boho-clay)">*</span></label>
+                                    <input type="number" id="p-original-price" class="form-control" placeholder="e.g., 499" min="0" step="any">
+                                    <span style="font-size: 0.72rem; color: var(--boho-muted); margin-top: 0.3rem; display: block;">Standard catalog list price</span>
+                                </div>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label class="form-label">Offer / Sale Price (₹) <span style="font-size: 0.75rem; font-weight: normal; color: var(--boho-muted);">(Optional)</span></label>
+                                    <input type="number" id="p-offer-price" class="form-control" placeholder="e.g., 299" min="0" step="any">
+                                    <span style="font-size: 0.72rem; color: var(--boho-muted); margin-top: 0.3rem; display: block;">Discounted promotional price</span>
+                                </div>
+                            </div>
+
+                            <!-- Offer Duration / Time Period Type -->
+                            <div class="form-group" id="offer-period-container" style="margin-bottom: 0;">
+                                <label class="form-label">Promotional Window</label>
+                                <div class="status-options-grid" style="grid-template-columns: 1fr 1fr; margin-top: 0.35rem;">
+                                    <label class="status-option-card active" id="offer-lifetime-card">
+                                        <input type="radio" name="p-offer-period" id="p-offer-lifetime" value="lifetime" checked style="display: none;">
+                                        <div class="status-indicator" style="background: var(--boho-clay); box-shadow: 0 0 8px var(--boho-clay-glow);"></div>
+                                        <div class="status-info">
+                                            <span class="status-title" style="color: var(--boho-espresso);">Lifetime Offer</span>
+                                            <span class="status-desc" style="color: var(--boho-muted);">Permanent promotional price</span>
+                                        </div>
+                                    </label>
+                                    <label class="status-option-card" id="offer-limited-card">
+                                        <input type="radio" name="p-offer-period" id="p-offer-limited" value="limited" style="display: none;">
+                                        <div class="status-indicator" style="background: #f59e0b; box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);"></div>
+                                        <div class="status-info">
+                                            <span class="status-title" style="color: var(--boho-espresso);">Limited Time</span>
+                                            <span class="status-desc" style="color: var(--boho-muted);">Auto-expires at target timestamp</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Offer End Date & Time Picker -->
+                            <div class="form-group" id="offer-expiry-group" style="display: none; margin-top: 1rem; margin-bottom: 0;">
+                                <label class="form-label">Offer Valid Until (Date & Time) <span style="color:var(--boho-clay)">*</span></label>
+                                <input type="datetime-local" id="p-offer-expiry" class="form-control">
+                                <span style="font-size: 0.72rem; color: var(--boho-muted); margin-top: 0.3rem; display: block;">Mod price will automatically return to original price after this date.</span>
+                            </div>
+                        </div>
+
+                        <!-- Free Channel Link Block -->
+                        <div class="boho-card" id="channel-link-group" style="display: none;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label">YouTube Sub2Unlock Channel Link <span style="color:var(--boho-clay)">*</span></label>
+                                <input type="url" id="p-channel-link" class="form-control" placeholder="https://youtube.com/@YourChannel">
+                                <span style="font-size: 0.72rem; color: var(--boho-muted); margin-top: 0.3rem; display: block;">Users must subscribe to this channel to unlock the free download.</span>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="form-group" id="schedule-datetime-group" style="display: none; animation: slideDown 0.3s ease-out forwards;">
-                        <label class="form-label">Target Launch Date & Time (Local Time)</label>
-                        <input type="datetime-local" id="p-scheduled-date" class="form-control">
+                    <!-- ==============================================
+                         STEP 2: Media Assets & Mod Archive
+                         ============================================== -->
+                    <div class="boho-step-pane" id="boho-pane-2" data-step="2">
+                        <!-- ShareMods Cloud File Upload -->
+                        <div class="boho-card">
+                            <div class="boho-card-header">
+                                <div class="boho-card-icon" style="background: #eff6ff; color: #2563eb;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                </div>
+                                <div>
+                                    <div class="boho-card-title">Vehicle Mod Archive File <span style="color:#2563eb">*</span></div>
+                                    <div class="boho-card-desc">Upload vehicle mod archive (.zip, .rar, .7z, .bussidmod up to 200MB)</div>
+                                </div>
+                            </div>
+
+                            <!-- ShareMods Upload Zone -->
+                            <div id="sharemods-upload-zone" style="border: 2px dashed rgba(37, 99, 235, 0.35); border-radius: 16px; padding: 1.6rem; text-align: center; cursor: pointer; transition: all 0.2s ease; background: #f8fafc; margin-bottom: 0.5rem;" 
+                                 onmouseenter="this.style.borderColor='#2563eb'; this.style.background='#eff6ff'" 
+                                 onmouseleave="if(!this.classList.contains('has-file')){this.style.borderColor='rgba(37, 99, 235, 0.35)'; this.style.background='#f8fafc';}">
+                                <input type="file" id="sharemods-file-input" style="display: none;" accept=".zip,.rar,.7z,.bussidmod,.bussidvehicle">
+                                
+                                <div id="sharemods-upload-content">
+                                    <div style="width: 44px; height: 44px; border-radius: 50%; background: #eff6ff; color: #2563eb; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0.6rem;">
+                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                    </div>
+                                    <div style="font-weight: 800; font-size: 0.95rem; color: var(--boho-espresso); margin-bottom: 0.25rem;">
+                                        Click to Upload or Drag & Drop Mod Archive
+                                    </div>
+                                    <div style="font-size: 0.78rem; color: var(--boho-muted);">
+                                        Supported: .zip, .rar, .7z, .bussidmod (Cloud Storage • Max 200MB)
+                                    </div>
+                                </div>
+
+                                <!-- Upload Progress State -->
+                                <div id="sharemods-upload-progress" style="display: none; padding: 0.5rem 0;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                                        <span id="sharemods-file-name" style="font-size: 0.85rem; font-weight: 700; color: var(--boho-espresso); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
+                                        <span id="sharemods-file-size" style="font-size: 0.75rem; color: var(--boho-muted);"></span>
+                                    </div>
+                                    <div style="width: 100%; height: 7px; background: #e2e8f0; border-radius: 999px; overflow: hidden; margin-bottom: 0.4rem;">
+                                        <div id="sharemods-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(135deg, #2563eb, #059669); border-radius: 999px; transition: width 0.15s ease;"></div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem;">
+                                        <span id="sharemods-progress-label" style="color: #2563eb; font-weight: 700;">Uploading Mod File...</span>
+                                        <span id="sharemods-progress-percent" style="color: var(--boho-warm-brown); font-weight: 800;">0%</span>
+                                    </div>
+                                </div>
+
+                                <!-- Upload Success State -->
+                                <div id="sharemods-upload-success" style="display: none; padding: 0.35rem 0;">
+                                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                            <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--boho-sage-light); color: var(--boho-sage); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                            </div>
+                                            <div style="text-align: left;">
+                                                <div style="font-weight: 800; font-size: 0.88rem; color: var(--boho-sage);">Mod File Uploaded Successfully!</div>
+                                                <div id="sharemods-success-filename" style="font-size: 0.75rem; color: var(--boho-warm-brown); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 320px;"></div>
+                                            </div>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                            <button type="button" id="sharemods-remove-file" style="background: none; border: 1px solid #fca5a5; cursor: pointer; color: #dc2626; padding: 5px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700;" title="Remove file">
+                                                Remove
+                                            </button>
+                                            <button type="button" id="sharemods-reupload-btn" style="background: none; border: 1px solid var(--boho-border); cursor: pointer; color: var(--boho-warm-brown); padding: 5px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700;" title="Upload different file">
+                                                Re-upload
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Hidden fields to store uploaded ShareMods URL and source -->
+                            <input type="hidden" id="p-download" value="">
+                            <input type="hidden" id="p-download-source" value="sharemods">
+                        </div>
+
+                        <!-- Product Showcase Imagery -->
+                        <div class="boho-card">
+                            <div class="boho-card-header">
+                                <div class="boho-card-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                                </div>
+                                <div>
+                                    <div class="boho-card-title">Product Showcase Imagery</div>
+                                    <div class="boho-card-desc">Slot 1 will serve as primary catalog banner and thumbnail</div>
+                                </div>
+                            </div>
+
+                            <div class="boho-image-grid" style="margin-bottom: 1.15rem;">
+                                <div class="form-group">
+                                    <label class="form-label">Slot 1: Primary Cover <span style="color:var(--boho-clay)">*</span></label>
+                                    <input type="url" id="p-image-1" class="form-control" placeholder="https://... Image 1 URL" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Slot 2: Exterior Angle</label>
+                                    <input type="url" id="p-image-2" class="form-control" placeholder="https://... Image 2 URL">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Slot 3: Cockpit / Interior</label>
+                                    <input type="url" id="p-image-3" class="form-control" placeholder="https://... Image 3 URL">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Slot 4: Night Lights / Details</label>
+                                    <input type="url" id="p-image-4" class="form-control" placeholder="https://... Image 4 URL">
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label">YouTube Cinematic Showcase Video (Optional)</label>
+                                <input type="url" id="p-youtube" class="form-control" placeholder="https://youtube.com/watch?v=...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ==============================================
+                         STEP 3: Vehicle Specs & Linked Editions
+                         ============================================== -->
+                    <div class="boho-step-pane" id="boho-pane-3" data-step="3">
+                        <div class="boho-card">
+                            <div class="boho-card-header">
+                                <div class="boho-card-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                                </div>
+                                <div>
+                                    <div class="boho-card-title">Vehicle Telemetry & Specifications</div>
+                                    <div class="boho-card-desc">Compatibility, horsepower and 3D geometric complexity</div>
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.15rem; margin-bottom: 1.15rem;">
+                                <div class="form-group">
+                                    <label class="form-label">Compatible Game Version</label>
+                                    <input type="text" id="p-version" class="form-control" placeholder="e.g., BUSSID v4.0 - v4.3">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Manufacturer / Chassis Brand</label>
+                                    <input type="text" id="p-brand" class="form-control" placeholder="e.g., BharatBenz, Volvo, Scania">
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.15rem; margin-bottom: 1.15rem;">
+                                <div class="form-group">
+                                    <label class="form-label">Powertrain / Engine Output</label>
+                                    <input type="text" id="p-engine" class="form-control" placeholder="e.g., 460 HP Euro 6 Turbo Diesel">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">3D Polygon Density</label>
+                                    <select id="p-polygons" class="form-control">
+                                        <option value="">Select Geometry Profile...</option>
+                                        <option value="Ultra High-Poly">Ultra High-Poly (Photorealistic Master)</option>
+                                        <option value="High-Poly">High-Poly (Balanced Fidelity)</option>
+                                        <option value="Optimized">Optimized (Low-End Mobile Friendly)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.15rem;">
+                                <div class="form-group">
+                                    <label class="form-label">Archive File Size</label>
+                                    <input type="text" id="p-size" class="form-control" placeholder="e.g., 84.5 MB (.bussidmod)">
+                                </div>
+                                <div style="display: flex; gap: 1.5rem; align-items: center; padding-top: 1.25rem;">
+                                    <div class="form-group" style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0;">
+                                        <input type="checkbox" id="p-interior" style="width: 18px; height: 18px; accent-color: var(--boho-clay); cursor: pointer;">
+                                        <label class="form-label" for="p-interior" style="margin-bottom: 0; cursor: pointer; font-size: 0.85rem;">Includes Detailed Interior</label>
+                                    </div>
+                                    <div class="form-group" style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0;">
+                                        <input type="checkbox" id="p-featured" style="width: 18px; height: 18px; accent-color: var(--boho-clay); cursor: pointer;">
+                                        <label class="form-label" for="p-featured" style="margin-bottom: 0; cursor: pointer; font-size: 0.85rem;">Featured on Spotlight</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Product Variants & Linked Editions -->
+                        <div class="boho-card">
+                            <div class="boho-card-header">
+                                <div class="boho-card-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                                </div>
+                                <div>
+                                    <div class="boho-card-title">Product Variants & Linked Editions</div>
+                                    <div class="boho-card-desc">Group chassis trims, liveries or coach editions on the same product page</div>
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 1.15rem;">
+                                <label class="form-label">Variant / Edition Title for THIS Product</label>
+                                <input type="text" id="p-variant-name" class="form-control" placeholder="e.g., Standard 4x2 Coach, Sleeper AC, Base Model (Optional)">
+                                <span style="font-size: 0.72rem; color: var(--boho-muted); margin-top: 0.3rem; display: block;">Label shown on the variant pill for this product. Defaults to product name if blank.</span>
+                            </div>
+
+                            <div class="form-group" style="border: 1px solid var(--boho-border); padding: 1.15rem; border-radius: 14px; background: #f8fafc; margin-bottom: 0;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                                    <div>
+                                        <label class="form-label" style="font-size: 0.85rem; margin-bottom: 0.15rem; color: var(--boho-espresso); font-weight: 800;">Linked Product Variants</label>
+                                        <p style="font-size: 0.75rem; color: var(--boho-muted); margin: 0;">Add published products from your catalog as selectable variants for this mod.</p>
+                                    </div>
+                                    <button type="button" class="btn btn-outline btn-sm" id="add-variant-row-btn" style="display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 700; border-color: var(--boho-clay); color: var(--boho-clay); background: var(--boho-clay-light);">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                        Add Variant
+                                    </button>
+                                </div>
+
+                                <div id="p-variants-list" style="display: flex; flex-direction: column; gap: 0.75rem; max-height: 240px; overflow-y: auto; padding-right: 0.25rem;">
+                                    <!-- Dynamic variant rows injected here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ==============================================
+                         STEP 4: Editorial & Storefront Release
+                         ============================================== -->
+                    <div class="boho-step-pane" id="boho-pane-4" data-step="4">
+                        <!-- Catalog Visibility & Launch Date -->
+                        <div class="boho-card">
+                            <div class="boho-card-header">
+                                <div class="boho-card-icon" style="background: var(--boho-sage-light); color: var(--boho-sage);">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+                                </div>
+                                <div>
+                                    <div class="boho-card-title">Storefront Release State</div>
+                                    <div class="boho-card-desc">Publish immediately or schedule an automated release date</div>
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label">Catalog Visibility</label>
+                                <div class="status-options-grid" style="grid-template-columns: 1fr 1fr;">
+                                    <label class="status-option-card active" id="status-live-card">
+                                        <input type="radio" name="p-status" id="p-status-live" value="live" checked style="display: none;">
+                                        <div class="status-indicator live" style="background: var(--boho-sage); box-shadow: 0 0 8px rgba(82, 110, 72, 0.4);"></div>
+                                        <div class="status-info">
+                                            <span class="status-title" style="color: var(--boho-espresso);">Live Storefront</span>
+                                            <span class="status-desc" style="color: var(--boho-muted);">Instantly available across marketplace</span>
+                                        </div>
+                                    </label>
+                                    <label class="status-option-card" id="status-scheduled-card">
+                                        <input type="radio" name="p-status" id="p-status-scheduled" value="scheduled" style="display: none;">
+                                        <div class="status-indicator scheduled" style="background: #f59e0b; box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);"></div>
+                                        <div class="status-info">
+                                            <span class="status-title" style="color: var(--boho-espresso);">Scheduled Release</span>
+                                            <span class="status-desc" style="color: var(--boho-muted);">Auto-unlock at a future timestamp</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group" id="schedule-datetime-group" style="display: none; margin-top: 1rem; margin-bottom: 0;">
+                                <label class="form-label">Target Launch Date & Time (Local Time)</label>
+                                <input type="datetime-local" id="p-scheduled-date" class="form-control">
+                            </div>
+                        </div>
+
+                        <!-- Editorial Documentation & Related -->
+                        <div class="boho-card">
+                            <div class="boho-card-header">
+                                <div class="boho-card-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                </div>
+                                <div>
+                                    <div class="boho-card-title">Editorial Documentation & Addons</div>
+                                    <div class="boho-card-desc">Vehicle summary, installation guide and recommended fleet items</div>
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 1.15rem;">
+                                <label class="form-label">Mod Telemetry Summary (Headline Highlights)</label>
+                                <textarea id="p-summary" class="form-control" rows="2" placeholder="Precision crafted coach chassis featuring authentic air suspension sounds and custom LED illumination..."></textarea>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 1.15rem;">
+                                <label class="form-label">Full Mod Documentation & Installation Guide <span style="color:var(--boho-clay)">*</span></label>
+                                <textarea id="p-description" class="form-control" rows="4" placeholder="Detailed vehicle features, sound physics, liveries included, installation steps..." required></textarea>
+                            </div>
+
+                            <div class="form-group" style="border: 1px solid var(--boho-border); padding: 1.15rem; border-radius: 14px; background: #f8fafc; margin-bottom: 0;">
+                                <label class="form-label" style="font-size: 0.85rem; margin-bottom: 0.2rem; color: var(--boho-espresso); font-weight: 800;">Compatible Fleet & Addons</label>
+                                <p style="font-size: 0.75rem; color: var(--boho-muted); margin-bottom: 0.75rem;">Check related mods/liveries to recommend to drivers on this product page.</p>
+                                <div id="p-related-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; max-height: 160px; overflow-y: auto; padding-right: 0.5rem;">
+                                    <!-- Checkboxes dynamically injected here by JS -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Section 6: Editorial Content & Related Addons -->
-                <div class="form-section-card">
-                    <div class="form-section-header">
-                        <div class="form-section-icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                        </div>
-                        <div class="form-section-title">6. Editorial Manifesto & Compatibility</div>
+                <!-- Sticky Bohemian Wizard Footer -->
+                <div class="boho-wizard-footer">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <button type="button" class="boho-btn-prev" id="wizard-prev-btn" style="display: none;">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                            <span>Back</span>
+                        </button>
+                        <button type="button" class="btn btn-outline btn-sm" id="cancel-modal-btn" style="color: var(--boho-muted); border-color: var(--boho-border);">
+                            Cancel
+                        </button>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">Mod Telemetry Summary (Headline & Key Highlights)</label>
-                        <textarea id="p-summary" class="form-control" rows="2" placeholder="Precision crafted coach chassis featuring authentic air suspension sounds and custom LED illumination..."></textarea>
+                    <div class="boho-step-pill-tracker" id="wizard-step-counter">
+                        <span class="boho-step-indicator-dot"></span>
+                        <span id="wizard-step-tracker-text">Step 1 of 4 • Identity & Pricing</span>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">Full Mod Documentation & Installation Guide <span style="color:var(--admin-danger)">*</span></label>
-                        <textarea id="p-description" class="form-control" rows="5" placeholder="Detailed vehicle features, sound physics, liveries included, installation steps..." required></textarea>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <button type="button" class="boho-btn-next" id="wizard-next-btn">
+                            <span>Next Step</span>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </button>
+                        <button type="submit" class="boho-btn-save" id="save-product-btn" style="display: none;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <span>Save Product</span>
+                        </button>
                     </div>
-
-                    <div class="form-group" style="border: 1px solid var(--admin-border); padding: 1.25rem; border-radius: var(--radius-xl); background: #ffffff;">
-                        <label class="form-label" style="font-size: 0.9rem; margin-bottom: 0.25rem; color: var(--admin-primary); font-weight: 800;">Compatible Fleet & Addons</label>
-                        <p class="text-secondary" style="font-size: 0.8rem; margin-bottom: 0.75rem;">Check related mods/liveries to recommend to drivers on this product page.</p>
-                        <div id="p-related-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; max-height: 180px; overflow-y: auto; padding-right: 0.5rem;">
-                            <!-- Checkboxes dynamically injected here by JS -->
-                        </div>
-                    </div>
-                </div>
-
-                <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem; padding-top: 1.25rem; border-top: 1px solid var(--admin-border);">
-                    <button type="button" class="btn btn-outline" id="cancel-modal-btn">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="save-product-btn" style="padding: 0.75rem 2rem;">Save Product</button>
                 </div>
             </form>
         </div>
