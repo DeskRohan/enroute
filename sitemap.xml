@@ -1,43 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+    <!-- Homepage (highest priority) -->
     <url>
-        <loc>https://yourdomain.com/</loc>
+        <loc>https://enroutestore.vercel.app/</loc>
+        <lastmod>2026-09-24</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
     </url>
+
+    <!-- Products Listing (high priority - core commerce page) -->
     <url>
-        <loc>https://yourdomain.com/index.html</loc>
-        <changefreq>daily</changefreq>
-        <priority>1.0</priority>
-    </url>
-    <url>
-        <loc>https://yourdomain.com/products.html</loc>
+        <loc>https://enroutestore.vercel.app/products.html</loc>
+        <lastmod>2026-09-24</lastmod>
         <changefreq>daily</changefreq>
         <priority>0.9</priority>
     </url>
+
+    <!-- Individual Product Detail Page (high priority - drives conversions) -->
     <url>
-        <loc>https://yourdomain.com/about.html</loc>
+        <loc>https://enroutestore.vercel.app/product.html</loc>
+        <lastmod>2026-09-24</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.9</priority>
+    </url>
+
+    <!-- Dashboard / User Garage (medium-high priority) -->
+    <url>
+        <loc>https://enroutestore.vercel.app/dashboard.html</loc>
+        <lastmod>2026-09-24</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.7</priority>
+    </url>
+
+    <!-- About Page (medium priority - trust signal) -->
+    <url>
+        <loc>https://enroutestore.vercel.app/about.html</loc>
+        <lastmod>2026-09-24</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
+
+    <!-- Contact Page (medium priority - trust signal) -->
     <url>
-        <loc>https://yourdomain.com/contact.html</loc>
+        <loc>https://enroutestore.vercel.app/contact.html</loc>
+        <lastmod>2026-09-24</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
+
+    <!-- Privacy Policy (lower priority - legal/trust) -->
     <url>
-        <loc>https://yourdomain.com/privacy.html</loc>
+        <loc>https://enroutestore.vercel.app/privacy.html</loc>
+        <lastmod>2026-09-24</lastmod>
         <changefreq>yearly</changefreq>
-        <priority>0.5</priority>
+        <priority>0.4</priority>
     </url>
+
+    <!-- Terms & Conditions (lower priority - legal/trust) -->
     <url>
-        <loc>https://yourdomain.com/terms.html</loc>
+        <loc>https://enroutestore.vercel.app/terms.html</loc>
+        <lastmod>2026-09-24</lastmod>
         <changefreq>yearly</changefreq>
-        <priority>0.5</priority>
+        <priority>0.4</priority>
     </url>
+
+    <!-- Refund Policy (lower priority - legal/trust) -->
     <url>
-        <loc>https://yourdomain.com/refund.html</loc>
+        <loc>https://enroutestore.vercel.app/refund.html</loc>
+        <lastmod>2026-09-24</lastmod>
         <changefreq>yearly</changefreq>
-        <priority>0.5</priority>
+        <priority>0.4</priority>
     </url>
+
 </urlset>

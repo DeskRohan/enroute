@@ -1,10 +1,33 @@
+# robots.txt for EnrouteIn Store
+# https://enroutestore.vercel.app/
+
+# Allow all search engine crawlers
 User-agent: *
 Allow: /
+Allow: /products.html
+Allow: /product.html
+Allow: /about.html
+Allow: /contact.html
+Allow: /dashboard.html
+Allow: /privacy.html
+Allow: /terms.html
+Allow: /refund.html
+
+# Block private/auth/transactional pages
 Disallow: /admin/
+Disallow: /api/
 Disallow: /checkout.html
 Disallow: /login.html
 Disallow: /register.html
 Disallow: /success.html
 Disallow: /sub2unlock.html
 
+# Block asset directories from crawling (saves crawl budget)
+Disallow: /js/
+Disallow: /css/
+
+# Crawl-delay (be polite to server)
+Crawl-delay: 1
+
+# Sitemap location
 Sitemap: https://enroutestore.vercel.app/sitemap.xml
