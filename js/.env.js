@@ -7,5 +7,5 @@ export const ENV = {
     FIREBASE_APP_ID: "1:840253279947:web:3c8d239ebcbb0f5631d54e",
     FIREBASE_MEASUREMENT_ID: "G-4DHDHZ2KX4",
     RAZORPAY_KEY_ID: "rzp_live_T18UlWiOOjCX7g",
-    SHAREMODS_API_KEY: "184356pw7b4tb78jfy6i0h01sw1675aegj2xty"
+    SHAREMODS_API_KEY: "184356pw7b4tb78jfy6i0h01sw1675aegj2xty"//sharemods
 };
