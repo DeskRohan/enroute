@@ -76,4 +76,12 @@
         <priority>0.4</priority>
     </url>
 
+    <!-- Google Site Verification -->
+    <url>
+        <loc>https://enroutestore.vercel.app/google2cc64b3ddf097f05.html</loc>
+        <lastmod>2026-09-24</lastmod>
+        <changefreq>never</changefreq>
+        <priority>0.1</priority>
+    </url>
+
 </urlset>
