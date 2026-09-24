@@ -386,14 +386,44 @@ const triggerDirectDownload = async (url, productName = '', btnEl = null) => {
             btnEl.disabled = false;
             btnEl.innerHTML = originalHtml;
         }
-        // Fallback: trigger download via redirect endpoint
-        const fallbackUrl = (window.location.hostname === 'localhost' && window.location.port !== '3001' ? 'http://localhost:3001' : '') + `/api/direct-download?download=1&url=${encodeURIComponent(url)}`;
-        const fallbackAnchor = document.createElement('a');
-        fallbackAnchor.href = fallbackUrl;
-        fallbackAnchor.style.display = 'none';
-        document.body.appendChild(fallbackAnchor);
-        fallbackAnchor.click();
-        setTimeout(() => document.body.removeChild(fallbackAnchor), 2000);
+        // Fallback: seamless client-side download form / tab without showing raw API JSON error
+        let fileCode = '';
+        const match = url.match(/sharemods\.com\/([a-zA-Z0-9]+)/);
+        if (match) fileCode = match[1];
+        else if (/^[a-zA-Z0-9]{8,20}$/.test(url.trim())) fileCode = url.trim();
+
+        if (fileCode) {
+            let iframe = document.getElementById('enroute-download-frame');
+            if (!iframe) {
+                iframe = document.createElement('iframe');
+                iframe.id = 'enroute-download-frame';
+                iframe.name = 'enroute-download-frame';
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+            }
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `https://sharemods.com/${fileCode}`;
+            form.target = 'enroute-download-frame';
+            const fields = { op: 'download2', id: fileCode, rand: '', referer: `https://sharemods.com/${fileCode}`, method_free: '', method_premium: '' };
+            for (const [k, v] of Object.entries(fields)) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = k;
+                input.value = v;
+                form.appendChild(input);
+            }
+            document.body.appendChild(form);
+            form.submit();
+            setTimeout(() => document.body.removeChild(form), 1000);
+        } else {
+            const fallbackA = document.createElement('a');
+            fallbackA.href = url;
+            fallbackA.download = '';
+            document.body.appendChild(fallbackA);
+            fallbackA.click();
+            setTimeout(() => document.body.removeChild(fallbackA), 1000);
+        }
     }
 };
 
