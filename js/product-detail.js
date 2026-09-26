@@ -1,5 +1,11 @@
 import { db, auth } from './firebase-config.js';
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { doc, getDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+let currentAuthUser = auth.currentUser;
+onAuthStateChanged(auth, (user) => {
+    currentAuthUser = user;
+});
 
 const productContainer = document.getElementById('product-container');
 
@@ -221,14 +227,7 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
             return;
         }
 
-        const user = auth.currentUser;
-        if (!user) {
-            alert('Please login to purchase.');
-            window.location.href = `login.html?redirect=product.html?id=${id}`;
-            return;
-        }
-
-        // Direct Buy Now redirects straight to checkout for this product
+        // Save single product checkout state first
         try {
             sessionStorage.setItem('checkoutMode', 'single');
             sessionStorage.setItem(
@@ -244,7 +243,16 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
                 })
             );
         } catch(e) {}
-        window.location.href = 'checkout.html';
+
+        const user = currentAuthUser || auth.currentUser;
+        if (!user) {
+            // Seamlessly redirect to login and then directly to checkout
+            window.location.href = `login.html?redirect=${encodeURIComponent(`checkout.html?id=${id}`)}`;
+            return;
+        }
+
+        // Direct Buy Now redirects straight to checkout for this product
+        window.location.href = `checkout.html?id=${id}`;
     };
 
     const updateCartButtonState = () => {

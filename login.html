@@ -126,8 +126,8 @@
             </form>
 
             <div class="auth-footer">
-                <p>Don't have an account? <a href="register.html">Sign up</a></p>
-                <p class="mt-2"><a href="#" style="color: var(--text-muted); font-size: 0.85rem;">Forgot password?</a></p>
+                <p>Don't have an account? <a href="register.html" id="register-link">Sign up</a></p>
+                <p class="mt-2"><a href="#" id="forgot-password-link" style="color: var(--text-muted); font-size: 0.85rem;">Forgot password?</a></p>
             </div>
         </div>
     </div>
@@ -135,17 +135,52 @@
     <!-- Logic -->
     <script type="module">
         import { auth, db } from './js/firebase-config.js';
-        import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const loginForm = document.getElementById('login-form');
         const errorMessage = document.getElementById('error-message');
         const loginBtn = document.getElementById('login-btn');
         const googleLoginBtn = document.getElementById('google-login-btn');
+        const registerLink = document.getElementById('register-link');
+        const forgotPasswordLink = document.getElementById('forgot-password-link');
 
+        // Extract and validate redirect parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectParam = urlParams.get('redirect') || '';
+
+        function getSafeRedirectUrl(target) {
+            if (!target) return 'index.html';
+            const clean = target.trim();
+            // Disallow javascript:, data:, or protocol-relative //
+            if (/^(javascript|data):/i.test(clean) || clean.startsWith('//')) {
+                return 'index.html';
+            }
+            if (clean.includes('://')) {
+                try {
+                    const parsed = new URL(clean, window.location.origin);
+                    if (parsed.origin !== window.location.origin) {
+                        return 'index.html';
+                    }
+                    return parsed.pathname + parsed.search + parsed.hash;
+                } catch (_) {
+                    return 'index.html';
+                }
+            }
+            return clean;
+        }
+
+        const safeRedirect = getSafeRedirectUrl(redirectParam);
+
+        // Preserve redirect in register link
+        if (redirectParam && registerLink) {
+            registerLink.href = `register.html?redirect=${encodeURIComponent(redirectParam)}`;
+        }
+
+        // Email / Password Login
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('email').value;
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
 
             errorMessage.style.display = 'none';
@@ -154,8 +189,9 @@
 
             try {
                 await signInWithEmailAndPassword(auth, email, password);
-                window.location.href = 'index.html';
+                window.location.href = safeRedirect;
             } catch (error) {
+                console.error("Login error:", error);
                 errorMessage.textContent = 'Invalid email or password. Please try again.';
                 errorMessage.style.display = 'block';
                 loginBtn.textContent = 'Sign In';
@@ -182,19 +218,40 @@
                     await setDoc(userDocRef, {
                         uid: user.uid,
                         email: user.email,
+                        name: user.displayName || '',
                         role: 'customer',
                         createdAt: new Date().toISOString()
                     });
                 }
                 
-                window.location.href = 'index.html';
+                window.location.href = safeRedirect;
             } catch (error) {
-                console.error(error);
+                console.error("Google sign-in error:", error);
                 errorMessage.textContent = 'Google sign-in failed. Please try again.';
                 errorMessage.style.display = 'block';
                 googleLoginBtn.disabled = false;
             }
         });
+
+        // Forgot Password Handler
+        if (forgotPasswordLink) {
+            forgotPasswordLink.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const emailInput = document.getElementById('email');
+                const email = emailInput ? emailInput.value.trim() : '';
+
+                const targetEmail = email || prompt("Please enter your account email to receive a password reset link:");
+                if (!targetEmail) return;
+
+                try {
+                    await sendPasswordResetEmail(auth, targetEmail);
+                    alert(`Password reset link has been sent to ${targetEmail}. Please check your inbox.`);
+                } catch (resetErr) {
+                    console.error("Reset password error:", resetErr);
+                    alert(resetErr.message || "Failed to send reset link. Please verify your email.");
+                }
+            });
+        }
     </script>
     <script type="module" src="js/auth.js"></script>
     <script src="js/cookie-consent.js"></script>

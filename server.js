@@ -7,6 +7,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PORT = process.env.PORT || 3000;
 
+// Fallback environment values for local development / testing
+if (!process.env.RAZORPAY_KEY_ID) process.env.RAZORPAY_KEY_ID = "rzp_live_T18UlWiOOjCX7g";
+if (!process.env.SHAREMODS_API_KEY) process.env.SHAREMODS_API_KEY = "184356pw7b4tb78jfy6i0h01sw1675aegj2xty";
+
 const MIME_TYPES = {
   '.html': 'text/html',
   '.js': 'text/javascript',

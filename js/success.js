@@ -440,6 +440,7 @@ onAuthStateChanged(auth, (user) => {
     if (user) {
         loadSuccessData(user);
     } else {
-        window.location.href = 'login.html';
+        const currentTarget = window.location.pathname.split('/').pop() + window.location.search;
+        window.location.href = `login.html?redirect=${encodeURIComponent(currentTarget || 'dashboard.html')}`;
     }
 });

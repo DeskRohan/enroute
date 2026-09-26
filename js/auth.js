@@ -70,6 +70,20 @@ onAuthStateChanged(auth, async (user) => {
         } catch (error) {
             console.warn("Auth: Could not fetch user profile:", error);
         }
+
+        // If already signed in and visiting login or register, forward them to redirect target or dashboard
+        const path = window.location.pathname;
+        if (path.endsWith('login.html') || path.endsWith('register.html')) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const redirectParam = urlParams.get('redirect');
+            if (redirectParam && !redirectParam.startsWith('//') && !redirectParam.includes('://')) {
+                window.location.href = redirectParam;
+                return;
+            } else if (path.endsWith('login.html')) {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+        }
     } else {
         // User is signed out
         if (loginBtn) loginBtn.style.display = 'inline-flex';
@@ -81,7 +95,12 @@ onAuthStateChanged(auth, async (user) => {
         const isProtected = protectedRoutes.some(route => window.location.pathname.includes(route));
         
         if (isProtected) {
-            window.location.href = window.location.pathname.includes('/admin/') ? '../login.html' : 'login.html';
+            const pageName = window.location.pathname.split('/').pop() || 'index.html';
+            const fullTarget = pageName + window.location.search;
+            const targetLogin = window.location.pathname.includes('/admin/') 
+                ? '../login.html' 
+                : `login.html?redirect=${encodeURIComponent(fullTarget)}`;
+            window.location.href = targetLogin;
         }
     }
 });

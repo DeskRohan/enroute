@@ -126,7 +126,7 @@
             </form>
 
             <div class="auth-footer">
-                <p>Already have an account? <a href="login.html">Sign in</a></p>
+                <p>Already have an account? <a href="login.html" id="login-link">Sign in</a></p>
             </div>
         </div>
     </div>
@@ -141,10 +141,42 @@
         const errorMessage = document.getElementById('error-message');
         const registerBtn = document.getElementById('register-btn');
         const googleRegisterBtn = document.getElementById('google-register-btn');
+        const loginLink = document.getElementById('login-link');
+
+        // Extract and validate redirect parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectParam = urlParams.get('redirect') || '';
+
+        function getSafeRedirectUrl(target) {
+            if (!target) return 'dashboard.html';
+            const clean = target.trim();
+            if (/^(javascript|data):/i.test(clean) || clean.startsWith('//')) {
+                return 'dashboard.html';
+            }
+            if (clean.includes('://')) {
+                try {
+                    const parsed = new URL(clean, window.location.origin);
+                    if (parsed.origin !== window.location.origin) {
+                        return 'dashboard.html';
+                    }
+                    return parsed.pathname + parsed.search + parsed.hash;
+                } catch (_) {
+                    return 'dashboard.html';
+                }
+            }
+            return clean;
+        }
+
+        const safeRedirect = getSafeRedirectUrl(redirectParam);
+
+        // Preserve redirect in login link
+        if (redirectParam && loginLink) {
+            loginLink.href = `login.html?redirect=${encodeURIComponent(redirectParam)}`;
+        }
 
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('email').value;
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
 
             if (password.length < 6) {
@@ -170,13 +202,13 @@
                     createdAt: new Date().toISOString()
                 });
 
-                window.location.href = 'dashboard.html';
+                window.location.href = safeRedirect;
             } catch (error) {
-                console.error(error);
+                console.error("Registration error:", error);
                 if (error.code === 'auth/email-already-in-use') {
-                    errorMessage.textContent = 'Email is already in use.';
+                    errorMessage.textContent = 'Email is already in use. Please sign in instead.';
                 } else {
-                    errorMessage.textContent = 'Failed to create account. Please try again.';
+                    errorMessage.textContent = error.message || 'Failed to create account. Please try again.';
                 }
                 errorMessage.style.display = 'block';
                 registerBtn.textContent = 'Create Account';
@@ -203,14 +235,15 @@
                     await setDoc(userDocRef, {
                         uid: user.uid,
                         email: user.email,
+                        name: user.displayName || '',
                         role: 'customer',
                         createdAt: new Date().toISOString()
                     });
                 }
                 
-                window.location.href = 'dashboard.html';
+                window.location.href = safeRedirect;
             } catch (error) {
-                console.error(error);
+                console.error("Google registration error:", error);
                 errorMessage.textContent = 'Google sign-in failed. Please try again.';
                 errorMessage.style.display = 'block';
                 googleRegisterBtn.disabled = false;

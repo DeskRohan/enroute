@@ -1,5 +1,5 @@
 import { db, auth } from './firebase-config.js';
-import { collection, addDoc, serverTimestamp, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { collection, addDoc, serverTimestamp, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 const checkoutForm = document.getElementById('checkout-form');
@@ -55,8 +55,8 @@ function getImageUrl(url) {
     return cleanUrl;
 }
 
-// Initialize Checkout Data (Supports Single Item and Multi-Item Cart)
-const initCheckout = () => {
+// Initialize Checkout Data (Supports Single Item, Multi-Item Cart, and Direct ID fallback)
+const initCheckout = async () => {
     const checkoutMode = sessionStorage.getItem('checkoutMode');
     const cartData = sessionStorage.getItem('checkoutCart');
     const singleProductData = sessionStorage.getItem('checkoutProduct');
@@ -73,12 +73,52 @@ const initCheckout = () => {
     }
 
     if (!isCartCheckout) {
-        if (!singleProductData) {
+        if (singleProductData) {
+            try {
+                currentProduct = JSON.parse(singleProductData);
+                cartItems = [currentProduct];
+            } catch(e) {
+                currentProduct = null;
+            }
+        }
+
+        // Direct URL param fallback (?id=... or ?productId=...)
+        if (!currentProduct) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const directId = urlParams.get('id') || urlParams.get('productId') || sessionStorage.getItem('viewProductId');
+            if (directId) {
+                try {
+                    const docSnap = await getDoc(doc(db, "products", directId));
+                    if (docSnap.exists()) {
+                        const pData = docSnap.data();
+                        const origPrice = Number(pData.originalPrice ?? pData.price ?? 0);
+                        const offerPrice = (pData.offerPrice !== undefined && pData.offerPrice !== null && pData.offerPrice !== '') ? Number(pData.offerPrice) : null;
+                        const isLimited = pData.offerPeriodType === 'limited';
+                        const isExpired = isLimited && pData.offerExpiryDate && new Date(pData.offerExpiryDate) <= new Date();
+                        const isOfferActive = (offerPrice !== null && offerPrice < origPrice && !isExpired);
+                        const currentPrice = isOfferActive ? offerPrice : origPrice;
+
+                        currentProduct = {
+                            id: directId,
+                            ...pData,
+                            price: currentPrice,
+                            originalPrice: origPrice,
+                            offerPrice: isOfferActive ? offerPrice : null,
+                            isOfferActive,
+                            downloadSource: pData.downloadSource || ((pData.downloadLink || '').includes('sharemods.com') ? 'sharemods' : 'manual')
+                        };
+                        cartItems = [currentProduct];
+                    }
+                } catch (fetchErr) {
+                    console.error("Could not fetch product for checkout:", fetchErr);
+                }
+            }
+        }
+
+        if (!currentProduct || cartItems.length === 0) {
             window.location.href = 'products.html';
             return;
         }
-        currentProduct = JSON.parse(singleProductData);
-        cartItems = [currentProduct];
     }
 
     const bc = document.getElementById('breadcrumbs');
@@ -171,14 +211,28 @@ const renderOrderSummary = () => {
 };
 
 // Handle Auth State
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
     if (user) {
         currentUser = user;
-        custEmailInput.value = user.email;
-        initCheckout();
+        custEmailInput.value = user.email || '';
+
+        // Auto-fill customer name
+        if (user.displayName && !custNameInput.value) {
+            custNameInput.value = user.displayName;
+        } else if (!custNameInput.value) {
+            try {
+                const userDocSnap = await getDoc(doc(db, "users", user.uid));
+                if (userDocSnap.exists() && userDocSnap.data().name) {
+                    custNameInput.value = userDocSnap.data().name;
+                }
+            } catch (_) {}
+        }
+
+        await initCheckout();
     } else {
-        // Must be logged in to checkout
-        window.location.href = 'login.html';
+        // Must be logged in to checkout - preserve redirect
+        const currentTarget = window.location.pathname.split('/').pop() + window.location.search;
+        window.location.href = `login.html?redirect=${encodeURIComponent(currentTarget || 'checkout.html')}`;
     }
 });
 
@@ -204,31 +258,36 @@ checkoutForm.addEventListener('submit', async (e) => {
             `Order: ${cartItems.length} BUSSID Mods (${cartItems.map(i => i.name).join(', ')})` : 
             `Purchase: ${cartItems[0].name}`;
 
-        // Create order on the server
-        const orderResponse = await fetch('/api/create-order', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                amount: Math.round(totalAmount * 100), // Amount in paise
-                currency: "INR",
-                receipt: `rcpt_${Date.now()}`
-            })
-        });
+        // Create order on the server with graceful fallback
+        let orderData = null;
+        try {
+            const orderResponse = await fetch('/api/create-order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    amount: Math.round(totalAmount * 100), // Amount in paise
+                    currency: "INR",
+                    receipt: `rcpt_${Date.now()}`
+                })
+            });
 
-        const orderData = await orderResponse.json();
-
-        if (!orderResponse.ok) {
-            throw new Error(orderData.error || 'Failed to create order on server');
+            if (orderResponse.ok) {
+                orderData = await orderResponse.json();
+            } else {
+                console.warn('Backend order service returned non-OK status, falling back to direct gateway options');
+            }
+        } catch (fetchErr) {
+            console.warn('Backend order service unreachable, falling back to direct gateway options:', fetchErr);
         }
 
         const options = {
             "key": RAZORPAY_KEY,
-            "amount": orderData.amount,
-            "currency": orderData.currency,
+            "amount": (orderData && orderData.amount) ? orderData.amount : Math.round(totalAmount * 100),
+            "currency": (orderData && orderData.currency) ? orderData.currency : "INR",
             "name": "EnrouteIn",
             "description": orderDescription.substring(0, 250),
-            "image": "https://via.placeholder.com/150",
-            "order_id": orderData.id,
+            "image": "assets/images/fevicon.png",
+            ...(orderData?.id ? { "order_id": orderData.id } : {}),
             "handler": async function (response) {
                 try {
                     // Prepare items array for DB
