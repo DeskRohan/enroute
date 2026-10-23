@@ -229,31 +229,32 @@ const promptForAdminName = (uid, onSuccess) => {
                 z-index: 100000; display: flex; align-items: center; justify-content: center;
             }
             .name-modal-content {
-                background: #ffffff; padding: 2.5rem; border-radius: 16px;
+                background: #FFFFFF; padding: 2rem; border-radius: 8px;
                 max-width: 400px; width: 90%; text-align: center;
-                box-shadow: 0 20px 40px rgba(0,0,0,0.1); border: 1px solid #e5e7eb;
-                color: #111827;
+                box-shadow: 0 10px 25px rgba(36, 74, 60, 0.15); border: 1px solid #E4E1D8;
+                color: #242A30;
             }
-            .name-modal-content h3 { margin-bottom: 1rem; font-size: 1.5rem; color: #111827; }
-            .name-modal-content p { color: #6b7280; margin-bottom: 1.5rem; font-size: 0.9rem; }
+            .name-modal-content h3 { margin-bottom: 0.75rem; font-size: 1.25rem; font-weight: 700; color: #153247; }
+            .name-modal-content p { color: #626C76; margin-bottom: 1.25rem; font-size: 0.875rem; }
             .name-modal-content input {
-                width: 100%; padding: 0.8rem 1rem; margin-bottom: 1.5rem; border-radius: 8px;
-                border: 1px solid #d1d5db; background: #f9fafb;
-                color: #111827; font-size: 1rem;
+                width: 100%; padding: 0.75rem 1rem; margin-bottom: 1.25rem; border-radius: 4px;
+                border: 1px solid #DFE5EA; background: #FFFFFF;
+                color: #242A30; font-size: 0.95rem; box-sizing: border-box;
             }
+            .name-modal-content input:focus { outline: none; border-color: #007DC6; box-shadow: 0 0 0 3px rgba(0, 125, 198, 0.15); }
             .name-modal-content button {
-                width: 100%; padding: 0.8rem; border: none; border-radius: 8px;
-                background: #3b82f6; color: #fff; font-size: 1rem; font-weight: 600;
-                cursor: pointer; transition: opacity 0.2s;
+                width: 100%; padding: 0.75rem 1rem; border: none; border-radius: 4px;
+                background: #007DC6; color: #FFFFFF; font-size: 0.95rem; font-weight: 600;
+                cursor: pointer; transition: background 0.2s ease;
             }
-            .name-modal-content button:hover { opacity: 0.9; }
+            .name-modal-content button:hover { background: #005A91; }
         </style>
         <div class="name-modal-content">
             <h3>Welcome, Admin!</h3>
             <p>Please provide your full name to proceed.</p>
             <input type="text" id="new-admin-name" placeholder="Enter your full name" required>
             <button id="save-admin-name-btn">Continue</button>
-            <p id="admin-name-error" style="color: #ef4444; font-size: 0.85rem; display: none; margin-top: 0.5rem;">Please enter a valid name.</p>
+            <p id="admin-name-error" style="color: #C62828; font-size: 0.85rem; display: none; margin-top: 0.5rem;">Please enter a valid name.</p>
         </div>
     `;
     document.body.appendChild(overlay);

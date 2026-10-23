@@ -30,57 +30,60 @@
     <meta name="twitter:description" content="Learn about EnrouteIn — our mission, our story, and why we are the trusted destination for premium BUSSID mods and digital products.">
     <meta name="twitter:image" content="https://enroutestore.vercel.app/assets/images/fevicon.png">
 
-    <!-- Fonts -->    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
     <!-- CSS -->
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/components.css">
     <style>
         body { padding-top: 80px; }
         .about-hero {
-            padding: var(--spacing-16) 0 var(--spacing-10);
+            padding: var(--spacing-12) 0 var(--spacing-10);
             text-align: center;
             position: relative;
-            background: var(--bg-secondary);
+            background: var(--bg-surface);
             border-bottom: 1px solid var(--color-border);
-            margin-bottom: var(--spacing-12);
+            margin-bottom: var(--spacing-10);
         }
         .about-badge {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 0.35rem 1rem;
-            background: var(--color-primary-light);
-            border: 1px solid rgba(37, 99, 235, 0.2);
-            border-radius: var(--radius-full);
-            font-size: 0.85rem;
+            padding: 0.35rem 0.85rem;
+            background: var(--color-bg-subtle);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
             font-weight: 700;
             color: var(--color-primary);
-            margin-bottom: var(--spacing-4);
+            margin-bottom: var(--spacing-3);
         }
         .content-section {
             max-width: 860px;
             margin: 0 auto var(--spacing-16);
             color: var(--text-secondary);
             line-height: 1.8;
-            padding-bottom: var(--spacing-16);
+            padding: 0 var(--spacing-4) var(--spacing-16);
             position: relative;
             z-index: 1;
         }
         .content-card {
-            background: var(--bg-secondary);
+            background: var(--bg-surface);
             border: 1px solid var(--color-border);
-            border-radius: var(--radius-2xl);
-            padding: var(--spacing-8);
-            margin-bottom: var(--spacing-8);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-6);
+            margin-bottom: var(--spacing-6);
             box-shadow: var(--shadow-sm);
             position: relative;
         }
         .content-card h2 {
             color: var(--text-primary);
-            font-size: 1.55rem;
+            font-size: 1.45rem;
             font-weight: 800;
             font-family: var(--font-heading);
-            margin-bottom: var(--spacing-4);
+            margin-bottom: var(--spacing-3);
             display: flex;
             align-items: center;
             gap: 0.75rem;
@@ -89,12 +92,12 @@
             content: '';
             display: inline-block;
             width: 4px;
-            height: 1.2rem;
-            background: var(--gradient-primary);
-            border-radius: 4px;
+            height: 1.15rem;
+            background: var(--color-primary);
+            border-radius: 2px;
         }
         .content-card p {
-            margin-bottom: var(--spacing-4);
+            margin-bottom: var(--spacing-3);
         }
         .feature-bullet-list {
             list-style: none;
@@ -102,21 +105,20 @@
             margin: var(--spacing-4) 0;
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: var(--spacing-4);
+            gap: var(--spacing-3);
         }
         .feature-bullet-item {
             display: flex;
             align-items: flex-start;
             gap: 0.75rem;
-            background: var(--bg-inset);
-            padding: var(--spacing-4);
-            border-radius: var(--radius-xl);
+            background: var(--color-bg-subtle);
+            padding: var(--spacing-3) var(--spacing-4);
+            border-radius: var(--radius-md);
             border: 1px solid var(--color-border);
-            box-shadow: var(--neo-inset);
         }
         .feature-bullet-icon {
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             flex-shrink: 0;
             color: var(--color-primary);
             margin-top: 2px;
@@ -126,74 +128,73 @@
         .values-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: var(--spacing-6);
-            margin: var(--spacing-6) 0 0;
+            gap: var(--spacing-4);
+            margin: var(--spacing-4) 0 0;
         }
         .value-card {
-            background: var(--gradient-convex);
+            background: var(--bg-surface);
             border: 1px solid var(--color-border);
-            border-radius: var(--radius-xl);
-            padding: var(--spacing-6);
-            box-shadow: var(--neo-flat-sm);
-            transition: all 0.25s ease;
+            border-radius: var(--radius-md);
+            padding: var(--spacing-5);
+            box-shadow: var(--shadow-xs);
+            transition: all var(--transition-fast);
         }
         .value-card:hover {
-            transform: translateY(-4px);
+            transform: translateY(-2px);
             border-color: var(--color-border-hover);
-            box-shadow: var(--neo-flat), 0 0 20px rgba(0, 240, 255, 0.15);
+            box-shadow: var(--shadow-sm);
         }
         .value-icon-wrapper {
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
-            background: var(--bg-inset);
+            width: 42px;
+            height: 42px;
+            border-radius: var(--radius-sm);
+            background: var(--color-bg-subtle);
             color: var(--color-primary);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: var(--spacing-4);
+            margin-bottom: var(--spacing-3);
             border: 1px solid var(--color-border);
-            box-shadow: var(--neo-inset);
         }
         .value-card h3 {
             color: var(--text-primary);
-            margin: 0 0 var(--spacing-2) 0 !important;
-            font-size: 1.15rem;
+            margin: 0 0 var(--spacing-1) 0 !important;
+            font-size: 1.1rem;
             font-weight: 700;
             font-family: var(--font-heading);
         }
         .value-card p {
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             margin: 0;
             color: var(--text-secondary);
         }
 
         /* Stats */
         .stats-section {
-            background: var(--gradient-convex);
-            border-radius: var(--radius-2xl);
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg);
             border: 1px solid var(--color-border);
-            padding: var(--spacing-8);
-            box-shadow: var(--neo-flat-lg);      margin: var(--spacing-6) 0;
+            padding: var(--spacing-6);
+            box-shadow: var(--shadow-sm);
+            margin: var(--spacing-6) 0;
         }
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: var(--spacing-6);
+            gap: var(--spacing-4);
             text-align: center;
         }
         .stat-item h3 {
-            font-size: 2.5rem;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 2.2rem;
+            color: var(--color-primary);
             margin: 0 0 var(--spacing-1);
             font-weight: 800;
-            letter-spacing: -1px;
+            letter-spacing: -0.02em;
+            font-family: var(--font-heading);
         }
         .stat-item p {
             color: var(--text-secondary);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 500;
             margin: 0;
         }
@@ -201,26 +202,28 @@
         /* CTA */
         .cta-section {
             text-align: center;
-            padding: var(--spacing-12) var(--spacing-6);
-            background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(30, 58, 138, 0.04) 100%);
-            border: 1px solid rgba(37, 99, 235, 0.2);
-            border-radius: var(--radius-xl);
+            padding: var(--spacing-10) var(--spacing-6);
+            background: var(--color-bg-subtle);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
             margin-top: var(--spacing-8);
         }
         .cta-section h2 {
-            margin-bottom: var(--spacing-3);
+            margin-bottom: var(--spacing-2);
             color: var(--text-primary);
-            font-size: 1.6rem;
-            font-weight: 700;
+            font-size: 1.5rem;
+            font-weight: 800;
+            font-family: var(--font-heading);
         }
         .cta-section p {
-            margin-bottom: var(--spacing-6);
-            font-size: 1rem;
+            margin-bottom: var(--spacing-5);
+            font-size: 0.95rem;
+            color: var(--text-secondary);
         }
 
         @media (max-width: 768px) {
             .values-grid { grid-template-columns: 1fr; }
-            .stats-grid { grid-template-columns: 1fr; gap: var(--spacing-6); }
+            .stats-grid { grid-template-columns: 1fr; gap: var(--spacing-4); }
             .feature-bullet-list { grid-template-columns: 1fr; }
         }
     </style>
@@ -231,7 +234,16 @@
     <!-- Header -->
     <header class="header">
         <div class="container nav">
-            <a href="index.html" class="logo">EnrouteIn<span>.</span></a>
+            <a href="index.html" class="logo">
+                EnrouteIn<span>.</span>
+                <span class="logo-badge">Store</span>
+            </a>
+            <form class="nav-search-form" id="header-search-form" action="products.html" method="GET">
+                <input type="text" name="search" id="header-search-input" class="nav-search-input" placeholder="Search BUSSID mods, bus liveries, maps..." autocomplete="off">
+                <button type="submit" class="nav-search-submit" title="Search Store">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </button>
+            </form>
             <ul class="nav-links">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="products.html">Store</a></li>
@@ -239,6 +251,10 @@
                 <li><a href="contact.html">Support</a></li>
             </ul>
             <div class="nav-actions">
+                <a href="dashboard.html" class="btn btn-outline nav-wish-btn" id="nav-wish-btn" title="View Wishlist">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                    <span class="nav-wish-badge" style="display: none;">0</span>
+                </a>
                 <button class="btn btn-outline nav-cart-btn" id="nav-cart-btn" title="View Cart">
                     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
                     <span class="nav-cart-badge" id="nav-cart-badge" style="display: none;">0</span>

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Messages - Enroute Admin</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
     <!-- CSS -->
     <link rel="stylesheet" href="../css/index.css">
     <link rel="stylesheet" href="../css/components.css">
@@ -39,11 +39,11 @@
                 <p class="text-secondary" style="font-size: 0.88rem; margin: 4px 0 0 0;">Direct secure messaging channel between authorized studio administrators.</p>
             </div>
             <div style="display: flex; align-items: center; gap: 12px;">
-                <div style="background: #ffffff; border: 1px solid var(--admin-border); padding: 0.5rem 1rem; border-radius: var(--radius-xl); font-size: 0.82rem; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                <div style="background: #ffffff; border: 1px solid var(--admin-border); padding: 0.5rem 1rem; border-radius: var(--radius-md); font-size: 0.82rem; font-weight: 700; display: flex; align-items: center; gap: 8px;">
                     <span style="color: var(--admin-text-muted);">YOUR ADMIN ID:</span>
-                    <strong id="my-admin-id-badge" style="color: #ef4444; font-family: monospace; font-size: 0.95rem;">ADM-0001</strong>
+                    <strong id="my-admin-id-badge" style="color: var(--admin-accent); font-family: monospace; font-size: 0.95rem;">ADM-0001</strong>
                 </div>
-                <button type="button" class="btn btn-primary" id="open-compose-btn" style="padding: 0.55rem 1.25rem; font-size: 0.85rem; border-radius: var(--radius-full); font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                <button type="button" class="btn btn-primary" id="open-compose-btn" style="padding: 0.55rem 1.25rem; font-size: 0.85rem; border-radius: var(--radius-md); font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
                     <span>New Message</span>
                 </button>
@@ -59,7 +59,7 @@
                     <span id="threads-count-badge" style="font-size: 0.72rem; font-weight: 800; background: var(--admin-primary-light); color: var(--admin-primary); padding: 2px 8px; border-radius: var(--radius-full);">0 Active</span>
                 </div>
                 <div class="chat-search-wrap">
-                    <input type="text" id="search-thread-input" class="form-control" placeholder="Search by Admin ID or name..." style="padding: 0.5rem 0.85rem; font-size: 0.82rem; border-radius: var(--radius-full);">
+                    <input type="text" id="search-thread-input" class="form-control" placeholder="Search by Admin ID or name..." style="padding: 0.5rem 0.85rem; font-size: 0.82rem; border-radius: var(--radius-md);">
                 </div>
                 <ul class="chat-threads-list" id="chat-threads-list">
                     <li style="padding: 2rem 1rem; text-align: center; color: var(--admin-text-muted); font-size: 0.85rem;">
@@ -71,12 +71,12 @@
             <!-- Active Chat Pane -->
             <div class="chat-main-pane" id="chat-pane-empty">
                 <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem; color: var(--admin-text-muted);">
-                    <div style="width: 64px; height: 64px; border-radius: 50%; background: #eff6ff; display: flex; align-items: center; justify-content: center; color: var(--admin-primary); margin-bottom: 1rem; border: 1px solid #bfdbfe;">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--admin-primary-light); display: flex; align-items: center; justify-content: center; color: var(--admin-primary); margin-bottom: 1rem; border: 1px solid var(--admin-border);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                     </div>
-                    <h3 style="margin: 0 0 0.5rem 0; color: var(--admin-text-primary); font-size: 1.2rem;">Select an Admin Channel</h3>
+                    <h3 style="margin: 0 0 0.5rem 0; color: var(--admin-text-primary); font-size: 1.15rem;">Select an Admin Channel</h3>
                     <p style="max-width: 360px; font-size: 0.85rem; line-height: 1.5; margin: 0 0 1.25rem 0;">Choose an ongoing discussion from the left or start a new message using an Administrator's ID.</p>
-                    <button type="button" class="btn btn-outline" id="empty-compose-btn" style="border-radius: var(--radius-full); padding: 0.5rem 1.25rem; font-size: 0.85rem;">+ Compose New Message</button>
+                    <button type="button" class="btn btn-outline" id="empty-compose-btn" style="border-radius: var(--radius-md); padding: 0.5rem 1.25rem; font-size: 0.85rem;">+ Compose New Message</button>
                 </div>
             </div>
 
@@ -97,7 +97,7 @@
                         </div>
                     </div>
                     <div>
-                        <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 700; color: #059669; background: #dcfce7; padding: 3px 10px; border-radius: var(--radius-full);">
+                        <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 700; color: var(--admin-success); background: var(--admin-success-light); padding: 3px 10px; border-radius: var(--radius-full); border: 1px solid rgba(50, 115, 84, 0.2);">
                             <span style="width: 7px; height: 7px; border-radius: 50%; background: #22c55e;"></span>
                             <span>Direct Relay Active</span>
                         </span>

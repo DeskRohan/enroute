@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,131 +10,442 @@
     <link rel="canonical" href="https://enroutestore.vercel.app/products.html">
 
     <!-- Standard SEO Meta Tags -->
-    <meta name="description" content="Browse and download premium BUSSID mods, liveries, maps, vehicle packs & game addons at EnrouteIn Store. Find the best bus simulator Indonesia mods.">
-    <meta name="keywords" content="buy BUSSID mods, BUSSID livery download, BUSSID mods store, bus simulator mods, premium game mods, BUSSID map download, EnrouteIn products">
+    <meta name="description"
+        content="Browse and download premium BUSSID mods, liveries, maps, vehicle packs & game addons at EnrouteIn Store. Find the best bus simulator Indonesia mods.">
+    <meta name="keywords"
+        content="buy BUSSID mods, BUSSID livery download, BUSSID mods store, bus simulator mods, premium game mods, BUSSID map download, EnrouteIn products">
     <meta name="author" content="EnrouteIn">
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-    
+
     <!-- Open Graph (Facebook/WhatsApp/Discord) -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://enroutestore.vercel.app/products.html">
     <meta property="og:title" content="Browse BUSSID Mods & Digital Products - EnrouteIn Store">
-    <meta property="og:description" content="Browse and download premium BUSSID mods, liveries, maps, vehicle packs & game addons at EnrouteIn Store.">
+    <meta property="og:description"
+        content="Browse and download premium BUSSID mods, liveries, maps, vehicle packs & game addons at EnrouteIn Store.">
     <meta property="og:image" content="https://enroutestore.vercel.app/assets/images/fevicon.png">
     <meta property="og:site_name" content="EnrouteIn Store">
     <meta property="og:locale" content="en_IN">
-    
+
     <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="https://enroutestore.vercel.app/products.html">
     <meta name="twitter:title" content="Browse BUSSID Mods & Digital Products - EnrouteIn Store">
-    <meta name="twitter:description" content="Browse and download premium BUSSID mods, liveries, maps, vehicle packs & game addons at EnrouteIn Store.">
+    <meta name="twitter:description"
+        content="Browse and download premium BUSSID mods, liveries, maps, vehicle packs & game addons at EnrouteIn Store.">
     <meta name="twitter:image" content="https://enroutestore.vercel.app/assets/images/fevicon.png">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap"
+        rel="stylesheet">
     <!-- CSS -->
-    <link rel="stylesheet" href="css/index.css">
-    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/index.css?v=20261022_walmart">
+    <link rel="stylesheet" href="css/components.css?v=20261022_walmart">
     <link rel="stylesheet" href="css/chatbot.css">
     <style>
-        body { padding-top: 76px; }
-        
+        body {
+            padding-top: 68px;
+        }
+
         .page-header {
-            padding: var(--spacing-16) 0 var(--spacing-10);
-            background: var(--bg-secondary);
+            padding: var(--spacing-8) 0 var(--spacing-6);
+            background: var(--bg-primary);
             border-bottom: 1px solid var(--color-border);
             text-align: center;
             position: relative;
         }
 
-        .filters-section {
+        .page-header h1 {
+            font-size: clamp(1.6rem, 2.8vw, 2.2rem);
+            font-weight: 800;
+            color: var(--color-dark-navy);
+        }
+
+        /* 2-Column Catalog Layout */
+        .catalog-layout {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 1.75rem;
+            align-items: start;
+            margin-top: 0.5rem;
+        }
+
+        .catalog-sidebar {
+            position: sticky;
+            top: 84px;
+            align-self: start;
+            z-index: 10;
+        }
+
+        .sidebar-filter-card {
+            background: #FFFFFF;
+            border: 1.5px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            box-shadow: 0 1px 4px rgba(21, 50, 71, 0.04);
+        }
+
+        .sidebar-header {
             display: flex;
-            flex-wrap: wrap;
-            gap: var(--spacing-4);
-            margin-bottom: var(--spacing-10);
-            justify-content: space-between;
             align-items: center;
-            background: var(--bg-secondary);
-            padding: var(--spacing-4) var(--spacing-6);
-            border-radius: var(--radius-xl);
-            border: 1px solid var(--color-border);
-            box-shadow: var(--shadow-sm);
+            justify-content: space-between;
+            padding-bottom: 0.85rem;
+            margin-bottom: 1rem;
+            border-bottom: 1.5px solid var(--color-border);
         }
 
-        .search-bar {
-            flex: 1;
-            min-width: 260px;
-            max-width: 440px;
-            position: relative;
+        .sidebar-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.98rem;
+            font-weight: 800;
+            color: var(--color-dark-navy);
         }
 
-        .search-bar svg {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            pointer-events: none;
-        }
-
-        .search-bar input {
-            padding-left: 46px;
-            background: var(--bg-primary);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-full);
-            color: var(--text-primary);
-            font-size: 0.925rem;
+        .sidebar-reset-btn {
+            background: none;
+            border: none;
+            color: var(--color-primary);
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: var(--radius-xs);
             transition: all var(--transition-fast);
         }
 
-        .search-bar input:focus {
-            background: var(--bg-secondary);
-            border-color: var(--color-primary);
-            box-shadow: 0 0 0 3px var(--color-primary-light);
+        .sidebar-reset-btn:hover {
+            background: var(--color-primary-soft);
+            text-decoration: underline;
         }
 
-        .filter-group {
+        .sidebar-group {
+            margin-bottom: 1.15rem;
+        }
+
+        .sidebar-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .sidebar-group-title {
+            font-size: 0.78rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin: 0 0 0.65rem 0;
+        }
+
+        .sidebar-options {
             display: flex;
-            gap: var(--spacing-3);
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 0.4rem;
         }
 
-        .filter-select {
-            padding: 0.75rem 2.4rem 0.75rem 1.25rem;
-            background-color: var(--bg-primary);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-full);
-            color: var(--text-primary);
-            font-family: inherit;
-            font-size: 0.875rem;
-            font-weight: 600;
+        .sidebar-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0.5rem 0.65rem;
+            border-radius: var(--radius-md);
             cursor: pointer;
+            user-select: none;
+            font-size: 0.86rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            transition: all var(--transition-fast);
+            border: 1px solid transparent;
+        }
+
+        .sidebar-option:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .sidebar-option input[type="radio"] {
             appearance: none;
             -webkit-appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 14px center;
+            width: 16px;
+            height: 16px;
+            border: 1.5px solid var(--color-border-strong);
+            border-radius: 50%;
+            outline: none;
+            margin: 0;
+            display: grid;
+            place-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
             transition: all var(--transition-fast);
         }
 
-        .filter-select:focus {
-            outline: none;
-            background-color: var(--bg-secondary);
+        .sidebar-option input[type="radio"]::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            transform: scale(0);
+            transition: transform 0.15s ease-in-out;
+            background: var(--color-primary);
+        }
+
+        .sidebar-option input[type="radio"]:checked {
             border-color: var(--color-primary);
-            box-shadow: 0 0 0 3px var(--color-primary-light);
+        }
+
+        .sidebar-option input[type="radio"]:checked::before {
+            transform: scale(1);
+        }
+
+        .sidebar-option:has(input[type="radio"]:checked) {
+            background: var(--color-primary-soft);
+            color: var(--color-primary);
+            font-weight: 700;
+            border-color: rgba(0, 125, 198, 0.2);
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background: var(--color-border);
+            margin: 1rem 0;
+        }
+
+        .catalog-main {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .catalog-top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.15rem;
+            flex-wrap: wrap;
+            gap: 0.65rem;
+        }
+
+        .catalog-count {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--color-dark-navy);
+        }
+
+        .active-filters-bar {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .active-filter-badge {
+            background: var(--color-primary-soft);
+            color: var(--color-primary);
+            padding: 3px 8px;
+            border-radius: var(--radius-xs);
+            border: 1px solid var(--color-border);
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .badge-clear-btn {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            font-weight: 800;
+            padding: 0 2px;
+        }
+
+        @media (max-width: 900px) {
+            .catalog-layout {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .catalog-sidebar {
+                display: none !important;
+            }
+        }
+
+        /* Filter Bottom Sheet / Modal */
+        .filter-modal-sheet {
+            background: var(--bg-secondary);
+            width: 100%;
+            max-width: 480px;
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--color-border);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            max-height: 85vh;
+            box-sizing: border-box;
+            transform: translateY(8px);
+            transition: transform var(--transition-fast);
+        }
+
+        .modal-overlay.active .filter-modal-sheet {
+            transform: translateY(0);
+        }
+
+        .filter-sheet-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.1rem 1.25rem;
+            border-bottom: 1px solid var(--color-border);
+            background: #FAFBFD;
+        }
+
+        .filter-sheet-close {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-full);
+            transition: background var(--transition-fast);
+        }
+
+        .filter-sheet-close:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .filter-sheet-body {
+            padding: 1.25rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .filter-group-heading {
+            font-size: 0.8rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin: 0 0 0.65rem 0;
+        }
+
+        .filter-pills-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.55rem;
+        }
+
+        .filter-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0.55rem 0.95rem;
+            background: var(--bg-primary);
+            border: 1.5px solid var(--color-border);
+            border-radius: var(--radius-full);
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-family: inherit;
+            user-select: none;
+        }
+
+        .filter-pill:hover {
+            background: var(--color-primary-soft);
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+        }
+
+        .filter-pill.active {
+            background: var(--color-primary-soft);
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+            font-weight: 700;
+            box-shadow: 0 0 0 1px var(--color-primary);
+        }
+
+        .filter-sheet-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 1rem 1.25rem;
+            border-top: 1px solid var(--color-border);
+            background: #FAFBFD;
+        }
+
+        .filter-sheet-footer .btn {
+            flex: 1;
+            height: 42px;
+            font-weight: 700;
+            border-radius: var(--radius-md);
+            font-size: 0.88rem;
         }
 
         .products-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: var(--spacing-8);
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+
+        @media (max-width: 640px) {
+            .filters-section {
+                padding: 6px 8px !important;
+                gap: 8px !important;
+            }
+
+            .search-bar input {
+                height: 40px !important;
+                font-size: 0.84rem !important;
+            }
+
+            .filter-trigger-btn {
+                height: 40px !important;
+                padding: 0 12px !important;
+                font-size: 0.82rem !important;
+            }
+
+            .modal-overlay#filter-modal-overlay {
+                align-items: flex-end !important;
+                padding: 0 !important;
+            }
+
+            .filter-modal-sheet {
+                max-width: 100% !important;
+                border-radius: 18px 18px 0 0 !important;
+                border-bottom: none !important;
+                max-height: 80vh !important;
+                animation: slideUpSheet 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            }
+
+            @keyframes slideUpSheet {
+                from {
+                    transform: translateY(100%);
+                }
+
+                to {
+                    transform: translateY(0);
+                }
+            }
         }
     </style>
     <link rel="icon" type="image/png" href="assets/images/fevicon.png">
 </head>
+
 <body>
 
     <!-- Header -->
@@ -143,6 +455,35 @@
                 EnrouteIn<span>.</span>
                 <span class="logo-badge">Store</span>
             </a>
+            <form class="nav-search-form" id="header-search-form" action="products.html" method="GET">
+                <input type="text" name="search" id="header-search-input" class="nav-search-input"
+                    placeholder="Search BUSSID mods, bus liveries, maps..." autocomplete="off">
+                <div class="nav-search-btn-group">
+                    <button type="button" class="nav-filter-btn" id="open-header-filter-btn"
+                        title="Filter & Sort Products" aria-label="Open filter options">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="4" y1="21" x2="4" y2="14"></line>
+                            <line x1="4" y1="10" x2="4" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12" y2="3"></line>
+                            <line x1="20" y1="21" x2="20" y2="16"></line>
+                            <line x1="20" y1="12" x2="20" y2="3"></line>
+                            <line x1="1" y1="14" x2="7" y2="14"></line>
+                            <line x1="9" y1="8" x2="15" y2="8"></line>
+                            <line x1="17" y1="16" x2="23" y2="16"></line>
+                        </svg>
+                        <span class="header-filter-dot" id="header-filter-dot" style="display: none;"></span>
+                    </button>
+                    <button type="submit" class="nav-search-submit" title="Search Store">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </button>
+                </div>
+            </form>
             <ul class="nav-links">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="products.html" class="active">Store</a></li>
@@ -150,94 +491,300 @@
                 <li><a href="contact.html">Support</a></li>
             </ul>
             <div class="nav-actions">
+                <a href="dashboard.html" class="btn btn-outline nav-wish-btn" id="nav-wish-btn" title="View Wishlist">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                        </path>
+                    </svg>
+                    <span class="nav-wish-badge" style="display: none;">0</span>
+                </a>
                 <button class="btn btn-outline nav-cart-btn" id="nav-cart-btn" title="View Cart">
-                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
                     <span class="nav-cart-badge" id="nav-cart-badge" style="display: none;">0</span>
                 </button>
-                <a href="login.html" class="btn btn-outline nav-login-btn" id="nav-login-btn" title="Login / Account">
-                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+                <a href="login.html" class="btn btn-outline nav-login-btn" id="nav-login-btn" title="Sign In">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                        <polyline points="10 17 15 12 10 7"></polyline>
+                        <line x1="15" y1="12" x2="3" y2="12"></line>
+                    </svg>
                 </a>
-                <a href="dashboard.html" class="btn btn-primary nav-dash-btn" id="nav-dash-btn" style="display: none;" title="Dashboard / Profile">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                <a href="dashboard.html" class="btn btn-primary nav-dash-btn" id="nav-dash-btn" style="display: none;"
+                    title="My Account & Orders">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
                 </a>
             </div>
         </div>
     </header>
 
-    <div class="page-header">
-        <div class="container">
-            <div class="trust-badge trust-badge-primary mb-4">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                <span>Full Catalog</span>
-            </div>
-            <h1>BUSSID Mod Store</h1>
-            <p class="text-secondary mt-2">Explore our hyper-realistic collection of buses, cars, trucks, and custom liveries.</p>
-        </div>
-    </div>
 
-    <section class="py-16">
+
+    <section class="py-8" style="background: var(--bg-primary);">
         <div class="container">
-            <!-- Filters -->
-            <div class="filters-section">
-                <div class="search-bar">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <input type="text" id="search-input" class="form-control" placeholder="Search by name, brand, livery...">
-                </div>
-                <div class="filter-group">
-                    <select id="category-filter" class="filter-select">
+            <!-- 2-Column Catalog Layout: Left Sticky Sidebar, Right Products Main -->
+            <div class="catalog-layout">
+
+                <!-- Left Sidebar: Sticky Filter & Sort Panel (Desktop) -->
+                <aside class="catalog-sidebar" id="catalog-sidebar">
+                    <div class="sidebar-filter-card">
+                        <div class="sidebar-header">
+                            <div class="sidebar-title">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+                                    style="color: var(--color-primary);">
+                                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                                </svg>
+                                <span>Filter & Sort</span>
+                            </div>
+                            <button type="button" class="sidebar-reset-btn" id="sidebar-reset-btn"
+                                title="Reset all filters">Clear</button>
+                        </div>
+
+                        <!-- Categories -->
+                        <div class="sidebar-group">
+                            <h4 class="sidebar-group-title">Category</h4>
+                            <div class="sidebar-options" id="sidebar-category-options">
+                                <label class="sidebar-option">
+                                    <input type="radio" name="sidebar-category" value="all" checked>
+                                    <span>All Categories</span>
+                                </label>
+                                <label class="sidebar-option">
+                                    <input type="radio" name="sidebar-category" value="mod">
+                                    <span>Vehicle Mods</span>
+                                </label>
+                                <label class="sidebar-option">
+                                    <input type="radio" name="sidebar-category" value="livery">
+                                    <span>Livery Skins</span>
+                                </label>
+                                <label class="sidebar-option">
+                                    <input type="radio" name="sidebar-category" value="sleeper">
+                                    <span>Sleeper Bus Mods</span>
+                                </label>
+                                <label class="sidebar-option">
+                                    <input type="radio" name="sidebar-category" value="seater">
+                                    <span>Seater Bus Mods</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="sidebar-divider"></div>
+
+                        <!-- Price Sorting -->
+                        <div class="sidebar-group">
+                            <h4 class="sidebar-group-title">Price & Order</h4>
+                            <div class="sidebar-options" id="sidebar-sort-options">
+                                <label class="sidebar-option">
+                                    <input type="radio" name="sidebar-sort" value="newest" checked>
+                                    <span>Newest First</span>
+                                </label>
+                                <label class="sidebar-option">
+                                    <input type="radio" name="sidebar-sort" value="price-low">
+                                    <span>Price: Low to High</span>
+                                </label>
+                                <label class="sidebar-option">
+                                    <input type="radio" name="sidebar-sort" value="price-high">
+                                    <span>Price: High to Low</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Right Main Column: Product Cards & Badges -->
+                <main class="catalog-main">
+                    <!-- Top Status Bar: Count and Active Filter Badges -->
+                    <div class="catalog-top-bar">
+                        <div class="catalog-count-wrap">
+                            <span id="products-count" class="catalog-count">Loading products...</span>
+                        </div>
+
+                        <!-- Active Filter Badges with Individual Clear Buttons -->
+                        <div class="active-filters-bar" id="active-filters-bar">
+                            <span id="active-category-query-wrap" class="active-filter-badge" style="display: none;">
+                                Category: <strong id="active-category-query-text"></strong>
+                                <button type="button" onclick="window.clearCategoryFilter()" class="badge-clear-btn"
+                                    title="Clear category">✕</button>
+                            </span>
+                            <span id="active-sort-query-wrap" class="active-filter-badge" style="display: none;">
+                                Sort: <strong id="active-sort-query-text"></strong>
+                                <button type="button" onclick="window.clearSortFilter()" class="badge-clear-btn"
+                                    title="Clear sort">✕</button>
+                            </span>
+                            <span id="active-search-query-wrap" class="active-filter-badge" style="display: none;">
+                                Keyword: "<strong id="active-search-query-text"></strong>"
+                                <button type="button" onclick="window.clearSearchFilter()" class="badge-clear-btn"
+                                    title="Clear search">✕</button>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Hidden selects to maintain compatibility & sync -->
+                    <select id="category-filter" style="display: none;">
                         <option value="all">All Categories</option>
-                        <option value="mod">Vehicle Mod</option>
-                        <option value="livery">Vehicle Livery/Skin</option>
+                        <option value="mod">Vehicle Mods</option>
+                        <option value="livery">Livery Skins</option>
+                        <option value="sleeper">Sleeper Bus Mods</option>
+                        <option value="seater">Seater Bus Mods</option>
                     </select>
-                    <select id="sort-filter" class="filter-select">
+                    <select id="sort-filter" style="display: none;">
                         <option value="newest">Sort: Newest First</option>
                         <option value="price-low">Price: Low to High</option>
                         <option value="price-high">Price: High to Low</option>
                     </select>
-                </div>
-            </div>
 
-            <!-- Products Grid -->
-            <div class="products-grid" id="products-container">
-                <!-- Skeleton Loading -->
-                <div class="card product-card">
-                    <div class="img-container" style="background: var(--bg-tertiary); animation: pulse 1.5s infinite;"></div>
-                    <div class="content">
-                        <div style="height: 18px; width: 35%; background: var(--color-border); margin-bottom: 12px; border-radius: var(--radius-full);"></div>
-                        <div style="height: 24px; background: var(--color-border); margin-bottom: 12px; border-radius: 4px;"></div>
-                        <div style="height: 18px; background: var(--color-border); width: 60%; margin-bottom: 20px; border-radius: 4px;"></div>
-                        <div style="height: 42px; background: var(--color-border); border-radius: var(--radius-md);"></div>
+                    <!-- Products Grid -->
+                    <div class="products-grid" id="products-container">
+                        <!-- Skeleton Loading -->
+                        <div class="card product-card">
+                            <div class="img-container"
+                                style="background: var(--bg-tertiary); animation: pulse 1.5s infinite;">
+                            </div>
+                            <div class="content">
+                                <div
+                                    style="height: 18px; width: 35%; background: var(--color-border); margin-bottom: 12px; border-radius: var(--radius-full);">
+                                </div>
+                                <div
+                                    style="height: 24px; background: var(--color-border); margin-bottom: 12px; border-radius: 4px;">
+                                </div>
+                                <div
+                                    style="height: 18px; background: var(--color-border); width: 60%; margin-bottom: 20px; border-radius: 4px;">
+                                </div>
+                                <div
+                                    style="height: 42px; background: var(--color-border); border-radius: var(--radius-md);">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card product-card">
+                            <div class="img-container"
+                                style="background: var(--bg-tertiary); animation: pulse 1.5s infinite;">
+                            </div>
+                            <div class="content">
+                                <div
+                                    style="height: 18px; width: 35%; background: var(--color-border); margin-bottom: 12px; border-radius: var(--radius-full);">
+                                </div>
+                                <div
+                                    style="height: 24px; background: var(--color-border); margin-bottom: 12px; border-radius: 4px;">
+                                </div>
+                                <div
+                                    style="height: 18px; background: var(--color-border); width: 60%; margin-bottom: 20px; border-radius: 4px;">
+                                </div>
+                                <div
+                                    style="height: 42px; background: var(--color-border); border-radius: var(--radius-md);">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card product-card">
+                            <div class="img-container"
+                                style="background: var(--bg-tertiary); animation: pulse 1.5s infinite;">
+                            </div>
+                            <div class="content">
+                                <div
+                                    style="height: 18px; width: 35%; background: var(--color-border); margin-bottom: 12px; border-radius: var(--radius-full);">
+                                </div>
+                                <div
+                                    style="height: 24px; background: var(--color-border); margin-bottom: 12px; border-radius: 4px;">
+                                </div>
+                                <div
+                                    style="height: 18px; background: var(--color-border); width: 60%; margin-bottom: 20px; border-radius: 4px;">
+                                </div>
+                                <div
+                                    style="height: 42px; background: var(--color-border); border-radius: var(--radius-md);">
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="card product-card">
-                    <div class="img-container" style="background: var(--bg-tertiary); animation: pulse 1.5s infinite;"></div>
-                    <div class="content">
-                        <div style="height: 18px; width: 35%; background: var(--color-border); margin-bottom: 12px; border-radius: var(--radius-full);"></div>
-                        <div style="height: 24px; background: var(--color-border); margin-bottom: 12px; border-radius: 4px;"></div>
-                        <div style="height: 18px; background: var(--color-border); width: 60%; margin-bottom: 20px; border-radius: 4px;"></div>
-                        <div style="height: 42px; background: var(--color-border); border-radius: var(--radius-md);"></div>
-                    </div>
-                </div>
-                <div class="card product-card">
-                    <div class="img-container" style="background: var(--bg-tertiary); animation: pulse 1.5s infinite;"></div>
-                    <div class="content">
-                        <div style="height: 18px; width: 35%; background: var(--color-border); margin-bottom: 12px; border-radius: var(--radius-full);"></div>
-                        <div style="height: 24px; background: var(--color-border); margin-bottom: 12px; border-radius: 4px;"></div>
-                        <div style="height: 18px; background: var(--color-border); width: 60%; margin-bottom: 20px; border-radius: 4px;"></div>
-                        <div style="height: 42px; background: var(--color-border); border-radius: var(--radius-md);"></div>
-                    </div>
-                </div>
+                </main>
             </div>
         </div>
     </section>
+
+    <!-- Filter & Sort Bottom Sheet Modal (Mobile & Triggered) -->
+    <div class="modal-overlay" id="filter-modal-overlay">
+        <div class="filter-modal-sheet" role="dialog" aria-labelledby="filter-sheet-title">
+            <div class="filter-sheet-header">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                    </svg>
+                    <h3 id="filter-sheet-title"
+                        style="margin: 0; font-size: 1.15rem; font-weight: 800; color: var(--color-dark-navy);">Sort &
+                        Filter</h3>
+                </div>
+                <button type="button" class="filter-sheet-close" id="close-filter-modal-btn"
+                    aria-label="Close filters">✕</button>
+            </div>
+
+            <div class="filter-sheet-body">
+                <!-- Group 1: Categories -->
+                <div class="filter-sheet-group">
+                    <h4 class="filter-group-heading">Category</h4>
+                    <div class="filter-pills-wrap" id="category-pills">
+                        <button type="button" class="filter-pill active" data-category="all">
+                            <span>All Categories</span>
+                        </button>
+                        <button type="button" class="filter-pill" data-category="mod">
+                            <span>Vehicle Mods</span>
+                        </button>
+                        <button type="button" class="filter-pill" data-category="livery">
+                            <span>Livery Skins</span>
+                        </button>
+                        <button type="button" class="filter-pill" data-category="sleeper">
+                            <span>Sleeper Bus Mods</span>
+                        </button>
+                        <button type="button" class="filter-pill" data-category="seater">
+                            <span>Seater Bus Mods</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Group 2: Price Sorting -->
+                <div class="filter-sheet-group" style="margin-top: 1.25rem;">
+                    <h4 class="filter-group-heading">Price & Order</h4>
+                    <div class="filter-pills-wrap" id="sort-pills">
+                        <button type="button" class="filter-pill active" data-sort="newest">
+                            <span>Newest First</span>
+                        </button>
+                        <button type="button" class="filter-pill" data-sort="price-low">
+                            <span>Price: Low to High</span>
+                        </button>
+                        <button type="button" class="filter-pill" data-sort="price-high">
+                            <span>Price: High to Low</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-sheet-footer">
+                <button type="button" class="btn btn-outline filter-reset-btn" id="filter-sheet-reset-btn">Clear
+                    All</button>
+                <button type="button" class="btn btn-primary filter-apply-btn" id="filter-sheet-apply-btn">Apply
+                    Filters</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-col">
-                    <a href="index.html" class="logo mb-4" style="display:inline-flex;">EnrouteIn<span>.</span><span class="logo-badge">Store</span></a>
-                    <p class="text-secondary" style="font-size: 0.95rem; line-height: 1.6;">The premier destination for hyper-realistic BUSSID mods, liveries, and simulation digital products.</p>
+                    <a href="index.html" class="logo mb-4" style="display:inline-flex;">EnrouteIn<span>.</span><span
+                            class="logo-badge">Store</span></a>
+                    <p class="text-secondary" style="font-size: 0.95rem; line-height: 1.6;">The premier destination for
+                        hyper-realistic BUSSID mods, liveries, and simulation digital products.</p>
                 </div>
                 <div class="footer-col">
                     <h4>Navigation</h4>
@@ -260,15 +807,33 @@
                     <h4>Get in Touch</h4>
                     <ul class="footer-links">
                         <li style="display: flex; align-items: center; gap: 8px;">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary); flex-shrink: 0;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                style="color: var(--color-primary); flex-shrink: 0;">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z">
+                                </path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
                             <a href="mailto:enroutestorein@gmail.com">enroutestorein@gmail.com</a>
                         </li>
                         <li style="display: flex; align-items: center; gap: 8px;">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary); flex-shrink: 0;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                style="color: var(--color-primary); flex-shrink: 0;">
+                                <path
+                                    d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+                                </path>
+                            </svg>
                             <a href="tel:+917621000916">+91 7621000916</a>
                         </li>
-                        <li style="display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 0.925rem;">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary); flex-shrink: 0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                        <li
+                            style="display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 0.925rem;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                style="color: var(--color-primary); flex-shrink: 0;">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
                             <span>Ahmedabad, Gujarat, India</span>
                         </li>
                     </ul>
@@ -276,11 +841,17 @@
             </div>
             <div class="footer-bottom">
                 <p>&copy; 2026 EnrouteIn. All rights reserved.</p>
-                <div style="display: flex; gap: 1rem; align-items: center; color: var(--text-secondary); font-size: 0.85rem;">
+                <div
+                    style="display: flex; gap: 1rem; align-items: center; color: var(--text-secondary); font-size: 0.85rem;">
                     <span>Developed by <strong>SIMPLINOVUS</strong></span>
                     <span>•</span>
                     <span style="display: inline-flex; align-items: center; gap: 4px;">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-success);"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            style="color: var(--color-success);">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
                         Secured by Razorpay
                     </span>
                 </div>
@@ -297,4 +868,5 @@
     <script src="js/cookie-consent.js"></script>
     <script src="js/bottom-ticker.js"></script>
 </body>
+
 </html>

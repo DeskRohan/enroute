@@ -2,8 +2,12 @@ import { db } from '../firebase-config.js';
 import { collection, getDocs, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const tableBody = document.getElementById('orders-table-body');
+const mobileCardsContainer = document.getElementById('mobile-orders-cards');
 const searchInput = document.getElementById('search-order');
 const exportBtn = document.getElementById('export-csv-btn');
+const ordersCountBadge = document.getElementById('orders-count-badge');
+const filterSummary = document.getElementById('orders-filter-summary');
+const clearSearchBtn = document.getElementById('clear-search-btn');
 
 let allOrders = [];
 
@@ -11,10 +15,18 @@ const formatPrice = (price) => {
     return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(price);
 };
 
-const formatDate = (timestamp) => {
-    if (!timestamp) return 'N/A';
+const formatDateObj = (timestamp) => {
+    if (!timestamp) return { date: 'N/A', time: '' };
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+    if (isNaN(date.getTime())) return { date: 'N/A', time: '' };
+    const dateStr = date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    const timeStr = date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+    return { date: dateStr, time: timeStr };
+};
+
+const formatDate = (timestamp) => {
+    const dt = formatDateObj(timestamp);
+    return dt.time ? `${dt.date} ${dt.time}` : dt.date;
 };
 
 const loadOrders = async () => {
@@ -34,7 +46,9 @@ const loadOrders = async () => {
             });
             if (adminProductIds.length === 0) {
                 // Admin has no products, so no orders
-                tableBody.innerHTML = `<tr><td colspan="7" class="text-center text-secondary">No orders found for your products.</td></tr>`;
+                if (tableBody) tableBody.innerHTML = `<tr><td colspan="7" class="text-center text-secondary" style="padding: 2.5rem;">No orders found for your products.</td></tr>`;
+                if (mobileCardsContainer) mobileCardsContainer.innerHTML = `<div class="orders-empty-state"><h3>No Orders</h3><p>No orders found for your products yet.</p></div>`;
+                if (ordersCountBadge) ordersCountBadge.textContent = '0 Orders';
                 return;
             }
         }
@@ -56,43 +70,153 @@ const loadOrders = async () => {
         renderTable(allOrders);
     } catch (error) {
         console.error("Error loading orders:", error);
-        tableBody.innerHTML = `<tr><td colspan="7" class="text-center text-danger">Failed to load orders</td></tr>`;
+        if (tableBody) tableBody.innerHTML = `<tr><td colspan="7" class="text-center text-danger" style="padding: 2.5rem;">Failed to load orders</td></tr>`;
+        if (mobileCardsContainer) mobileCardsContainer.innerHTML = `<div class="orders-empty-state"><h3 style="color:var(--admin-danger);">Failed to load orders</h3><p>Please check your connection and refresh.</p></div>`;
     }
 };
 
 const renderTable = (orders) => {
+    // Update badge counter
+    if (ordersCountBadge) {
+        ordersCountBadge.textContent = `${orders.length} ${orders.length === 1 ? 'Order' : 'Orders'}`;
+    }
+
+    // Search feedback and clear button toggle
+    const term = searchInput ? searchInput.value.trim() : '';
+    if (term) {
+        if (filterSummary) {
+            filterSummary.textContent = `Found ${orders.length} of ${allOrders.length} orders matching "${term}"`;
+            filterSummary.style.display = 'block';
+        }
+        if (clearSearchBtn) clearSearchBtn.style.display = 'block';
+    } else {
+        if (filterSummary) filterSummary.style.display = 'none';
+        if (clearSearchBtn) clearSearchBtn.style.display = 'none';
+    }
+
     if (orders.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="7" class="text-center text-secondary">No orders found.</td></tr>`;
+        const emptyMsg = term
+            ? `No orders matching "${term}". Try clearing the search.`
+            : 'No orders recorded yet.';
+        if (tableBody) {
+            tableBody.innerHTML = `<tr><td colspan="7" class="text-center text-secondary" style="padding: 2.5rem;">${emptyMsg}</td></tr>`;
+        }
+        if (mobileCardsContainer) {
+            mobileCardsContainer.innerHTML = `
+                <div class="orders-empty-state">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <h3>No Orders Found</h3>
+                    <p>${emptyMsg}</p>
+                </div>
+            `;
+        }
         return;
     }
 
-    let html = '';
+    let desktopHtml = '';
+    let mobileHtml = '';
+
     orders.forEach(order => {
-        html += `
+        const rawId = order.id || '';
+        const idDisplay = rawId ? `#${rawId.slice(0, 8).toUpperCase()}` : '#N/A';
+        const statusLower = (order.status || 'completed').toLowerCase();
+        let statusClass = 'status-completed';
+        if (statusLower.includes('pending')) statusClass = 'status-pending';
+        else if (statusLower.includes('fail') || statusLower.includes('cancel')) statusClass = 'status-failed';
+
+        const dt = formatDateObj(order.createdAt);
+        const formattedAmount = formatPrice(order.amount);
+        const customerName = order.customerName || 'Customer';
+        const customerEmail = order.email || '';
+        const productName = order.productName || 'Mod Package';
+
+        // 1. Desktop Table Row
+        desktopHtml += `
             <tr>
-                <td style="font-family: monospace;">#${order.id.slice(0, 8)}</td>
-                <td>${order.customerName || 'N/A'}</td>
-                <td>${order.email}</td>
-                <td>${order.productName}</td>
-                <td class="color-primary" style="font-weight: 600;">${formatPrice(order.amount)}</td>
-                <td><span style="font-size: 0.75rem; padding: 0.25rem 0.5rem; background: rgba(34, 197, 94, 0.1); color: var(--color-accent); border-radius: 4px; text-transform: uppercase;">${order.status}</span></td>
-                <td style="font-size: 0.875rem;">${formatDate(order.createdAt)}</td>
+                <td class="col-id" data-label="Order ID">
+                    <span class="order-cell-val" style="font-family: monospace; font-weight: 700;">${idDisplay}</span>
+                </td>
+                <td class="col-customer" data-label="Customer">
+                    <span class="order-cell-val" style="font-weight: 600;" title="${customerName}">${customerName}</span>
+                </td>
+                <td class="col-email" data-label="Email">
+                    <span class="order-cell-val" title="${customerEmail}">${customerEmail || 'N/A'}</span>
+                </td>
+                <td class="col-product" data-label="Product">
+                    <span class="order-cell-val" title="${productName}">${productName}</span>
+                </td>
+                <td class="col-amount" data-label="Amount">
+                    <span class="order-cell-val" style="font-weight: 700; color: var(--admin-text-primary);">${formattedAmount}</span>
+                </td>
+                <td class="col-status" data-label="Status">
+                    <span class="order-cell-val">
+                        <span class="status-pill ${statusClass}">${order.status || 'Completed'}</span>
+                    </span>
+                </td>
+                <td class="col-date" data-label="Date">
+                    <div class="order-cell-val">
+                        <div style="font-weight: 600; font-size: 0.8rem; line-height: 1.2;">${dt.date}</div>
+                        ${dt.time ? `<div style="font-size: 0.72rem; color: var(--admin-text-muted);">${dt.time}</div>` : ''}
+                    </div>
+                </td>
             </tr>
         `;
+
+        // 2. Native Mobile Card
+        mobileHtml += `
+            <div class="mobile-order-card">
+                <div class="moc-header">
+                    <div class="moc-id-group">
+                        <span class="moc-order-id">${idDisplay}</span>
+                        <span class="moc-date">${dt.date}${dt.time ? ' &bull; ' + dt.time : ''}</span>
+                    </div>
+                    <span class="status-pill ${statusClass}">${order.status || 'Completed'}</span>
+                </div>
+                <div class="moc-body">
+                    <div class="moc-product-name">${productName}</div>
+                    <div class="moc-customer-row">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="moc-customer-icon"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        <span class="moc-customer-name">${customerName}</span>
+                        ${customerEmail ? `<span class="moc-dot">&bull;</span><span class="moc-customer-email">${customerEmail}</span>` : ''}
+                    </div>
+                </div>
+                <div class="moc-footer">
+                    <span class="moc-amount-label">Order Total</span>
+                    <span class="moc-amount-value">${formattedAmount}</span>
+                </div>
+            </div>
+        `;
     });
-    tableBody.innerHTML = html;
+
+    if (tableBody) tableBody.innerHTML = desktopHtml;
+    if (mobileCardsContainer) mobileCardsContainer.innerHTML = mobileHtml;
 };
 
 // Search Filter
-searchInput.addEventListener('input', (e) => {
-    const term = e.target.value.toLowerCase();
-    const filtered = allOrders.filter(order => 
-        order.id.toLowerCase().includes(term) || 
-        order.email.toLowerCase().includes(term) ||
-        (order.customerName && order.customerName.toLowerCase().includes(term))
-    );
-    renderTable(filtered);
-});
+if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase().trim();
+        const filtered = allOrders.filter(order => 
+            (order.id && order.id.toLowerCase().includes(term)) || 
+            (order.email && order.email.toLowerCase().includes(term)) ||
+            (order.customerName && order.customerName.toLowerCase().includes(term)) ||
+            (order.productName && order.productName.toLowerCase().includes(term))
+        );
+        renderTable(filtered);
+    });
+}
+
+// Clear Search Button
+if (clearSearchBtn && searchInput) {
+    clearSearchBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        searchInput.dispatchEvent(new Event('input'));
+        searchInput.focus();
+    });
+}
 
 // CSV Export
 exportBtn.addEventListener('click', () => {

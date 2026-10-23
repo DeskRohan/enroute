@@ -152,7 +152,7 @@ const renderOrderSummary = () => {
 
         itemsPreviewHtml += `
             <div class="product-preview" style="display:flex; gap:var(--spacing-3); margin-bottom:var(--spacing-4); padding-bottom:var(--spacing-4); border-bottom:1px solid var(--color-border);">
-                <img src="${displayImage}" alt="${item.name}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=800';" style="width:68px; height:68px; object-fit:cover; border-radius:var(--radius-lg); border:1px solid var(--color-border); flex-shrink:0;">
+                <img src="${displayImage}" alt="${item.name}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=800';" style="width:68px; height:68px; object-fit:cover; border-radius:var(--radius-md); border:1px solid var(--color-border); flex-shrink:0;">
                 <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
                     <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:6px;">
                         <h4 style="font-size:0.95rem; font-weight:700; margin:0; line-height:1.3; color:var(--text-primary);">${item.name}</h4>
@@ -160,7 +160,7 @@ const renderOrderSummary = () => {
                     </div>
                     <div style="display:flex; align-items:center; gap:0.5rem; margin-top:4px;">
                         <span class="text-secondary" style="font-size:0.75rem; text-transform:uppercase;">${(item.category === 'livery' ? 'Vehicle Livery/Skin' : 'Vehicle Mod')}</span>
-                        <span style="font-size:0.7rem; font-weight:700; color:#059669; background:rgba(16,185,129,0.1); padding:1px 6px; border-radius:3px;">1 Unit License</span>
+                        <span style="font-size:0.7rem; font-weight:700; color:var(--color-success); background:rgba(50,115,84,0.1); padding:2px 6px; border-radius:var(--radius-sm);">1 Unit License</span>
                     </div>
                 </div>
             </div>
@@ -176,7 +176,7 @@ const renderOrderSummary = () => {
                 <span>Items Subtotal (${cartItems.length})</span>
                 <span style="text-decoration: line-through; color: var(--text-muted);">${formatPrice(totalOriginal)}</span>
             </div>
-            <div class="summary-item" style="color: #059669; font-weight: 600;">
+            <div class="summary-item" style="color: var(--color-success); font-weight: 600;">
                 <span>Total Offer Savings</span>
                 <span>-${formatPrice(totalDiscount)}</span>
             </div>
@@ -199,9 +199,9 @@ const renderOrderSummary = () => {
     }
 
     orderSummaryContainer.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--color-border-subtle);">
             <h3 style="margin:0;">Order Summary</h3>
-            <span style="font-size:0.78rem; font-weight:700; background:var(--color-primary-light); color:var(--color-primary); padding:2px 8px; border-radius:var(--radius-full);">${cartItems.length} Mod${cartItems.length > 1 ? 's' : ''} Selected</span>
+            <span style="font-size:0.75rem; font-weight:700; background:var(--color-bg-subtle); color:var(--color-primary); padding:3px 8px; border-radius:var(--radius-sm); border:1px solid var(--color-border);">${cartItems.length} Mod${cartItems.length > 1 ? 's' : ''} Selected</span>
         </div>
         <div class="order-items-scroll" style="max-height: 280px; overflow-y: auto; margin-bottom: 1rem; padding-right: 4px;">
             ${itemsPreviewHtml}
@@ -357,7 +357,7 @@ checkoutForm.addEventListener('submit', async (e) => {
                 "email": currentUser.email
             },
             "theme": {
-                "color": "#2563eb"
+                "color": "#202124"
             }
         };
 

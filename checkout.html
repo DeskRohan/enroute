@@ -7,111 +7,121 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
     <!-- CSS -->
-    <link rel="stylesheet" href="css/index.css">
-    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/index.css?v=20261022_walmart">
+    <link rel="stylesheet" href="css/components.css?v=20261022_walmart">
     <style>
         body { padding-top: 80px; }
 
         .checkout-container {
-            max-width: 950px;
-            margin: var(--spacing-12) auto var(--spacing-16);
+            max-width: 960px;
+            margin: var(--spacing-8) auto var(--spacing-16);
+            padding: 0 var(--spacing-4);
         }
 
         .checkout-header {
-            margin-bottom: var(--spacing-8);
+            margin-bottom: var(--spacing-6);
         }
 
         .checkout-title {
-            font-size: 2.25rem;
+            font-size: 1.85rem;
             font-weight: 800;
             letter-spacing: -0.02em;
             color: var(--text-primary);
-            margin-top: var(--spacing-3);
+            margin-top: var(--spacing-2);
             font-family: var(--font-heading);
         }
 
         .checkout-grid {
             display: grid;
             grid-template-columns: 1.35fr 1fr;
-            gap: var(--spacing-8);
+            gap: var(--spacing-6);
             align-items: start;
         }
 
         .checkout-card {
-            background: var(--bg-secondary);
-            padding: var(--spacing-8);
-            border-radius: var(--radius-2xl);
+            background: var(--bg-surface);
+            padding: var(--spacing-6);
+            border-radius: var(--radius-lg);
             border: 1px solid var(--color-border);
             box-shadow: var(--shadow-sm);
             position: relative;
         }
 
         .checkout-card h3 {
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             font-weight: 700;
             font-family: var(--font-heading);
             color: var(--text-primary);
-            margin-bottom: var(--spacing-6);
+            margin-bottom: var(--spacing-5);
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            padding-bottom: var(--spacing-3);
+            border-bottom: 1px solid var(--color-border-subtle);
         }
 
         .order-summary {
-            background: var(--bg-secondary);
-            padding: var(--spacing-8);
-            border-radius: var(--radius-2xl);
+            background: var(--bg-surface);
+            padding: var(--spacing-6);
+            border-radius: var(--radius-lg);
             border: 1px solid var(--color-border);
-            box-shadow: var(--shadow-md);
+            box-shadow: var(--shadow-sm);
             position: sticky;
-            top: 100px;
+            top: 90px;
+        }
+
+        .order-summary h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            font-family: var(--font-heading);
+            color: var(--text-primary);
         }
 
         .summary-item {
             display: flex;
             justify-content: space-between;
-            margin-bottom: var(--spacing-4);
-            padding-bottom: var(--spacing-4);
+            align-items: center;
+            margin-bottom: var(--spacing-3);
+            padding-bottom: var(--spacing-3);
             border-bottom: 1px solid var(--color-border-subtle);
             color: var(--text-secondary);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
         }
 
         .summary-item:last-child {
             border-bottom: none;
             margin-bottom: 0;
             padding-bottom: 0;
-            font-size: 1.4rem;
+            font-size: 1.25rem;
             font-weight: 800;
             font-family: var(--font-heading);
-            color: var(--color-primary);
+            color: var(--text-primary);
         }
 
         .product-preview {
             display: flex;
-            gap: var(--spacing-4);
-            margin-bottom: var(--spacing-6);
-            padding-bottom: var(--spacing-6);
+            gap: var(--spacing-3);
+            margin-bottom: var(--spacing-4);
+            padding-bottom: var(--spacing-4);
             border-bottom: 1px solid var(--color-border-subtle);
         }
 
         .product-preview img {
-            width: 84px;
-            height: 84px;
+            width: 72px;
+            height: 72px;
             object-fit: cover;
-            border-radius: var(--radius-xl);
+            border-radius: var(--radius-md);
             border: 1px solid var(--color-border);
-            box-shadow: var(--shadow-sm);
         }
 
         .security-badge-box {
-            margin-top: var(--spacing-6);
+            margin-top: var(--spacing-5);
             padding: var(--spacing-4);
-            background: var(--bg-primary);
+            background: var(--color-bg-subtle);
             border: 1px solid var(--color-border);
-            border-radius: var(--radius-xl);
+            border-radius: var(--radius-md);
             display: flex;
             align-items: center;
             gap: 0.75rem;
@@ -121,12 +131,13 @@
             flex-shrink: 0;
         }
         .security-badge-text {
-            font-size: 0.825rem;
+            font-size: 0.8rem;
             color: var(--text-secondary);
-            line-height: 1.4;
+            line-height: 1.45;
         }
         .security-badge-text strong {
             color: var(--text-primary);
+            font-weight: 700;
         }
 
         @media (max-width: 768px) {
@@ -194,10 +205,13 @@
                         <small class="text-secondary mt-1 block" style="font-size: 0.8rem;">Your digital download license will be linked directly to this email.</small>
                     </div>
                     
-                    <button type="submit" id="pay-btn" class="btn btn-primary btn-lg mt-6" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; border-radius: var(--radius-full);">
+                    <button type="submit" id="pay-btn" class="btn btn-primary btn-lg mt-6" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; border-radius: var(--radius-md); font-weight: 700;">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                         Pay Securely with Razorpay
                     </button>
+                    <p style="font-size: 0.78rem; color: var(--text-muted); text-align: center; margin-top: 0.75rem; line-height: 1.4;">
+                        By completing this purchase, you agree to EnrouteIn's <a href="terms.html" target="_blank" style="color: var(--color-primary); text-decoration: underline;">Terms of Service</a> and <a href="refund.html" target="_blank" style="color: var(--color-primary); text-decoration: underline;">Refund Policy</a>.
+                    </p>
 
                     <div class="security-badge-box">
                         <div class="security-badge-icon">

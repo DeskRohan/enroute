@@ -30,12 +30,27 @@ const showUserWelcomeToast = (name) => {
     setTimeout(() => toast.remove(), 3500);
 };
 
+// Toggle login / dashboard buttons based on auth state
+export const updateNavAuthButtons = (isAuthenticated) => {
+    const lBtn = document.getElementById('nav-login-btn');
+    const dBtn = document.getElementById('nav-dash-btn');
+    if (isAuthenticated) {
+        if (lBtn) lBtn.style.setProperty('display', 'none', 'important');
+        if (dBtn) dBtn.style.setProperty('display', 'inline-flex', 'important');
+    } else {
+        if (lBtn) lBtn.style.setProperty('display', 'inline-flex', 'important');
+        if (dBtn) dBtn.style.setProperty('display', 'none', 'important');
+    }
+};
+
+// Initial state before auth loads
+updateNavAuthButtons(false);
+
 // Listen for Auth State Changes
 onAuthStateChanged(auth, async (user) => {
     if (user) {
-        // User is signed in
-        if (loginBtn) loginBtn.style.display = 'none';
-        if (dashBtn) dashBtn.style.display = 'inline-flex';
+        // User is signed in: show profile icon, hide login arrow
+        updateNavAuthButtons(true);
 
         try {
             // Check role (Admin or Customer)
@@ -85,9 +100,8 @@ onAuthStateChanged(auth, async (user) => {
             }
         }
     } else {
-        // User is signed out
-        if (loginBtn) loginBtn.style.display = 'inline-flex';
-        if (dashBtn) dashBtn.style.display = 'none';
+        // User is signed out: show login arrow, hide profile icon
+        updateNavAuthButtons(false);
         localStorage.removeItem('userRole');
 
         // Protect specific routes
@@ -144,8 +158,8 @@ export const promptForName = (uid) => {
                 color: var(--text-primary, #fff); font-size: 1rem;
             }
             .name-modal-content button {
-                width: 100%; padding: 0.8rem; border: none; border-radius: 8px;
-                background: var(--color-primary, #3b82f6); color: #fff; font-size: 1rem; font-weight: 600;
+                width: 100%; padding: 0.8rem; border: 1px solid var(--color-primary-hover, #005A91); border-radius: 6px;
+                background: var(--color-primary, #007DC6); color: #FFFFFF; font-size: 1rem; font-weight: 700;
                 cursor: pointer; transition: opacity 0.2s;
             }
             .name-modal-content button:hover { opacity: 0.9; }

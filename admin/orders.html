@@ -3,63 +3,473 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Orders - Enroute Admin</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <title>Orders - Merchant Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
     <!-- CSS -->
     <link rel="stylesheet" href="../css/index.css">
     <link rel="stylesheet" href="../css/components.css">
     <link rel="stylesheet" href="../css/admin.css">
     <link rel="icon" type="image/png" href="../assets/images/fevicon.png">
+    <style>
+        /* ====================================================
+           Desktop Table View Proportions
+           ==================================================== */
+        .desktop-orders-view {
+            display: block;
+            width: 100%;
+            background: #FFFFFF;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--admin-border);
+            box-shadow: var(--admin-shadow-sm);
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        .admin-table {
+            width: 100% !important;
+            table-layout: fixed;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .admin-table th,
+        .admin-table td {
+            padding: 0.85rem 0.75rem;
+            font-size: 0.84rem;
+            vertical-align: middle;
+            border-bottom: 1px solid var(--admin-border-subtle);
+        }
+
+        .admin-table th {
+            font-weight: 700;
+            color: var(--admin-text-secondary);
+            background: #F8F9FA;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--admin-border);
+            white-space: nowrap;
+        }
+
+        .admin-table tbody tr {
+            transition: background 0.15s ease;
+        }
+
+        .admin-table tbody tr:hover {
+            background: #FAFBFD;
+        }
+
+        .admin-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Strict desktop column proportions (sum to 100%) */
+        .col-id { width: 11%; font-family: monospace; font-size: 0.8rem; }
+        .col-customer { width: 16%; font-weight: 600; }
+        .col-email { width: 21%; color: var(--admin-text-secondary); }
+        .col-product { width: 22%; font-weight: 600; }
+        .col-amount { width: 11%; font-weight: 700; }
+        .col-status { width: 9%; }
+        .col-date { width: 10%; }
+
+        .order-cell-val {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .col-product .order-cell-val {
+            white-space: normal;
+            line-height: 1.35;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        /* Status Pills */
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: var(--radius-xs);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+        }
+
+        .status-completed {
+            background: #E7F5EA;
+            color: #238636;
+            border: 1px solid rgba(35, 134, 54, 0.25);
+        }
+
+        .status-pending {
+            background: #FFFBEB;
+            color: #D97706;
+            border: 1px solid rgba(217, 119, 6, 0.25);
+        }
+
+        .status-failed {
+            background: #FDE8E8;
+            color: #C62828;
+            border: 1px solid rgba(198, 40, 40, 0.25);
+        }
+
+        /* ====================================================
+           Native Mobile Orders Cards View (Hidden on Desktop)
+           ==================================================== */
+        .mobile-orders-view {
+            display: none;
+            flex-direction: column;
+            gap: 0.75rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .mobile-order-card {
+            background: #FFFFFF;
+            border: 1px solid var(--admin-border);
+            border-radius: var(--radius-lg);
+            padding: 0.95rem 1rem;
+            box-shadow: 0 1px 3px rgba(32, 33, 36, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            transition: transform 0.12s ease;
+            box-sizing: border-box;
+        }
+
+        .mobile-order-card:active {
+            transform: scale(0.995);
+        }
+
+        .moc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.5rem;
+            padding-bottom: 0.55rem;
+            border-bottom: 1px solid var(--admin-border-subtle);
+        }
+
+        .moc-id-group {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .moc-order-id {
+            font-family: monospace;
+            font-weight: 800;
+            font-size: 0.88rem;
+            color: var(--admin-text-primary);
+            letter-spacing: 0.02em;
+        }
+
+        .moc-date {
+            font-size: 0.73rem;
+            color: var(--admin-text-muted);
+            font-weight: 500;
+        }
+
+        .moc-body {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .moc-product-name {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--admin-text-primary);
+            line-height: 1.35;
+        }
+
+        .moc-customer-row {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.8rem;
+            color: var(--admin-text-secondary);
+            flex-wrap: wrap;
+        }
+
+        .moc-customer-icon {
+            color: var(--admin-text-muted);
+            flex-shrink: 0;
+        }
+
+        .moc-customer-name {
+            font-weight: 600;
+            color: var(--admin-text-primary);
+        }
+
+        .moc-dot {
+            color: var(--admin-border-strong);
+            font-size: 0.7rem;
+        }
+
+        .moc-customer-email {
+            color: var(--admin-text-secondary);
+            word-break: break-all;
+        }
+
+        .moc-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 0.6rem;
+            border-top: 1px dashed var(--admin-border-subtle);
+            margin-top: 0.1rem;
+        }
+
+        .moc-amount-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--admin-text-secondary);
+        }
+
+        .moc-amount-value {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--admin-text-primary);
+            font-family: var(--font-heading);
+        }
+
+        /* Search & Filter Header Responsive Layout */
+        .orders-page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.15rem;
+        }
+
+        .orders-title-group {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+        }
+
+        .orders-title-group h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--admin-text-primary);
+        }
+
+        .orders-count-pill {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            background: #EAECEF;
+            color: var(--admin-text-secondary);
+            border-radius: var(--radius-full);
+        }
+
+        .orders-controls-bar {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1.15rem;
+        }
+
+        .search-box-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 360px;
+        }
+
+        .search-box-wrapper svg.search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--admin-text-muted);
+            pointer-events: none;
+        }
+
+        .search-box-wrapper input {
+            width: 100%;
+            padding: 0.6rem 2.2rem 0.6rem 2.35rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--admin-border);
+            font-size: 0.86rem;
+            background: #FFFFFF;
+            transition: all 0.15s ease;
+            box-sizing: border-box;
+        }
+
+        .search-box-wrapper input:focus {
+            outline: none;
+            border-color: var(--admin-primary);
+            box-shadow: 0 0 0 2px var(--admin-primary-light);
+        }
+
+        .search-clear-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 1.15rem;
+            line-height: 1;
+            color: var(--admin-text-muted);
+            cursor: pointer;
+            padding: 4px;
+            display: none;
+        }
+
+        .search-clear-btn:hover {
+            color: var(--admin-text-primary);
+        }
+
+        .orders-stats-hint {
+            font-size: 0.78rem;
+            color: var(--admin-text-muted);
+            font-weight: 500;
+        }
+
+        /* Empty State */
+        .orders-empty-state {
+            padding: 2.25rem 1.25rem;
+            text-align: center;
+            background: #FFFFFF;
+            border: 1px dashed var(--admin-border);
+            border-radius: var(--radius-lg);
+            color: var(--admin-text-secondary);
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        .orders-empty-state svg {
+            margin-bottom: 0.65rem;
+            color: var(--admin-text-muted);
+        }
+
+        .orders-empty-state h3 {
+            margin: 0 0 0.25rem 0;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--admin-text-primary);
+        }
+
+        .orders-empty-state p {
+            margin: 0;
+            font-size: 0.82rem;
+            color: var(--admin-text-muted);
+        }
+
+        /* ====================================================
+           Breakpoints: On screens <= 768px, Switch to Cards
+           ==================================================== */
+        @media (max-width: 768px) {
+            .desktop-orders-view {
+                display: none !important;
+            }
+
+            .mobile-orders-view {
+                display: flex !important;
+            }
+
+            .orders-page-header {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 0.9rem;
+            }
+
+            .orders-title-group h1 {
+                font-size: 1.3rem;
+            }
+
+            .search-box-wrapper {
+                max-width: 100% !important;
+            }
+
+            #export-csv-btn {
+                padding: 0.42rem 0.75rem;
+                font-size: 0.76rem;
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+            }
+        }
+    </style>
 </head>
 <body>
 
     <div class="mobile-admin-header">
-        <div class="admin-logo" style="border: none; padding: 0;">EnrouteIn<span>Admin</span></div>
+        <div class="admin-logo" style="border: none; padding: 0;">EnrouteIn<span>Merchant</span></div>
     </div>
 
     <aside class="admin-sidebar">
         <div class="admin-logo">
-            EnrouteIn<span>Admin</span>
+            EnrouteIn<span>Merchant</span>
         </div>
         <ul class="admin-nav">
             <li><a href="dashboard.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span class="nav-text">Dashboard</span></a></li>
             <li><a href="products.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg> <span class="nav-text">Products</span></a></li>
             <li><a href="orders.html" class="active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> <span class="nav-text">Orders</span></a></li>
-            <li><a href="users.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> <span class="nav-text">Users</span></a></li>
             <li><a href="reports.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg> <span class="nav-text">Reports</span></a></li>
-            <li><a href="messages.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> <span class="nav-text">Messages</span></a></li>
-            <li><a href="account.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> <span class="nav-text">Account</span></a></li>
+            <li><a href="account.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> <span class="nav-text">Profile</span></a></li>
         </ul>
     </aside>
 
     <main class="admin-main">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-8);">
-            <h1>Order Management</h1>
-            <button class="btn btn-primary" id="export-csv-btn">Export CSV</button>
+        <div class="orders-page-header">
+            <div class="orders-title-group">
+                <h1>Orders</h1>
+                <span class="orders-count-pill" id="orders-count-badge">...</span>
+            </div>
+            <button class="btn btn-outline" id="export-csv-btn" title="Export Orders to CSV">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <span>Export CSV</span>
+            </button>
         </div>
 
-        <!-- Filters -->
-        <div style="display: flex; gap: var(--spacing-4); margin-bottom: var(--spacing-6);">
-            <input type="text" id="search-order" class="form-control" placeholder="Search by Order ID or Email" style="max-width: 300px;">
+        <!-- Filters & Search -->
+        <div class="orders-controls-bar">
+            <div class="search-box-wrapper">
+                <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="search-order" class="form-control" placeholder="Search by Order ID, customer, or email...">
+                <button type="button" id="clear-search-btn" class="search-clear-btn" aria-label="Clear Search">&times;</button>
+            </div>
+            <div class="orders-stats-hint" id="orders-filter-summary" style="display: none;"></div>
         </div>
 
-        <div class="table-container">
+        <!-- Desktop Orders Table (screens > 768px) -->
+        <div class="desktop-orders-view">
             <table class="admin-table">
                 <thead>
                     <tr>
-                        <th>Order ID</th>
-                        <th>Customer Name</th>
-                        <th>Email</th>
-                        <th>Product</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                        <th>Date</th>
+                        <th class="col-id">Order ID</th>
+                        <th class="col-customer">Customer</th>
+                        <th class="col-email">Email</th>
+                        <th class="col-product">Product</th>
+                        <th class="col-amount">Amount</th>
+                        <th class="col-status">Status</th>
+                        <th class="col-date">Date</th>
                     </tr>
                 </thead>
                 <tbody id="orders-table-body">
-                    <tr><td colspan="7" class="text-center">Loading...</td></tr>
+                    <tr><td colspan="7" class="text-center" style="padding: 2.5rem;">Loading orders...</td></tr>
                 </tbody>
             </table>
+        </div>
+
+        <!-- Native Mobile Orders Cards (screens <= 768px) -->
+        <div class="mobile-orders-view" id="mobile-orders-cards">
+            <div class="orders-empty-state">
+                <p>Loading orders...</p>
+            </div>
         </div>
     </main>
 
@@ -77,17 +487,13 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
             <span>Orders</span>
         </a>
-        <a href="messages.html" class="bottom-nav-item">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-            <span>Messages</span>
-        </a>
         <a href="reports.html" class="bottom-nav-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
             <span>Reports</span>
         </a>
         <a href="account.html" class="bottom-nav-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-            <span>Account</span>
+            <span>Profile</span>
         </a>
     </nav>
 
@@ -97,6 +503,5 @@
         requireAdmin();
     </script>
     <script type="module" src="../js/admin/admin-orders.js"></script>
-    <script type="module" src="../js/admin/admin-ticker.js"></script>
 </body>
 </html>

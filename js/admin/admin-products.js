@@ -255,7 +255,7 @@ const loadProducts = async () => {
     try {
         const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
         const snapshot = await getDocs(q);
-        allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        allProducts = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
         const adminEmail = localStorage.getItem('adminEmail');
         if (adminEmail !== 'admin@enroute.in') {
             allProducts = allProducts.filter(p => p.addedBy === adminEmail);
@@ -279,8 +279,14 @@ const renderTable = () => {
 
     allProducts.forEach(product => {
         let actionsHtml = `
-            <button class="btn btn-sm btn-outline edit-btn" data-id="${product.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Edit</button>
-            <button class="btn btn-sm btn-outline delete-btn" data-id="${product.id}" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; color: var(--color-danger); border-color: var(--color-danger); margin-left: 0.5rem;">Delete</button>
+            <div style="display: inline-flex; align-items: center; gap: 6px;">
+                <a href="product-editor.html?id=${encodeURIComponent(product.id)}" class="btn btn-sm btn-outline edit-btn" data-id="${product.id}" title="Edit Product" aria-label="Edit Product" onclick="try{sessionStorage.setItem('editProductId', '${product.id}')}catch(_){}" style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border-radius: 6px; color: var(--admin-text-primary); border: 1px solid var(--admin-border); background: #FFFFFF; text-decoration: none;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                </a>
+                <button type="button" class="btn btn-sm btn-outline delete-btn" data-id="${product.id}" title="Delete Product" aria-label="Delete Product" style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border-radius: 6px; color: #dc2626; border: 1px solid #fca5a5; background: #FFF5F5; cursor: pointer;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                </button>
+            </div>
         `;
 
         let statusHtml = '';
@@ -604,9 +610,14 @@ const closeModal = () => {
 };
 
 // Handlers
-addBtn.addEventListener('click', () => {
-    openModal(false);
-});
+if (addBtn) {
+    addBtn.addEventListener('click', () => {
+        try { sessionStorage.removeItem('editProductId'); } catch (_) {}
+        if (addBtn.tagName !== 'A') {
+            window.location.href = 'product-editor.html';
+        }
+    });
+}
 
 closeBtn.addEventListener('click', closeModal);
 cancelBtn.addEventListener('click', closeModal);
@@ -671,147 +682,17 @@ fPricingType.addEventListener('change', (e) => {
 });
 
 const handleEdit = (e) => {
-    const id = e.target.getAttribute('data-id');
-    const product = allProducts.find(p => p.id === id);
-    if (product) {
-        fId.value = product.id;
-        currentEditingAddedBy = product.addedBy || null; // Preserve original uploader
-        fName.value = product.name;
-        fCategory.value = product.category;
-        fVariantName.value = product.variantName || '';
-        
-        fPricingType.value = product.pricingType || (product.price === 0 ? 'free' : 'paid');
-        if (fPricingType.value === 'free') {
-            priceGroup.style.display = 'none';
-            fOriginalPrice.required = false;
-            fOriginalPrice.value = 0;
-            fOfferPrice.value = '';
-            channelLinkGroup.style.display = 'block';
-            fChannelLink.required = true;
-            fChannelLink.value = product.channelLink || '';
-        } else {
-            priceGroup.style.display = 'block';
-            fOriginalPrice.required = true;
-            fOriginalPrice.value = product.originalPrice ?? product.price ?? '';
-            fOfferPrice.value = (product.offerPrice !== undefined && product.offerPrice !== null) ? product.offerPrice : '';
-            channelLinkGroup.style.display = 'none';
-            fChannelLink.required = false;
-            fChannelLink.value = '';
-
-            // Handle offer period type
-            const offerPeriod = product.offerPeriodType || 'lifetime';
-            if (offerPeriod === 'limited') {
-                fOfferLimitedCard.classList.add('active');
-                fOfferLifetimeCard.classList.remove('active');
-                fOfferLimitedInput.checked = true;
-                fOfferExpiryGroup.style.display = 'block';
-                fOfferExpiryDate.required = true;
-                fOfferExpiryDate.value = formatDateTimeLocal(product.offerExpiryDate);
-            } else {
-                fOfferLifetimeCard.classList.add('active');
-                fOfferLimitedCard.classList.remove('active');
-                fOfferLifetimeInput.checked = true;
-                fOfferExpiryGroup.style.display = 'none';
-                fOfferExpiryDate.required = false;
-                fOfferExpiryDate.value = '';
-            }
-        }
-
-        const imgs = product.images || [product.image];
-        fImage1.value = imgs[0] || '';
-        fImage2.value = imgs[1] || '';
-        fImage3.value = imgs[2] || '';
-        fImage4.value = imgs[3] || '';
-
-        fDownload.value = product.downloadLink || '';
-        fVersion.value = product.version || '';
-        fBrand.value = product.brand || '';
-        fEngine.value = product.engine || '';
-        fPolygons.value = product.polygons || '';
-        fSize.value = product.size || '';
-        fInterior.checked = product.interior || false;
-        fFeatured.checked = product.featured || false;
-        fSummary.value = product.summary || '';
-        fYoutube.value = product.youtube || '';
-        fDesc.value = product.description;
-
-        // Populate status fields
-        if (product.status === 'scheduled') {
-            fStatusScheduledCard.classList.add('active');
-            fStatusLiveCard.classList.remove('active');
-            fStatusScheduledInput.checked = true;
-            fScheduleDatetimeGroup.style.display = 'block';
-            fScheduledDate.required = true;
-            fScheduledDate.value = formatDateTimeLocal(product.scheduledDate);
-        } else {
-            fStatusLiveCard.classList.add('active');
-            fStatusScheduledCard.classList.remove('active');
-            fStatusLiveInput.checked = true;
-            fScheduleDatetimeGroup.style.display = 'none';
-            fScheduledDate.required = false;
-            fScheduledDate.value = '';
-        }
-
-        openModal(true, id);
-
-        // Check related mods
-        if (product.relatedMods && Array.isArray(product.relatedMods)) {
-            product.relatedMods.forEach(relId => {
-                const cb = document.getElementById(`rel-${relId}`);
-                if (cb) cb.checked = true;
-            });
-        }
-
-        // Check and populate linked product variants
-        variantsList.innerHTML = '';
-        if (product.variants && Array.isArray(product.variants) && product.variants.length > 0) {
-            product.variants.forEach(v => {
-                const vId = (typeof v === 'object' && v !== null) ? v.id : v;
-                const vLabel = (typeof v === 'object' && v !== null) ? v.label : '';
-                if (vId) {
-                    const row = createVariantRow(vId, vLabel);
-                    variantsList.appendChild(row);
-                }
-            });
-        }
-        updateVariantsEmptyState();
-
-        // Setup ShareMods upload state for editing
-        const hasShareModsLink = product.downloadSource === 'sharemods' || 
-            (product.downloadLink && product.downloadLink.includes('sharemods.com'));
-
-        if (hasShareModsLink) {
-            shareModsUploadedUrl = product.downloadLink;
-            if (fDownloadSource) fDownloadSource.value = 'sharemods';
-            if (shareModsUploadContent) shareModsUploadContent.style.display = 'none';
-            if (shareModsUploadProgress) shareModsUploadProgress.style.display = 'none';
-            if (shareModsUploadSuccess) shareModsUploadSuccess.style.display = 'block';
-            
-            let displayFilename = product.name ? `${product.name} (Mod Archive)` : 'Uploaded Mod File';
-            try {
-                const parts = product.downloadLink.split('/');
-                const lastPart = parts[parts.length - 1];
-                if (lastPart && lastPart.endsWith('.html')) {
-                    displayFilename = decodeURIComponent(lastPart.replace('.html', ''));
-                } else if (lastPart) {
-                    displayFilename = decodeURIComponent(lastPart);
-                }
-            } catch (_) {}
-            
-            if (shareModsSuccessFilename) shareModsSuccessFilename.textContent = displayFilename;
-            if (shareModsUploadZone) {
-                shareModsUploadZone.classList.add('has-file');
-                shareModsUploadZone.style.borderColor = 'var(--boho-sage)';
-                shareModsUploadZone.style.background = 'var(--boho-sage-light)';
-            }
-        } else {
-            resetShareModsUpload();
-        }
+    const btn = e.currentTarget || e.target.closest('.edit-btn');
+    const id = btn ? (btn.getAttribute('data-id') || btn.dataset.id) : (e.target ? e.target.getAttribute('data-id') : null);
+    if (id) {
+        try { sessionStorage.setItem('editProductId', id); } catch (_) {}
+        window.location.href = `product-editor.html?id=${encodeURIComponent(id)}`;
     }
 };
 
 const handleDelete = async (e) => {
-    const id = e.target.getAttribute('data-id');
+    const btn = e.currentTarget || e.target.closest('.delete-btn');
+    const id = btn ? btn.getAttribute('data-id') : e.target.getAttribute('data-id');
     if (confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
         try {
             await deleteDoc(doc(db, "products", id));
@@ -1005,14 +886,14 @@ const openTransferModal = async () => {
             const imgUrl = getImageUrl(p.image || (p.images && p.images[0]) || '');
             const uploaderLabel = p.addedBy && p.addedBy !== adminEmail ? `<span style="font-size:0.7rem; color:#f59e0b; font-weight:600;">by ${p.addedBy}</span>` : '';
             html += `
-                <label style="display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 0.85rem; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; cursor: pointer; transition: all 0.15s ease;" onmouseenter="this.style.borderColor='#8b5cf6'; this.style.background='rgba(139,92,246,0.04)'" onmouseleave="if(!this.querySelector('input').checked){this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';}">
-                    <input type="checkbox" class="transfer-product-cb" value="${p.id}" style="width: 17px; height: 17px; accent-color: #8b5cf6; cursor: pointer; flex-shrink: 0;">
-                    <img src="${imgUrl}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=800';" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; flex-shrink: 0;">
+                <label style="display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 0.85rem; background: #FFFFFF; border: 1px solid #DFE5EA; border-radius: 4px; cursor: pointer; transition: all 0.15s ease;" onmouseenter="this.style.borderColor='#007DC6'; this.style.background='#EAF5FC'" onmouseleave="if(!this.querySelector('input').checked){this.style.borderColor='#DFE5EA'; this.style.background='#FFFFFF';}">
+                    <input type="checkbox" class="transfer-product-cb" value="${p.id}" style="width: 17px; height: 17px; accent-color: #007DC6; cursor: pointer; flex-shrink: 0;">
+                    <img src="${imgUrl}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=800';" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid #DFE5EA; flex-shrink: 0;">
                     <div style="flex: 1; min-width: 0;">
-                        <div style="font-weight: 700; font-size: 0.85rem; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name}</div>
+                        <div style="font-weight: 700; font-size: 0.85rem; color: #242A30; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name}</div>
                         <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1px;">
-                            <span style="font-size: 0.75rem; color: #64748b;">${p.category === 'livery' ? 'Livery' : 'Mod'}</span>
-                            <span style="font-size: 0.75rem; font-weight: 700; color: ${isFree ? '#059669' : '#8b5cf6'};">${priceText}</span>
+                            <span style="font-size: 0.75rem; color: #626C76;">${p.category === 'livery' ? 'Livery' : 'Mod'}</span>
+                            <span style="font-size: 0.75rem; font-weight: 700; color: ${isFree ? '#218838' : '#242A30'};">${priceText}</span>
                             ${uploaderLabel}
                         </div>
                     </div>
@@ -1030,11 +911,11 @@ const openTransferModal = async () => {
         cb.addEventListener('change', () => {
             const label = cb.closest('label');
             if (cb.checked) {
-                label.style.borderColor = '#8b5cf6';
-                label.style.background = 'rgba(139,92,246,0.04)';
+                label.style.borderColor = '#007DC6';
+                label.style.background = '#EAF5FC';
             } else {
-                label.style.borderColor = '#e2e8f0';
-                label.style.background = '#f8fafc';
+                label.style.borderColor = '#DFE5EA';
+                label.style.background = '#FFFFFF';
             }
             updateTransferCount();
         });
@@ -1068,24 +949,24 @@ const showTransferStep = (step) => {
 
     // Step 2
     if (step >= 2) {
-        step2Circle.style.background = '#8b5cf6'; step2Circle.style.color = '#fff';
-        step2Label.style.color = '#8b5cf6';
-        line12.style.background = '#8b5cf6';
+        step2Circle.style.background = '#202124'; step2Circle.style.color = '#fff';
+        step2Label.style.color = '#202124';
+        line12.style.background = '#202124';
     } else {
-        step2Circle.style.background = '#e2e8f0'; step2Circle.style.color = '#94a3b8';
-        step2Label.style.color = '#94a3b8';
-        line12.style.background = '#e2e8f0';
+        step2Circle.style.background = '#FFF8D9'; step2Circle.style.color = '#60646C';
+        step2Label.style.color = '#60646C';
+        line12.style.background = '#E2E5E9';
     }
 
     // Step 3
     if (step >= 3) {
-        step3Circle.style.background = '#8b5cf6'; step3Circle.style.color = '#fff';
-        step3Label.style.color = '#8b5cf6';
-        line23.style.background = '#8b5cf6';
+        step3Circle.style.background = '#202124'; step3Circle.style.color = '#fff';
+        step3Label.style.color = '#202124';
+        line23.style.background = '#202124';
     } else {
-        step3Circle.style.background = '#e2e8f0'; step3Circle.style.color = '#94a3b8';
-        step3Label.style.color = '#94a3b8';
-        line23.style.background = '#e2e8f0';
+        step3Circle.style.background = '#FFF8D9'; step3Circle.style.color = '#60646C';
+        step3Label.style.color = '#60646C';
+        line23.style.background = '#E2E5E9';
     }
 
     // Update title/desc
@@ -1141,14 +1022,14 @@ const loadAdminsForTransfer = async () => {
                 ? `<img src="../assets/images/varified.png" style="height: 14px; vertical-align: middle; margin-left: 2px;" title="Verified Admin">`
                 : '';
             html += `
-                <label style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0.85rem; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; cursor: pointer; transition: all 0.15s ease;" onmouseenter="this.style.borderColor='#8b5cf6'; this.style.background='rgba(139,92,246,0.04)'" onmouseleave="if(!this.querySelector('input').checked){this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';}">
-                    <input type="radio" name="transfer-admin" class="transfer-admin-radio" value="${admin.email}" style="width: 17px; height: 17px; accent-color: #8b5cf6; cursor: pointer; flex-shrink: 0;">
-                    <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #8b5cf6, #6366f1); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; flex-shrink: 0;">${initial}</div>
+                <label style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0.85rem; background: #FFFFFF; border: 1px solid #DFE5EA; border-radius: 4px; cursor: pointer; transition: all 0.15s ease;" onmouseenter="this.style.borderColor='#007DC6'; this.style.background='#EAF5FC'" onmouseleave="if(!this.querySelector('input').checked){this.style.borderColor='#DFE5EA'; this.style.background='#FFFFFF';}">
+                    <input type="radio" name="transfer-admin" class="transfer-admin-radio" value="${admin.email}" style="width: 17px; height: 17px; accent-color: #007DC6; cursor: pointer; flex-shrink: 0;">
+                    <div style="width: 36px; height: 36px; border-radius: 4px; background: #153247; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; flex-shrink: 0;">${initial}</div>
                     <div style="flex: 1; min-width: 0;">
-                        <div style="font-weight: 700; font-size: 0.88rem; color: #1e293b; display: flex; align-items: center; gap: 0.25rem;">
+                        <div style="font-weight: 700; font-size: 0.88rem; color: #242A30; display: flex; align-items: center; gap: 0.25rem;">
                             ${admin.name} ${verifiedBadge}
                         </div>
-                        <div style="font-size: 0.75rem; color: #64748b; margin-top: 1px;">${admin.email}</div>
+                        <div style="font-size: 0.75rem; color: #626C76; margin-top: 1px;">${admin.email}</div>
                     </div>
                 </label>
             `;
@@ -1165,11 +1046,11 @@ const loadAdminsForTransfer = async () => {
                 document.querySelectorAll('.transfer-admin-radio').forEach(r => {
                     const label = r.closest('label');
                     if (r.checked) {
-                        label.style.borderColor = '#8b5cf6';
-                        label.style.background = 'rgba(139,92,246,0.04)';
+                        label.style.borderColor = '#007DC6';
+                        label.style.background = '#EAF5FC';
                     } else {
-                        label.style.borderColor = '#e2e8f0';
-                        label.style.background = '#f8fafc';
+                        label.style.borderColor = '#DFE5EA';
+                        label.style.background = '#FFFFFF';
                     }
                 });
             });
@@ -1188,9 +1069,9 @@ const renderTransferSummary = () => {
 
     let productsListHtml = selectedProducts.map(p => {
         const isFree = (p.price === 0 || p.pricingType === 'free');
-        return `<div style="display: flex; justify-content: space-between; align-items: center; padding: 0.35rem 0; border-bottom: 1px solid #f1f5f9;">
-            <span style="font-weight: 600; font-size: 0.82rem; color: #1e293b;">${p.name}</span>
-            <span style="font-size: 0.75rem; font-weight: 700; color: ${isFree ? '#059669' : '#8b5cf6'};">${isFree ? 'FREE' : '₹' + (p.originalPrice ?? p.price)}</span>
+        return `<div style="display: flex; justify-content: space-between; align-items: center; padding: 0.35rem 0; border-bottom: 1px solid #E2E5E9;">
+            <span style="font-weight: 600; font-size: 0.82rem; color: #202124;">${p.name}</span>
+            <span style="font-size: 0.75rem; font-weight: 700; color: ${isFree ? '#238636' : '#202124'};">${isFree ? 'FREE' : '₹' + (p.originalPrice ?? p.price)}</span>
         </div>`;
     }).join('');
 
@@ -1200,15 +1081,15 @@ const renderTransferSummary = () => {
 
     transferSummary.innerHTML = `
         <div style="margin-bottom: 1rem;">
-            <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Products to Transfer (${selectedProducts.length})</div>
+            <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: #60646C; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Products to Transfer (${selectedProducts.length})</div>
             ${productsListHtml}
         </div>
-        <div style="display: flex; align-items: center; gap: 0.65rem; padding: 0.75rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;">
-            <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #8b5cf6, #6366f1); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; flex-shrink: 0;">${targetAdmin ? targetAdmin.name.charAt(0).toUpperCase() : '?'}</div>
+        <div style="display: flex; align-items: center; gap: 0.65rem; padding: 0.75rem; background: #fff; border: 1px solid #E2E5E9; border-radius: 4px;">
+            <div style="width: 32px; height: 32px; border-radius: 4px; background: #202124; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; flex-shrink: 0;">${targetAdmin ? targetAdmin.name.charAt(0).toUpperCase() : '?'}</div>
             <div>
-                <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em;">Transferring To</div>
-                <div style="font-weight: 700; font-size: 0.88rem; color: #1e293b;">${targetAdmin ? targetAdmin.name : 'Unknown'} ${verifiedBadge}</div>
-                <div style="font-size: 0.75rem; color: #64748b;">${targetAdmin ? targetAdmin.email : ''}</div>
+                <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: #60646C; letter-spacing: 0.05em;">Transferring To</div>
+                <div style="font-weight: 700; font-size: 0.88rem; color: #202124;">${targetAdmin ? targetAdmin.name : 'Unknown'} ${verifiedBadge}</div>
+                <div style="font-size: 0.75rem; color: #60646C;">${targetAdmin ? targetAdmin.email : ''}</div>
             </div>
         </div>
     `;

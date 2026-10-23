@@ -181,15 +181,19 @@ exportBtn.addEventListener('click', () => {
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
+    const todayStr = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
     
     // Add Title
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(18);
-    doc.text("EnrouteIn Revenue Report", 14, 20);
+    doc.text("EnrouteIn Merchant Revenue Report", 14, 20);
     
-    // Add Summary
-    doc.setFontSize(11);
-    doc.text(`Total Revenue (Filtered): ${summaryRevenue.textContent}`, 14, 30);
-    doc.text(`Total Units Sold: ${summaryUnits.textContent}`, 14, 36);
+    // Add Metadata
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text(`Generated on: ${todayStr}`, 14, 28);
+    doc.text(`Total Revenue (Filtered): ${summaryRevenue.textContent}`, 14, 35);
+    doc.text(`Total Units Sold: ${summaryUnits.textContent}`, 14, 42);
 
     // Prepare Table Data
     const tableHeaders = [['Product Name', 'Pricing Type', 'Units Sold', 'Total Revenue Generated (INR)']];
@@ -203,21 +207,22 @@ exportBtn.addEventListener('click', () => {
             data.name,
             pType.charAt(0).toUpperCase() + pType.slice(1),
             data.units,
-            data.revenue
+            `INR ${data.revenue.toLocaleString('en-IN')}`
         ];
     });
 
     // AutoTable
     doc.autoTable({
-        startY: 45,
+        startY: 50,
         head: tableHeaders,
         body: tableRows,
         theme: 'striped',
-        headStyles: { fillColor: [37, 99, 235] } // Matches var(--color-primary) roughly
+        headStyles: { fillColor: [32, 33, 36], textColor: [255, 255, 255], fontStyle: 'bold' },
+        styles: { fontSize: 10, cellPadding: 4 }
     });
 
     // Save
-    doc.save(`enroute_revenue_report_${new Date().toISOString().split('T')[0]}.pdf`);
+    doc.save(`enroute_merchant_report_${new Date().toISOString().split('T')[0]}.pdf`);
 });
 
 generateBtn.addEventListener('click', generateReport);

@@ -23,38 +23,38 @@ const showSetPasswordModal = ({ targetUid, targetEmail, targetName, onSuccess })
     overlay.id = 'enroute-set-password-modal';
     overlay.style = "position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px); z-index: 100000; display: flex; align-items: center; justify-content: center; padding: 1rem;";
     overlay.innerHTML = `
-        <div style="background: #ffffff; padding: 2rem; border-radius: 18px; width: 100%; max-width: 440px; color: #0f172a; box-shadow: 0 25px 60px rgba(0,0,0,0.25); border: 1px solid #e2e8f0; animation: fadeIn 0.2s ease; font-family: 'Plus Jakarta Sans', sans-serif;">
+        <div style="background: #ffffff; padding: 2rem; border-radius: 8px; width: 100%; max-width: 440px; color: #252923; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 1px solid #E4E1D8; animation: fadeIn 0.2s ease; font-family: 'Plus Jakarta Sans', sans-serif;">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem;">
                 <div style="display: flex; align-items: center; gap: 0.65rem;">
-                    <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(37, 99, 235, 0.1); color: #2563eb; display: flex; align-items: center; justify-content: center;">
+                    <div style="width: 38px; height: 38px; border-radius: 6px; background: rgba(247, 202, 0, 0.2); color: #202124; display: flex; align-items: center; justify-content: center;">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                     </div>
                     <div>
-                        <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800; color: #0f172a;">Set Admin Password</h3>
-                        <p style="margin: 0; font-size: 0.8rem; color: #64748b;">Direct password update for admin</p>
+                        <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800; color: #252923;">Set Admin Password</h3>
+                        <p style="margin: 0; font-size: 0.8rem; color: #77786F;">Direct password update for admin</p>
                     </div>
                 </div>
                 <button type="button" id="modal-close-x" style="background: transparent; border: none; font-size: 1.5rem; line-height: 1; color: #94a3b8; cursor: pointer; padding: 4px;">&times;</button>
             </div>
 
             <!-- Target Admin Info Card -->
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 0.85rem 1rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.75rem;">
-                <div style="width: 36px; height: 36px; border-radius: 50%; background: #2563eb; color: #ffffff; font-weight: 800; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <div style="background: #FFF8D9; border: 1px solid #E2E5E9; border-radius: 6px; padding: 0.85rem 1rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.75rem;">
+                <div style="width: 36px; height: 36px; border-radius: 50%; background: #202124; color: #ffffff; font-weight: 800; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                     ${(targetName || 'A').charAt(0).toUpperCase()}
                 </div>
                 <div style="overflow: hidden;">
-                    <div style="font-weight: 700; font-size: 0.9rem; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${targetName || 'Admin'}</div>
-                    <div style="font-size: 0.8rem; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${targetEmail}</div>
+                    <div style="font-weight: 700; font-size: 0.9rem; color: #252923; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${targetName || 'Admin'}</div>
+                    <div style="font-size: 0.8rem; color: #77786F; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${targetEmail}</div>
                 </div>
             </div>
 
             <form id="set-password-form" autocomplete="off">
                 <!-- New Password Field -->
                 <div style="margin-bottom: 1rem;">
-                    <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 0.4rem;">New Password</label>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #153247; margin-bottom: 0.4rem;">New Password</label>
                     <div style="position: relative; display: flex; align-items: center;">
-                        <input type="password" id="input-new-pw" required minlength="6" placeholder="Enter new password (min. 6 chars)" style="width: 100%; padding: 0.75rem 2.5rem 0.75rem 0.85rem; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.92rem; font-family: inherit; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#cbd5e1'">
-                        <button type="button" class="pw-toggle-btn" data-target="input-new-pw" style="position: absolute; right: 0.75rem; background: none; border: none; cursor: pointer; color: #64748b; padding: 0; display: flex; align-items: center;" title="Show/Hide Password">
+                        <input type="password" id="input-new-pw" required minlength="6" placeholder="Enter new password (min. 6 chars)" style="width: 100%; padding: 0.75rem 2.5rem 0.75rem 0.85rem; border: 1.5px solid #DFE5EA; border-radius: 6px; font-size: 0.92rem; font-family: inherit; outline: none; transition: all 0.2s;" onfocus="this.style.borderColor='#007DC6'; this.style.boxShadow='0 0 0 3px rgba(0, 125, 198, 0.15)'" onblur="this.style.borderColor='#DFE5EA'; this.style.boxShadow='none'">
+                        <button type="button" class="pw-toggle-btn" data-target="input-new-pw" style="position: absolute; right: 0.75rem; background: none; border: none; cursor: pointer; color: #626C76; padding: 0; display: flex; align-items: center;" title="Show/Hide Password">
                             <svg class="eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                             <svg class="eye-closed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
                         </button>
@@ -63,10 +63,10 @@ const showSetPasswordModal = ({ targetUid, targetEmail, targetName, onSuccess })
 
                 <!-- Confirm Password Field -->
                 <div style="margin-bottom: 1.15rem;">
-                    <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 0.4rem;">Confirm New Password</label>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #153247; margin-bottom: 0.4rem;">Confirm New Password</label>
                     <div style="position: relative; display: flex; align-items: center;">
-                        <input type="password" id="input-confirm-pw" required minlength="6" placeholder="Re-enter new password" style="width: 100%; padding: 0.75rem 2.5rem 0.75rem 0.85rem; border: 1.5px solid #cbd5e1; border-radius: 8px; font-size: 0.92rem; font-family: inherit; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#cbd5e1'">
-                        <button type="button" class="pw-toggle-btn" data-target="input-confirm-pw" style="position: absolute; right: 0.75rem; background: none; border: none; cursor: pointer; color: #64748b; padding: 0; display: flex; align-items: center;" title="Show/Hide Password">
+                        <input type="password" id="input-confirm-pw" required minlength="6" placeholder="Re-enter new password" style="width: 100%; padding: 0.75rem 2.5rem 0.75rem 0.85rem; border: 1.5px solid #DFE5EA; border-radius: 6px; font-size: 0.92rem; font-family: inherit; outline: none; transition: all 0.2s;" onfocus="this.style.borderColor='#007DC6'; this.style.boxShadow='0 0 0 3px rgba(0, 125, 198, 0.15)'" onblur="this.style.borderColor='#DFE5EA'; this.style.boxShadow='none'">
+                        <button type="button" class="pw-toggle-btn" data-target="input-confirm-pw" style="position: absolute; right: 0.75rem; background: none; border: none; cursor: pointer; color: #626C76; padding: 0; display: flex; align-items: center;" title="Show/Hide Password">
                             <svg class="eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                             <svg class="eye-closed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
                         </button>
@@ -74,17 +74,17 @@ const showSetPasswordModal = ({ targetUid, targetEmail, targetName, onSuccess })
                 </div>
 
                 <!-- Info Notice -->
-                <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 0.65rem 0.85rem; margin-bottom: 1.25rem; font-size: 0.78rem; color: #1e40af; line-height: 1.45; display: flex; align-items: flex-start; gap: 6px;">
+                <div style="background: #FFF5D6; border: 1px solid #DFE5EA; border-radius: 6px; padding: 0.65rem 0.85rem; margin-bottom: 1.25rem; font-size: 0.78rem; color: #242A30; line-height: 1.45; display: flex; align-items: flex-start; gap: 6px;">
                     <span style="font-size: 0.9rem; line-height: 1;">💡</span>
                     <span>No email link will be sent. The new password is set directly and can be used immediately to log in.</span>
                 </div>
 
                 <!-- Error Message -->
-                <div id="modal-pw-error" style="display: none; background: #fef2f2; border: 1px solid #fecaca; color: #ef4444; padding: 0.6rem 0.85rem; border-radius: 8px; font-size: 0.82rem; font-weight: 600; margin-bottom: 1rem;"></div>
+                <div id="modal-pw-error" style="display: none; background: #FCEBEC; border: 1px solid #F8D7DA; color: #C62828; padding: 0.6rem 0.85rem; border-radius: 6px; font-size: 0.82rem; font-weight: 600; margin-bottom: 1rem;"></div>
 
                 <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
                     <button type="button" id="modal-pw-cancel" class="btn btn-outline" style="padding: 0.65rem 1.25rem; font-size: 0.88rem;">Cancel</button>
-                    <button type="submit" id="modal-pw-submit" class="btn" style="padding: 0.65rem 1.45rem; font-size: 0.88rem; background: #2563eb; color: #ffffff; border: none; border-radius: 8px; font-weight: 700;">Save Password</button>
+                    <button type="submit" id="modal-pw-submit" class="btn btn-primary" style="padding: 0.65rem 1.45rem; font-size: 0.88rem; background: #007DC6; color: #FFFFFF; border: none; border-radius: 6px; font-weight: 600;">Save Password</button>
                 </div>
             </form>
         </div>

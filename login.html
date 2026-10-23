@@ -8,9 +8,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
     <!-- CSS -->
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/components.css">
@@ -27,12 +25,12 @@
 
         .auth-card {
             width: 100%;
-            max-width: 450px;
-            padding: var(--spacing-10) var(--spacing-8);
-            border-radius: var(--radius-2xl);
-            box-shadow: var(--shadow-xl);
+            max-width: 440px;
+            padding: var(--spacing-8) var(--spacing-8);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
             border: 1px solid var(--color-border);
-            background: var(--bg-secondary);
+            background: var(--bg-surface);
             position: relative;
         }
 
@@ -40,32 +38,34 @@
             content: '';
             position: absolute;
             top: 0;
-            left: 20%;
-            right: 20%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--color-primary);
+            border-top-left-radius: var(--radius-lg);
+            border-top-right-radius: var(--radius-lg);
         }
 
         .auth-header {
             text-align: center;
-            margin-bottom: var(--spacing-8);
+            margin-bottom: var(--spacing-6);
         }
 
         .auth-header .logo {
             display: inline-flex;
             align-items: center;
-            margin-bottom: var(--spacing-4);
+            margin-bottom: var(--spacing-3);
         }
 
         .error-message {
             color: var(--color-danger);
-            background: rgba(239, 68, 68, 0.08);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            border-radius: var(--radius-lg);
+            background: var(--color-danger-light);
+            border: 1px solid rgba(198, 40, 40, 0.25);
+            border-radius: var(--radius-md);
             padding: 0.75rem 1rem;
-            font-size: 0.875rem;
+            font-size: 0.85rem;
             font-weight: 600;
-            margin-bottom: var(--spacing-5);
+            margin-bottom: var(--spacing-4);
             display: none;
             text-align: center;
         }
@@ -80,6 +80,7 @@
         .auth-footer a {
             font-weight: 700;
             color: var(--color-primary);
+            text-decoration: underline;
         }
     </style>
     <link rel="icon" type="image/png" href="assets/images/fevicon.png">

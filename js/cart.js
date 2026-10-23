@@ -361,6 +361,22 @@ export const EnrouteCart = {
                 this.openCart();
             }
         });
+
+        // Ensure header search on static/content pages navigates cleanly to products.html (never product.html)
+        if (!document.getElementById('products-container')) {
+            document.querySelectorAll('.nav-search-form, #header-search-form').forEach(form => {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const input = form.querySelector('input[type="text"]');
+                    const term = input ? input.value.trim() : '';
+                    if (term) {
+                        window.location.href = `products.html?search=${encodeURIComponent(term)}`;
+                    } else {
+                        window.location.href = 'products.html';
+                    }
+                });
+            });
+        }
     }
 };
 

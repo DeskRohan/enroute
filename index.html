@@ -11,25 +11,29 @@
     <link rel="canonical" href="https://enroutestore.vercel.app/">
 
     <!-- Standard SEO Meta Tags -->
-    <meta name="description" content="EnrouteIn — India's #1 store for premium BUSSID mods, game addons & digital products. Download high-quality bus simulator mods, liveries, maps & vehicle packs.">
-    <meta name="keywords" content="BUSSID mods, bus simulator mods, BUSSID livery, BUSSID map mod, game mods, digital products, enrouteIn, premium game addons, bus simulator Indonesia mods, BUSSID vehicle pack">
+    <meta name="description"
+        content="EnrouteIn — India's #1 store for premium BUSSID mods, game addons & digital products. Download high-quality bus simulator mods, liveries, maps & vehicle packs.">
+    <meta name="keywords"
+        content="BUSSID mods, bus simulator mods, BUSSID livery, BUSSID map mod, game mods, digital products, enrouteIn, premium game addons, bus simulator Indonesia mods, BUSSID vehicle pack">
     <meta name="author" content="EnrouteIn">
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-    
+
     <!-- Open Graph (Facebook/WhatsApp/Discord) -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://enroutestore.vercel.app/">
     <meta property="og:title" content="EnrouteIn — Premium BUSSID Mods & Digital Products Store">
-    <meta property="og:description" content="India's #1 store for premium BUSSID mods, game addons & digital products. Download high-quality bus simulator mods, liveries, maps & vehicle packs.">
+    <meta property="og:description"
+        content="India's #1 store for premium BUSSID mods, game addons & digital products. Download high-quality bus simulator mods, liveries, maps & vehicle packs.">
     <meta property="og:image" content="https://enroutestore.vercel.app/assets/images/fevicon.png">
     <meta property="og:site_name" content="EnrouteIn Store">
     <meta property="og:locale" content="en_IN">
-    
+
     <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="https://enroutestore.vercel.app/">
     <meta name="twitter:title" content="EnrouteIn — Premium BUSSID Mods & Digital Products Store">
-    <meta name="twitter:description" content="India's #1 store for premium BUSSID mods, game addons & digital products. Download high-quality bus simulator mods, liveries, maps & vehicle packs.">
+    <meta name="twitter:description"
+        content="India's #1 store for premium BUSSID mods, game addons & digital products. Download high-quality bus simulator mods, liveries, maps & vehicle packs.">
     <meta name="twitter:image" content="https://enroutestore.vercel.app/assets/images/fevicon.png">
 
     <!-- JSON-LD Structured Data: WebSite (enables sitelinks search box) -->
@@ -103,109 +107,118 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap"
+        rel="stylesheet">
     <!-- CSS -->
-    <link rel="stylesheet" href="css/index.css">
-    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/index.css?v=20261022_walmart">
+    <link rel="stylesheet" href="css/components.css?v=20261022_walmart">
     <link rel="stylesheet" href="css/chatbot.css">
     <style>
-        /* Home Automotive Editorial Styles */
+        /* Commercial E-Commerce Homepage Styles */
         body {
-            padding-top: 76px;
+            padding-top: 68px;
         }
 
         /* Banner Hero */
         .hero-banner {
             width: 100%;
             position: relative;
-            padding: var(--spacing-8) 0 var(--spacing-12);
+            padding: 0;
+            margin: 0;
             overflow: hidden;
-            background: linear-gradient(180deg, #ffffff 0%, var(--bg-primary) 100%);
+            background: var(--bg-primary);
         }
 
         .hero-image-wrapper {
             width: 100%;
-            max-width: 1240px;
-            margin: 0 auto;
-            padding: 0 var(--spacing-6);
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
         }
 
         .hero-image-wrapper a {
             display: block;
-            border-radius: var(--radius-xl);
+            width: 100%;
+            border-radius: 0;
             overflow: hidden;
-            box-shadow: var(--shadow-lg);
-            border: 1px solid var(--color-border);
-            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-            background: #ffffff;
-            padding: 5px;
+            box-shadow: none;
+            border: none;
+            background: transparent;
+            padding: 0;
+            margin: 0;
         }
 
         .hero-image-wrapper a:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-xl);
-            border-color: var(--color-border-hover);
+            transform: none;
+            box-shadow: none;
+            border: none;
         }
 
         .hero-image-wrapper img {
             width: 100%;
             height: auto;
-            aspect-ratio: 4.5 / 1;
+            aspect-ratio: 30 / 10;
             object-fit: cover;
             object-position: center;
             display: block;
-            border-radius: calc(var(--radius-xl) - 5px);
+            border-radius: 0;
+            border: none;
+            margin: 0;
+            padding: 0;
         }
 
         .hero-text-container {
             text-align: center;
-            max-width: 920px;
+            max-width: 840px;
             margin: 0 auto;
-            padding: var(--spacing-12) var(--spacing-6) var(--spacing-8);
+            padding: var(--spacing-8) var(--spacing-6) var(--spacing-6);
         }
 
         .hero-pill-badge {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            background: #ffffff;
-            padding: 6px 18px;
+            gap: 7px;
+            background: var(--color-primary-soft);
+            padding: 5px 14px;
             border-radius: var(--radius-full);
-            font-size: 0.825rem;
+            font-size: 0.78rem;
             font-weight: 700;
-            margin-bottom: var(--spacing-6);
+            margin-bottom: var(--spacing-4);
             border: 1px solid var(--color-border);
-            color: var(--text-primary);
+            color: var(--color-primary);
             box-shadow: var(--shadow-xs);
         }
 
         .hero-pill-badge .dot {
-            width: 8px;
-            height: 8px;
+            width: 7px;
+            height: 7px;
             border-radius: 50%;
-            background: #10b981;
+            background: var(--color-success);
         }
 
         .hero-text h1 {
-            font-size: clamp(2.5rem, 5vw, 4.25rem);
-            line-height: 1.08;
-            letter-spacing: -0.04em;
-            margin-bottom: var(--spacing-6);
-            color: var(--text-primary);
+            font-size: clamp(2rem, 3.5vw, 2.75rem);
+            line-height: 1.15;
+            letter-spacing: -0.03em;
+            margin-bottom: var(--spacing-4);
+            color: var(--color-dark-navy);
             font-weight: 800;
         }
 
         .hero-text h1 .highlight {
-            color: var(--color-primary);
+            color: var(--color-dark-navy);
+            background: linear-gradient(180deg, transparent 65%, var(--color-accent) 65%);
             display: inline;
+            padding: 0 4px;
         }
 
         .hero-text p {
-            font-size: 1.15rem;
+            font-size: 1.05rem;
             color: var(--text-secondary);
-            margin-bottom: var(--spacing-8);
-            line-height: 1.65;
-            max-width: 700px;
+            margin-bottom: var(--spacing-6);
+            line-height: 1.6;
+            max-width: 640px;
             margin-left: auto;
             margin-right: auto;
         }
@@ -213,7 +226,7 @@
         .hero-actions {
             display: flex;
             justify-content: center;
-            gap: var(--spacing-4);
+            gap: var(--spacing-3);
             flex-wrap: wrap;
         }
 
@@ -221,20 +234,28 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
-            margin-bottom: var(--spacing-10);
+            margin-bottom: var(--spacing-6);
             gap: var(--spacing-4);
+            border-bottom: 1px solid var(--color-border);
+            padding-bottom: var(--spacing-3);
+        }
+
+        .section-header h2 {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: var(--text-primary);
         }
 
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: var(--spacing-8);
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--spacing-6);
         }
 
-        /* Automotive Features Grid */
+        /* Commercial Features Grid */
         .features-section {
-            background: #ffffff;
-            padding: var(--spacing-20) 0;
+            background: var(--bg-secondary);
+            padding: var(--spacing-12) 0;
             border-top: 1px solid var(--color-border);
             border-bottom: 1px solid var(--color-border);
             position: relative;
@@ -243,32 +264,32 @@
         .features-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: var(--spacing-8);
+            gap: var(--spacing-6);
         }
 
         .feature-card {
-            background: #ffffff;
+            background: var(--bg-primary);
             border: 1px solid var(--color-border);
-            border-radius: var(--radius-xl);
-            padding: var(--spacing-8);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-6);
             display: flex;
             align-items: flex-start;
-            gap: var(--spacing-6);
-            box-shadow: var(--shadow-sm);
-            transition: all var(--transition-normal);
+            gap: var(--spacing-5);
+            box-shadow: var(--shadow-xs);
+            transition: all var(--transition-fast);
         }
 
         .feature-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-md);
-            border-color: var(--color-border-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+            border-color: var(--color-primary);
         }
 
         .feature-icon-wrapper {
             background: var(--bg-tertiary);
-            width: 60px;
-            height: 60px;
-            border-radius: var(--radius-lg);
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -278,13 +299,25 @@
         }
 
         .feature-icon-wrapper svg {
-            width: 28px;
-            height: 28px;
+            width: 22px;
+            height: 22px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.05rem;
+            margin-bottom: var(--spacing-1);
+            font-weight: 700;
+        }
+
+        .feature-card p {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
         }
 
         /* How It Works */
         .how-it-works {
-            padding: var(--spacing-20) 0;
+            padding: var(--spacing-12) 0;
             position: relative;
             background: var(--bg-primary);
         }
@@ -292,75 +325,76 @@
         .steps-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: var(--spacing-8);
+            gap: var(--spacing-6);
             position: relative;
-            margin-top: var(--spacing-12);
+            margin-top: var(--spacing-8);
         }
 
         .step-card {
-            background: #ffffff;
+            background: var(--bg-secondary);
             border: 1px solid var(--color-border);
-            border-radius: var(--radius-xl);
-            padding: var(--spacing-10) var(--spacing-6);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-6) var(--spacing-5);
             text-align: center;
-            box-shadow: var(--shadow-sm);
-            transition: all var(--transition-normal);
+            box-shadow: var(--shadow-xs);
+            transition: all var(--transition-fast);
             position: relative;
         }
 
         .step-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-md);
-            border-color: var(--color-border-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+            border-color: var(--color-primary);
         }
 
         .step-number {
-            width: 54px;
-            height: 54px;
-            border-radius: var(--radius-full);
-            background: var(--text-primary);
-            color: #ffffff;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--color-primary);
+            color: var(--color-primary-text);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.35rem;
+            font-size: 1.15rem;
             font-weight: 800;
-            font-family: var(--font-heading);
-            margin: 0 auto var(--spacing-6);
-            box-shadow: var(--shadow-sm);
+            margin: 0 auto var(--spacing-4);
+            box-shadow: var(--shadow-xs);
         }
 
         .step-card h3 {
-            font-size: 1.2rem;
-            margin-bottom: var(--spacing-3);
+            font-size: 1.05rem;
+            margin-bottom: var(--spacing-2);
+            font-weight: 700;
         }
 
         .step-card p {
-            font-size: 0.95rem;
-            line-height: 1.6;
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
         }
 
         @media (max-width: 900px) {
             .hero-image-wrapper {
-                padding: 0 var(--spacing-4);
+                padding: 0;
             }
 
             .hero-image-wrapper img {
-                aspect-ratio: 4.5 / 1;
+                aspect-ratio: 30 / 10;
                 object-fit: cover;
             }
 
             .hero-text-container {
-                padding: var(--spacing-8) var(--spacing-4) var(--spacing-10);
+                padding: var(--spacing-6) var(--spacing-4) var(--spacing-6);
             }
 
             .hero-text h1 {
-                font-size: 2.35rem;
+                font-size: 1.95rem;
             }
 
             .hero-actions {
                 flex-direction: column;
-                gap: var(--spacing-3);
+                gap: var(--spacing-2);
             }
 
             .hero-actions .btn {
@@ -372,14 +406,14 @@
             }
 
             .feature-card {
-                flex-direction: column;
-                text-align: center;
-                align-items: center;
+                flex-direction: row;
+                text-align: left;
+                align-items: flex-start;
             }
 
             .steps-grid {
                 grid-template-columns: 1fr;
-                gap: var(--spacing-6);
+                gap: var(--spacing-4);
             }
         }
     </style>
@@ -395,6 +429,32 @@
                 EnrouteIn<span>.</span>
                 <span class="logo-badge">Store</span>
             </a>
+            <form class="nav-search-form" id="header-search-form" action="products.html" method="GET">
+                <input type="text" name="search" id="header-search-input" class="nav-search-input"
+                    placeholder="Search BUSSID mods, bus liveries, maps..." autocomplete="off">
+                <div class="nav-search-btn-group">
+                    <button type="button" class="nav-filter-btn" id="open-header-filter-btn" title="Filter & Sort Products" aria-label="Open filter options">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="4" y1="21" x2="4" y2="14"></line>
+                            <line x1="4" y1="10" x2="4" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12" y2="3"></line>
+                            <line x1="20" y1="21" x2="20" y2="16"></line>
+                            <line x1="20" y1="12" x2="20" y2="3"></line>
+                            <line x1="1" y1="14" x2="7" y2="14"></line>
+                            <line x1="9" y1="8" x2="15" y2="8"></line>
+                            <line x1="17" y1="16" x2="23" y2="16"></line>
+                        </svg>
+                    </button>
+                    <button type="submit" class="nav-search-submit" title="Search Store">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </button>
+                </div>
+            </form>
             <ul class="nav-links">
                 <li><a href="index.html" class="active">Home</a></li>
                 <li><a href="products.html">Store</a></li>
@@ -402,15 +462,39 @@
                 <li><a href="contact.html">Support</a></li>
             </ul>
             <div class="nav-actions">
+                <a href="dashboard.html" class="btn btn-outline nav-wish-btn" id="nav-wish-btn" title="View Wishlist">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                        </path>
+                    </svg>
+                    <span class="nav-wish-badge" style="display: none;">0</span>
+                </a>
                 <button class="btn btn-outline nav-cart-btn" id="nav-cart-btn" title="View Cart">
-                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
                     <span class="nav-cart-badge" id="nav-cart-badge" style="display: none;">0</span>
                 </button>
-                <a href="login.html" class="btn btn-outline nav-login-btn" id="nav-login-btn" title="Login / Account">
-                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+                <a href="login.html" class="btn btn-outline nav-login-btn" id="nav-login-btn" title="Sign In">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                        <polyline points="10 17 15 12 10 7"></polyline>
+                        <line x1="15" y1="12" x2="3" y2="12"></line>
+                    </svg>
                 </a>
-                <a href="dashboard.html" class="btn btn-primary nav-dash-btn" id="nav-dash-btn" style="display: none;" title="Dashboard / Profile">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                <a href="dashboard.html" class="btn btn-primary nav-dash-btn" id="nav-dash-btn" style="display: none;"
+                    title="My Account & Orders">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
                 </a>
             </div>
         </div>
@@ -418,121 +502,210 @@
 
     <!-- Banner Hero Section -->
     <section class="hero-banner">
+        <h1
+            style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">
+            Enroute Store — Premium BUSSID Mods & Liveries</h1>
         <div class="hero-image-wrapper">
             <a href="products.html">
-                <img src="assets/images/herofinal.png" alt="Enroute Hero Banner">
+                <img src="assets/images/hero30x10.png" alt="Enroute Hero Banner" width="2172" height="724">
             </a>
-        </div>
-        <div class="hero-text-container">
-            <div class="hero-text">
-                <div class="hero-pill-badge">
-                    <span class="dot"></span>
-                    <span style="color: #f59e0b; font-weight: 700;">★★★★★</span>
-                    <span>Trusted by 10,000+ Drivers</span>
-                </div>
-                <h1>Experience the <span class="highlight">Ultimate Drive</span>.</h1>
-                <p>Elevate your gameplay with hyper-realistic, premium BUSSID mods. Meticulously crafted 3D models, instant delivery, and lifetime access.</p>
-                <div class="hero-actions">
-                    <a href="products.html" class="btn btn-primary btn-lg">
-                        <span>Browse Collection</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                    </a>
-                    <a href="#features" class="btn btn-outline btn-lg">
-                        <span>Why Enroute</span>
-                    </a>
-                </div>
-            </div>
         </div>
     </section>
 
-    <!-- Featured Products -->
-    <section id="featured" class="py-16" style="background: var(--bg-secondary); border-top: 1px solid var(--color-border);">
+    <!-- Live Recently Added Products Marquee Strip -->
+    <div class="recent-products-marquee-strip" id="recent-products-marquee-strip"
+        aria-label="Recently Added BUSSID Mods">
+        <div class="marquee-label">
+            <span class="marquee-live-dot"></span>
+            <span class="marquee-label-text">NEW ARRIVALS</span>
+        </div>
+        <div class="marquee-content-wrap">
+            <div class="marquee-track" id="recent-products-track">
+                <!-- Dynamically loaded & updated real-time from Firestore -->
+                <span class="marquee-loading-item">⚡ Loading freshly added simulator mods...</span>
+            </div>
+        </div>
+        <a href="products.html?sort=newest" class="marquee-view-all-btn" title="View all new arrivals">
+            <span>Explore All</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        </a>
+    </div>
+
+    <!-- Section 1: Latest Arrivals -->
+    <section id="featured" class="py-12"
+        style="background: var(--bg-primary); border-top: 1px solid var(--color-border);">
         <div class="container">
             <div class="section-header">
                 <div>
-                    <h2>Latest Arrivals</h2>
-                    <p class="text-secondary mt-2">Discover our newest, highest-fidelity creations.</p>
+                    <h2>Latest Releases</h2>
+                    <p class="text-secondary mt-1" style="font-size: 0.88rem;">Freshly uploaded simulator creations
+                        ready for immediate download.</p>
                 </div>
-                <a href="products.html" class="btn btn-outline">
+                <a href="products.html?sort=newest" class="btn btn-outline btn-sm">
                     <span>View All</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
                 </a>
             </div>
 
             <div class="products-grid" id="featured-products">
                 <!-- Skeleton Loading -->
-                <div class="card product-card">
-                    <div class="img-container" style="background: var(--bg-tertiary); animation: pulse 1.5s infinite;"></div>
-                    <div class="content">
-                        <div style="height: 18px; width: 35%; background: var(--color-border); margin-bottom: 12px; border-radius: var(--radius-full);"></div>
-                        <div style="height: 24px; background: var(--color-border); margin-bottom: 12px; border-radius: 4px;"></div>
-                        <div style="height: 18px; background: var(--color-border); width: 60%; margin-bottom: 20px; border-radius: 4px;"></div>
-                        <div style="height: 42px; background: var(--color-border); border-radius: var(--radius-md);"></div>
+                <div class="card product-card"
+                    style="background:#fff; border:1px solid var(--color-border); border-radius:var(--radius-md); overflow:hidden;">
+                    <div style="aspect-ratio:16/9; background: var(--bg-tertiary); animation: pulse 1.5s infinite;">
+                    </div>
+                    <div style="padding:1rem;">
+                        <div
+                            style="height: 16px; width: 40%; background: var(--color-border); margin-bottom: 10px; border-radius: 4px;">
+                        </div>
+                        <div
+                            style="height: 20px; background: var(--color-border); margin-bottom: 10px; border-radius: 4px;">
+                        </div>
+                        <div
+                            style="height: 18px; background: var(--color-border); width: 60%; margin-bottom: 16px; border-radius: 4px;">
+                        </div>
+                        <div style="height: 36px; background: var(--color-border); border-radius: 4px;"></div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+
+    <!-- Section 2: Popular Vehicle Mods -->
+    <section class="py-12" style="background: var(--bg-secondary); border-top: 1px solid var(--color-border);">
+        <div class="container">
+            <div class="section-header">
+                <div>
+                    <h2>Popular Vehicle Mods</h2>
+                    <p class="text-secondary mt-1" style="font-size: 0.88rem;">Top-rated buses, trucks, and vehicles for
+                        BUSSID enthusiasts.</p>
+                </div>
+                <a href="products.html?category=mod" class="btn btn-outline btn-sm">
+                    <span>View All Mods</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </a>
+            </div>
+
+            <div class="products-grid" id="popular-mods">
+                <!-- Loaded dynamically from real catalogue -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: Premium Livery Skins -->
+    <section class="py-12" style="background: var(--bg-primary); border-top: 1px solid var(--color-border);">
+        <div class="container">
+            <div class="section-header">
+                <div>
+                    <h2>Top Livery Skins</h2>
+                    <p class="text-secondary mt-1" style="font-size: 0.88rem;">Ultra-clean 4K liveries, realistic
+                        operator fleet skins, and wraps.</p>
+                </div>
+                <a href="products.html?category=livery" class="btn btn-outline btn-sm">
+                    <span>View All Liveries</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </a>
+            </div>
+
+            <div class="products-grid" id="popular-liveries">
+                <!-- Loaded dynamically from real catalogue -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 4: Budget & Free Starter Mods -->
+
 
     <!-- Features -->
     <section id="features" class="features-section">
         <div class="container">
             <div style="text-align: center; max-width: 680px; margin: 0 auto var(--spacing-16);">
                 <div class="trust-badge trust-badge-primary mb-4">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z">
+                        </path>
+                    </svg>
                     <span>Premium Standards</span>
                 </div>
                 <h2>The Enroute Standard</h2>
-                <p class="text-secondary mt-3">We deliver a meticulously engineered digital experience for serious simulation enthusiasts.</p>
+                <p class="text-secondary mt-3">We deliver a meticulously engineered digital experience for serious
+                    simulation enthusiasts.</p>
             </div>
 
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon-wrapper">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                            </polygon>
                         </svg>
                     </div>
                     <div>
                         <h3 style="margin-bottom: 0.5rem;">Hyper-Realistic Quality</h3>
-                        <p class="text-secondary" style="font-size: 0.95rem; line-height: 1.6;">Every 3D model, geometry, and high-resolution texture is crafted with exacting detail to match real-world vehicles.</p>
+                        <p class="text-secondary" style="font-size: 0.95rem; line-height: 1.6;">Every 3D model,
+                            geometry, and high-resolution texture is crafted with exacting detail to match real-world
+                            vehicles.</p>
                     </div>
                 </div>
 
                 <div class="feature-card">
                     <div class="feature-icon-wrapper">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
                             <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
                         </svg>
                     </div>
                     <div>
                         <h3 style="margin-bottom: 0.5rem;">Instant Cloud Access</h3>
-                        <p class="text-secondary" style="font-size: 0.95rem; line-height: 1.6;">No waiting or broken links. The instant your order is confirmed, high-speed direct downloads are ready in your dashboard.</p>
+                        <p class="text-secondary" style="font-size: 0.95rem; line-height: 1.6;">No waiting or broken
+                            links. The instant your order is confirmed, high-speed direct downloads are ready in your
+                            dashboard.</p>
                     </div>
                 </div>
 
                 <div class="feature-card">
                     <div class="feature-icon-wrapper">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
                         </svg>
                     </div>
                     <div>
                         <h3 style="margin-bottom: 0.5rem;">Free Lifetime Updates</h3>
-                        <p class="text-secondary" style="font-size: 0.95rem; line-height: 1.6;">When game patches and new features arrive, all our mods are updated immediately. You get free access to every future iteration.</p>
+                        <p class="text-secondary" style="font-size: 0.95rem; line-height: 1.6;">When game patches and
+                            new features arrive, all our mods are updated immediately. You get free access to every
+                            future iteration.</p>
                     </div>
                 </div>
 
                 <div class="feature-card">
                     <div class="feature-icon-wrapper">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
                             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                             <polyline points="9 12 11 14 15 10"></polyline>
                         </svg>
                     </div>
                     <div>
                         <h3 style="margin-bottom: 0.5rem;">Bank-Grade Security</h3>
-                        <p class="text-secondary" style="font-size: 0.95rem; line-height: 1.6;">Powered by Razorpay, checkout is fully encrypted and PCI-DSS compliant. Your transactions and data are always 100% protected.</p>
+                        <p class="text-secondary" style="font-size: 0.95rem; line-height: 1.6;">Powered by Razorpay,
+                            checkout is fully encrypted and PCI-DSS compliant. Your transactions and data are always
+                            100% protected.</p>
                     </div>
                 </div>
             </div>
@@ -550,17 +723,20 @@
                 <div class="step-card">
                     <div class="step-number">1</div>
                     <h3>Choose Your Mod</h3>
-                    <p class="text-secondary">Explore our curated collection of premium buses, cars, trucks, and custom livery maps.</p>
+                    <p class="text-secondary">Explore our curated collection of premium buses, cars, trucks, and custom
+                        livery maps.</p>
                 </div>
                 <div class="step-card">
                     <div class="step-number">2</div>
                     <h3>Secure Checkout</h3>
-                    <p class="text-secondary">Complete your payment securely via UPI, Cards, NetBanking, or Wallet with instant confirmation.</p>
+                    <p class="text-secondary">Complete your payment securely via UPI, Cards, NetBanking, or Wallet with
+                        instant confirmation.</p>
                 </div>
                 <div class="step-card">
                     <div class="step-number">3</div>
                     <h3>Download & Drive</h3>
-                    <p class="text-secondary">Instantly access your download file directly in your dashboard and import into your game.</p>
+                    <p class="text-secondary">Instantly access your download file directly in your dashboard and import
+                        into your game.</p>
                 </div>
             </div>
         </div>
@@ -571,8 +747,10 @@
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-col">
-                    <a href="index.html" class="logo mb-4" style="display:inline-flex;">EnrouteIn<span>.</span><span class="logo-badge">Store</span></a>
-                    <p class="text-secondary" style="font-size: 0.95rem; line-height: 1.6;">The premier destination for hyper-realistic BUSSID mods, liveries, and simulation digital products.</p>
+                    <a href="index.html" class="logo mb-4" style="display:inline-flex;">EnrouteIn<span>.</span><span
+                            class="logo-badge">Store</span></a>
+                    <p class="text-secondary" style="font-size: 0.95rem; line-height: 1.6;">The premier destination for
+                        hyper-realistic BUSSID mods, liveries, and simulation digital products.</p>
                 </div>
                 <div class="footer-col">
                     <h4>Navigation</h4>
@@ -595,15 +773,33 @@
                     <h4>Get in Touch</h4>
                     <ul class="footer-links">
                         <li style="display: flex; align-items: center; gap: 8px;">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary); flex-shrink: 0;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                style="color: var(--color-primary); flex-shrink: 0;">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z">
+                                </path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
                             <a href="mailto:enroutestorein@gmail.com">enroutestorein@gmail.com</a>
                         </li>
                         <li style="display: flex; align-items: center; gap: 8px;">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary); flex-shrink: 0;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                style="color: var(--color-primary); flex-shrink: 0;">
+                                <path
+                                    d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+                                </path>
+                            </svg>
                             <a href="tel:+917621000916">+91 7621000916</a>
                         </li>
-                        <li style="display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 0.925rem;">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary); flex-shrink: 0;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                        <li
+                            style="display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 0.925rem;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                style="color: var(--color-primary); flex-shrink: 0;">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
                             <span>Ahmedabad, Gujarat, India</span>
                         </li>
                     </ul>
@@ -611,11 +807,17 @@
             </div>
             <div class="footer-bottom">
                 <p>&copy; 2026 EnrouteIn. All rights reserved.</p>
-                <div style="display: flex; gap: 1rem; align-items: center; color: var(--text-secondary); font-size: 0.85rem;">
+                <div
+                    style="display: flex; gap: 1rem; align-items: center; color: var(--text-secondary); font-size: 0.85rem;">
                     <span>Developed by <strong>SIMPLINOVUS</strong></span>
                     <span>•</span>
                     <span style="display: inline-flex; align-items: center; gap: 4px;">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-success);"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            style="color: var(--color-success);">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
                         Secured by Razorpay
                     </span>
                 </div>

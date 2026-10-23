@@ -28,13 +28,14 @@ const copyShareMsgBtn = document.getElementById('copy-share-msg-btn');
 const licenseCanvas = document.getElementById('driver-license-canvas');
 
 // Tab Navigation
-const tabGarage = document.getElementById('tab-garage');
+const tabOverview = document.getElementById('tab-overview');
+const tabOrders = document.getElementById('tab-orders');
 const tabWishlist = document.getElementById('tab-wishlist');
 const tabRequests = document.getElementById('tab-requests');
-const tabOrders = document.getElementById('tab-orders');
+const tabHelp = document.getElementById('tab-help');
 
 let currentUser = null;
-let currentTab = 'garage'; // 'garage' | 'wishlist' | 'requests' | 'orders'
+let currentTab = 'overview'; // 'overview' | 'orders' | 'wishlist' | 'requests' | 'help'
 let cachedOrders = [];
 let cachedGarageProducts = [];
 
@@ -185,7 +186,7 @@ const drawDriverLicenseCard = (canvas, driverName, driverId, rank, email) => {
     } else {
         // Fallback dynamic logo emblem
         ctx.save();
-        ctx.fillStyle = '#1e3a8a';
+        ctx.fillStyle = '#202124';
         ctx.beginPath();
         ctx.roundRect ? ctx.roundRect(logoX, logoY, logoSize, logoSize, 12) : ctx.rect(logoX, logoY, logoSize, logoSize);
         ctx.fill();
@@ -228,8 +229,8 @@ const drawDriverLicenseCard = (canvas, driverName, driverId, rank, email) => {
     const barX = width - 60 - barW;
     const barY = 48;
     const barGrad = ctx.createLinearGradient(barX, barY, barX + barW, barY);
-    barGrad.addColorStop(0, '#1e3a8a');
-    barGrad.addColorStop(1, '#38bdf8');
+    barGrad.addColorStop(0, '#007DC6');
+    barGrad.addColorStop(1, '#FFC220');
     ctx.fillStyle = barGrad;
     ctx.beginPath();
     ctx.roundRect ? ctx.roundRect(barX, barY, barW, barH, 3) : ctx.rect(barX, barY, barW, barH);
@@ -293,8 +294,8 @@ const drawDriverLicenseCard = (canvas, driverName, driverId, rank, email) => {
 
     // Glowing shadow
     const avGlow = ctx.createRadialGradient(avCX, avCY, avR * 0.8, avCX, avCY, avR * 1.3);
-    avGlow.addColorStop(0, 'rgba(59, 130, 246, 0.35)');
-    avGlow.addColorStop(1, 'rgba(59, 130, 246, 0)');
+    avGlow.addColorStop(0, 'rgba(36, 74, 60, 0.25)');
+    avGlow.addColorStop(1, 'rgba(36, 74, 60, 0)');
     ctx.fillStyle = avGlow;
     ctx.beginPath();
     ctx.arc(avCX, avCY, avR * 1.3, 0, Math.PI * 2);
@@ -302,9 +303,9 @@ const drawDriverLicenseCard = (canvas, driverName, driverId, rank, email) => {
 
     // Sphere Gradient
     const sphereGrad = ctx.createRadialGradient(avCX - 20, avCY - 20, 10, avCX, avCY, avR);
-    sphereGrad.addColorStop(0, '#60a5fa');
-    sphereGrad.addColorStop(0.5, '#2563eb');
-    sphereGrad.addColorStop(1, '#1d4ed8');
+    sphereGrad.addColorStop(0, '#34363A');
+    sphereGrad.addColorStop(0.5, '#202124');
+    sphereGrad.addColorStop(1, '#111215');
     ctx.fillStyle = sphereGrad;
     ctx.beginPath();
     ctx.arc(avCX, avCY, avR, 0, Math.PI * 2);
@@ -322,7 +323,7 @@ const drawDriverLicenseCard = (canvas, driverName, driverId, rank, email) => {
     const badgeY = avCY + 46;
     const badgeR = 18;
 
-    ctx.fillStyle = '#10b981';
+    ctx.fillStyle = '#238636';
     ctx.beginPath();
     ctx.arc(badgeX, badgeY, badgeR, 0, Math.PI * 2);
     ctx.fill();
@@ -340,17 +341,17 @@ const drawDriverLicenseCard = (canvas, driverName, driverId, rank, email) => {
     ctx.textBaseline = 'alphabetic';
 
     // Label: OFFICIAL DRIVER OPERATOR
-    ctx.fillStyle = '#64748b';
+    ctx.fillStyle = '#60646C';
     ctx.font = '800 12px "Space Grotesk", sans-serif';
     ctx.fillText('OFFICIAL DRIVER OPERATOR', colX, 192);
 
     // Value: Driver Name
-    ctx.fillStyle = '#090d16';
+    ctx.fillStyle = '#202124';
     ctx.font = '900 42px "Space Grotesk", sans-serif';
     ctx.fillText(driverName || 'admin', colX, 242);
 
     // Hairline Divider
-    ctx.strokeStyle = '#e2e8f0';
+    ctx.strokeStyle = '#E2E5E9';
     ctx.lineWidth = 1.2;
     ctx.beginPath();
     ctx.moveTo(colX, 282);
@@ -358,41 +359,41 @@ const drawDriverLicenseCard = (canvas, driverName, driverId, rank, email) => {
     ctx.stroke();
 
     // LICENSE ID NUMBER
-    ctx.fillStyle = '#64748b';
+    ctx.fillStyle = '#60646C';
     ctx.font = '800 12px "Space Grotesk", sans-serif';
     ctx.fillText('LICENSE ID NUMBER', colX, 318);
 
-    ctx.fillStyle = '#2563eb';
+    ctx.fillStyle = '#202124';
     ctx.font = '900 28px monospace';
     ctx.fillText(driverId, colX, 356);
 
     // FLEET RANK
     const rankColX = 570;
-    ctx.fillStyle = '#64748b';
+    ctx.fillStyle = '#60646C';
     ctx.font = '800 12px "Space Grotesk", sans-serif';
     ctx.fillText('FLEET RANK', rankColX, 318);
 
-    // Fleet Rank Mint Badge Pill
+    // Fleet Rank Pale Sage Badge Pill
     const rankPillW = 185;
     const rankPillH = 38;
-    ctx.fillStyle = '#dcfce7';
+    ctx.fillStyle = '#FFF8D9';
     ctx.beginPath();
-    ctx.roundRect ? ctx.roundRect(rankColX, 328, rankPillW, rankPillH, 8) : ctx.rect(rankColX, 328, rankPillW, rankPillH);
+    ctx.roundRect ? ctx.roundRect(rankColX, 328, rankPillW, rankPillH, 4) : ctx.rect(rankColX, 328, rankPillW, rankPillH);
     ctx.fill();
-    ctx.strokeStyle = '#86efac';
-    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = '#EAB800';
+    ctx.lineWidth = 1;
     ctx.stroke();
 
-    ctx.fillStyle = '#059669';
+    ctx.fillStyle = '#202124';
     ctx.font = '900 15px "Space Grotesk", sans-serif';
     ctx.fillText(`👑 ${rank.toUpperCase()}`, rankColX + 14, 352);
 
     // SIMULATION CLEARANCE
-    ctx.fillStyle = '#64748b';
+    ctx.fillStyle = '#77786F';
     ctx.font = '800 12px "Space Grotesk", sans-serif';
     ctx.fillText('SIMULATION CLEARANCE', colX, 416);
 
-    ctx.fillStyle = '#0f172a';
+    ctx.fillStyle = '#252923';
     ctx.font = '900 20px "Space Grotesk", sans-serif';
     ctx.fillText('LIFETIME CLOUD ASSET HOLDER', colX, 452);
 
@@ -405,7 +406,7 @@ const drawDriverLicenseCard = (canvas, driverName, driverId, rank, email) => {
         ctx.restore();
     }
 
-    ctx.fillStyle = 'rgba(148, 163, 184, 0.45)';
+    ctx.fillStyle = 'rgba(119, 120, 111, 0.35)';
     ctx.font = '900 24px "Space Grotesk", sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('ENROUTEIN', 940, 265);
@@ -416,7 +417,7 @@ const drawDriverLicenseCard = (canvas, driverName, driverId, rank, email) => {
     // Barcode at right
     const bcX = 770;
     const bcY = 385;
-    ctx.fillStyle = '#0f172a';
+    ctx.fillStyle = '#252923';
     const barPattern = [4, 2, 6, 3, 5, 2, 4, 8, 3, 6, 2, 7, 4, 3, 6, 2, 5, 7, 3, 5, 4, 2, 6, 5, 8, 3, 2, 5, 4, 3, 6, 2, 7, 4, 2, 6, 3];
     let curX = bcX;
     for (let bw of barPattern) {
@@ -424,14 +425,14 @@ const drawDriverLicenseCard = (canvas, driverName, driverId, rank, email) => {
         curX += bw + 3;
     }
 
-    ctx.fillStyle = '#64748b';
+    ctx.fillStyle = '#77786F';
     ctx.font = '800 11px monospace';
     ctx.textAlign = 'center';
     ctx.fillText('E N R O U T E I N   -   V E R I F I E D', bcX + (curX - bcX) / 2, bcY + 86);
     ctx.textAlign = 'left';
 
     // 9. Bottom Footer Bar
-    ctx.strokeStyle = '#e2e8f0';
+    ctx.strokeStyle = '#E4E1D8';
     ctx.lineWidth = 1.2;
     ctx.beginPath();
     ctx.moveTo(55, 575);
@@ -467,8 +468,8 @@ const drawDriverLicenseCard = (canvas, driverName, driverId, rank, email) => {
     ctx.fillText('KEEP DRIVING FOR A BETTER VIRTUAL TOMORROW  →', width - 90, 616);
     ctx.textAlign = 'left';
 
-    // Blue Geometric Corner Polygon (Bottom Right)
-    ctx.fillStyle = '#2563eb';
+    // Spark Yellow Geometric Corner Polygon (Bottom Right)
+    ctx.fillStyle = '#FFC220';
     ctx.beginPath();
     ctx.moveTo(width - 70, height - 85);
     ctx.lineTo(width - 25, height - 85);
@@ -478,7 +479,7 @@ const drawDriverLicenseCard = (canvas, driverName, driverId, rank, email) => {
     ctx.closePath();
     ctx.fill();
 
-    ctx.fillStyle = '#1e40af';
+    ctx.fillStyle = '#18382F';
     ctx.beginPath();
     ctx.moveTo(width - 45, height - 45);
     ctx.lineTo(width - 2, height - 2);
@@ -714,8 +715,12 @@ const loadDashboardData = async () => {
         // Update Wishlist Counter
         updateWishlistCount();
 
-        // Render current active tab
-        renderCurrentTab();
+        // Render current active tab (respecting URL hash if provided)
+        if (window.location.hash) {
+            handleUrlHash();
+        } else {
+            renderCurrentTab();
+        }
     } catch (error) {
         console.error("Error loading dashboard data:", error);
         contentArea.innerHTML = `
@@ -770,23 +775,265 @@ const updateWishlistCount = () => {
 };
 
 // ----------------------------------------------------
+// Download Executor Helper
+// ----------------------------------------------------
+const executeDirectDownload = async (url, btn) => {
+    if (!url || url === '#' || url === 'undefined') {
+        showToast('Download link is not available.');
+        return;
+    }
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path></svg>
+        <span>Preparing...</span>
+    `;
+
+    try {
+        if (url.includes('sharemods.com') || /^[a-z0-9]{12}$/i.test(url.trim())) {
+            const apiBase = (window.location.hostname === 'localhost' && window.location.port !== '3001') ? 'http://localhost:3001' : '';
+            const res = await fetch(`${apiBase}/api/direct-download?url=${encodeURIComponent(url)}`);
+            const data = await res.json();
+            if (data.ok && data.directUrl) {
+                btn.innerHTML = `<span>✓ Downloading!</span>`;
+                const a = document.createElement('a');
+                a.href = data.directUrl;
+                if (data.filename) a.download = data.filename;
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                }, 3000);
+                return;
+            }
+        }
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = '';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+            document.body.removeChild(a);
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        }, 1000);
+    } catch (err) {
+        console.error('Direct download error:', err);
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+        
+        let fileCode = '';
+        const match = url.match(/sharemods\.com\/([a-zA-Z0-9]+)/);
+        if (match) fileCode = match[1];
+        else if (/^[a-z0-9]{8,20}$/i.test(url.trim())) fileCode = url.trim();
+
+        if (fileCode) {
+            let iframe = document.getElementById('enroute-download-frame');
+            if (!iframe) {
+                iframe = document.createElement('iframe');
+                iframe.id = 'enroute-download-frame';
+                iframe.name = 'enroute-download-frame';
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+            }
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `https://sharemods.com/${fileCode}`;
+            form.target = 'enroute-download-frame';
+            const fields = { op: 'download2', id: fileCode, rand: '', referer: `https://sharemods.com/${fileCode}`, method_free: '', method_premium: '' };
+            for (const [k, v] of Object.entries(fields)) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = k;
+                input.value = v;
+                form.appendChild(input);
+            }
+            document.body.appendChild(form);
+            form.submit();
+            setTimeout(() => document.body.removeChild(form), 1000);
+        } else {
+            const fallbackA = document.createElement('a');
+            fallbackA.href = url;
+            fallbackA.download = '';
+            document.body.appendChild(fallbackA);
+            fallbackA.click();
+            setTimeout(() => document.body.removeChild(fallbackA), 1000);
+        }
+    }
+};
+
+// ----------------------------------------------------
 // Tab Router
 // ----------------------------------------------------
 const renderCurrentTab = () => {
     switch (currentTab) {
-        case 'garage':
-            renderGarageTab();
+        case 'overview':
+            renderOverviewTab();
+            break;
+        case 'orders':
+            renderOrdersTab();
             break;
         case 'wishlist':
             renderWishlistTab();
             break;
         case 'requests':
+        case 'community':
             renderVotingHubTab();
             break;
-        case 'orders':
-            renderOrdersTab();
+        case 'help':
+            renderHelpTab();
+            break;
+        case 'garage':
+            renderGarageTab();
+            break;
+        default:
+            renderOverviewTab();
             break;
     }
+};
+
+// ----------------------------------------------------
+// TAB 0: Customer Account Overview (Task 8.1)
+// ----------------------------------------------------
+const renderOverviewTab = () => {
+    const totalOrders = cachedOrders.length;
+    const unlockedMods = cachedGarageProducts.length;
+    let savedWishlistCount = 0;
+    try {
+        savedWishlistCount = JSON.parse(localStorage.getItem('enroute_wishlist') || '[]').length;
+    } catch(e) {}
+
+    const recentOrders = cachedOrders.slice(0, 3);
+    let recentOrdersHtml = '';
+
+    if (recentOrders.length === 0) {
+        recentOrdersHtml = `
+            <div style="background: var(--bg-surface); border: 1px dashed var(--color-border); border-radius: var(--radius-md); padding: 2.5rem 1.5rem; text-align: center;">
+                <p class="text-secondary" style="font-size: 0.95rem; margin-bottom: 1rem;">You haven't placed any orders yet. Discover our collection of high-definition bus mods and liveries.</p>
+                <a href="products.html" class="btn btn-primary btn-sm">Explore Store Catalog</a>
+            </div>
+        `;
+    } else {
+        recentOrdersHtml = recentOrders.map((order, idx) => {
+            const orderProduct = cachedGarageProducts.find(p => p.id === order.productId);
+            const downloadLink = orderProduct?.downloadLink || order.downloadLink || '#';
+            return `
+                <div style="background: var(--bg-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.15rem 1.25rem; margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 2px;">
+                            Order #${order.id.slice(0, 8).toUpperCase()} • ${formatDate(order.createdAt)}
+                        </div>
+                        <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">${order.productName || 'BUSSID Mod'}</h4>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary); display: flex; align-items: center; gap: 8px;">
+                            <span style="font-weight: 700; color: var(--color-primary);">${formatPrice(order.amount)}</span>
+                            <span>•</span>
+                            <span style="color: var(--color-success); font-weight: 700;">✓ Paid (Razorpay)</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <button type="button" class="btn btn-primary btn-sm overview-download-btn" data-url="${downloadLink}" style="gap: 5px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            <span>Download Mod</span>
+                        </button>
+                        <button type="button" class="btn btn-outline btn-sm overview-invoice-btn" data-order-index="${idx}" title="Tax Invoice">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                            <span>Invoice</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    contentArea.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-6); flex-wrap: wrap; gap: var(--spacing-4);">
+            <div>
+                <h2 style="font-size: 1.5rem; font-weight: 800; margin: 0; color: var(--text-primary);">Account Overview</h2>
+                <p class="text-secondary" style="font-size: 0.875rem; margin: 2px 0 0 0;">Manage your orders, digital downloads, and personal preferences.</p>
+            </div>
+            <a href="products.html" class="btn btn-primary btn-sm">Explore Store</a>
+        </div>
+
+        <!-- 3 Quick Metric Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: var(--spacing-4); margin-bottom: var(--spacing-6);">
+            <div style="background: var(--bg-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.25rem; display: flex; align-items: center; gap: 1rem;">
+                <div style="width: 44px; height: 44px; border-radius: var(--radius-sm); background: var(--color-primary-light); color: var(--color-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                </div>
+                <div>
+                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted);">Total Orders</div>
+                    <div style="font-size: 1.4rem; font-weight: 800; font-family: var(--font-heading); color: var(--text-primary);">${totalOrders}</div>
+                </div>
+            </div>
+
+            <div style="background: var(--bg-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.25rem; display: flex; align-items: center; gap: 1rem;">
+                <div style="width: 44px; height: 44px; border-radius: var(--radius-sm); background: rgba(35, 134, 54, 0.1); color: #238636; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                </div>
+                <div>
+                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted);">Active Downloads</div>
+                    <div style="font-size: 1.4rem; font-weight: 800; font-family: var(--font-heading); color: #238636;">${unlockedMods} Files</div>
+                </div>
+            </div>
+
+            <div style="background: var(--bg-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.25rem; display: flex; align-items: center; gap: 1rem;">
+                <div style="width: 44px; height: 44px; border-radius: var(--radius-sm); background: rgba(255, 194, 32, 0.15); color: #b45309; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                </div>
+                <div>
+                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted);">Saved Wishlist</div>
+                    <div style="font-size: 1.4rem; font-weight: 800; font-family: var(--font-heading); color: var(--text-primary);">${savedWishlistCount} Items</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Orders Section -->
+        <div style="margin-bottom: var(--spacing-6);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
+                <h3 style="font-size: 1.15rem; font-weight: 800; margin: 0; color: var(--text-primary);">Recent Orders</h3>
+                ${totalOrders > 0 ? '<a href="#orders" id="overview-view-all-orders" style="font-size: 0.85rem; font-weight: 700; color: var(--color-primary); text-decoration: none;">View All Orders &rarr;</a>' : ''}
+            </div>
+            ${recentOrdersHtml}
+        </div>
+
+        <!-- Help & Shortcuts Banner -->
+        <div style="background: var(--color-bg-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.25rem 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h4 style="font-size: 1rem; font-weight: 700; margin: 0 0 4px 0; color: var(--text-primary);">Need Help with Mod Installation?</h4>
+                <p class="text-secondary" style="font-size: 0.85rem; margin: 0;">Copy downloaded .bussidmod files to your phone\'s <code>Internal Storage &gt; BUSSID &gt; Mods</code> folder.</p>
+            </div>
+            <a href="#help" id="overview-help-shortcut" class="btn btn-outline btn-sm">View Installation Guide</a>
+        </div>
+    `;
+
+    // Attach listeners
+    contentArea.querySelectorAll('.overview-download-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const url = btn.getAttribute('data-url');
+            executeDirectDownload(url, btn);
+        });
+    });
+
+    contentArea.querySelectorAll('.overview-invoice-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const idx = parseInt(btn.getAttribute('data-order-index'));
+            showInvoice(recentOrders[idx]);
+        });
+    });
+
+    document.getElementById('overview-view-all-orders')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        activateTab('orders', tabOrders);
+    });
+
+    document.getElementById('overview-help-shortcut')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        activateTab('help', tabHelp);
+    });
 };
 
 // ----------------------------------------------------
@@ -1294,17 +1541,23 @@ const loadRequestsFeed = async () => {
 };
 
 // ----------------------------------------------------
-// TAB 4: Order Invoices
+// ----------------------------------------------------
+// TAB 1: My Orders & Downloads (Task 8.2)
 // ----------------------------------------------------
 const renderOrdersTab = () => {
     if (cachedOrders.length === 0) {
         contentArea.innerHTML = `
             <div style="margin-bottom: var(--spacing-6);">
-                <h2 style="font-size: 1.5rem; font-weight: 800; margin: 0; color: var(--text-primary);">Order Invoices & Receipts</h2>
-                <p class="text-secondary" style="font-size: 0.875rem; margin: 2px 0 0 0;">View transaction history and download tax invoices.</p>
+                <h2 style="font-size: 1.5rem; font-weight: 800; margin: 0; color: var(--text-primary);">My Orders & Downloads</h2>
+                <p class="text-secondary" style="font-size: 0.875rem; margin: 2px 0 0 0;">View your completed digital purchases, download mod files, and access tax invoices.</p>
             </div>
-            <div class="empty-state" style="background: var(--bg-primary); border-radius: var(--radius-xl); border: 1px dashed var(--color-border); padding: 3rem 1rem; text-align: center;">
-                <p class="text-secondary">No purchase orders found.</p>
+            <div class="empty-state" style="background: var(--bg-surface); border-radius: var(--radius-md); border: 1px dashed var(--color-border); padding: 3.5rem 2rem; text-align: center;">
+                <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--color-primary-light); color: var(--color-primary); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-4);">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                </div>
+                <h4 style="margin-bottom: 0.5rem; font-size: 1.25rem;">No Orders Found</h4>
+                <p class="text-secondary" style="font-size: 0.95rem; margin-bottom: 1.5rem;">You haven't purchased any BUSSID mods yet.</p>
+                <a href="products.html" class="btn btn-primary">Browse BUSSID Mods</a>
             </div>
         `;
         return;
@@ -1312,22 +1565,69 @@ const renderOrdersTab = () => {
 
     let ordersHtml = '';
     cachedOrders.forEach((order, index) => {
+        const orderProduct = cachedGarageProducts.find(p => p.id === order.productId);
+        const downloadLink = orderProduct?.downloadLink || order.downloadLink || '#';
+        const primaryImg = (orderProduct?.images && orderProduct.images.length > 0) ? orderProduct.images[0] : (orderProduct?.image || '');
+
         ordersHtml += `
-            <div class="order-card" style="display: flex; justify-content: space-between; align-items: center; padding: 1.15rem 1.35rem; background: var(--bg-primary); border: 1px solid var(--color-border); border-radius: var(--radius-xl); margin-bottom: 0.75rem;">
-                <div>
-                    <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; margin-bottom: 2px;">Order #${order.id.slice(0, 8).toUpperCase()}</div>
-                    <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">${order.productName || 'BUSSID Mod'}</h4>
-                    <p class="text-secondary" style="font-size: 0.825rem; margin: 0;">Date: ${formatDate(order.createdAt)} • Method: Razorpay</p>
-                </div>
-                <div style="display: flex; align-items: center; gap: 1.25rem;">
-                    <div style="text-align: right;">
-                        <div style="font-size: 1.25rem; font-weight: 800; font-family: var(--font-heading); color: var(--color-primary);">${formatPrice(order.amount)}</div>
-                        <span style="font-size: 0.72rem; font-weight: 800; padding: 2px 8px; background: rgba(16, 185, 129, 0.1); color: #059669; border-radius: var(--radius-full); border: 1px solid rgba(16, 185, 129, 0.25);">PAID</span>
+            <div class="order-container" style="background: var(--bg-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); margin-bottom: 1.25rem; overflow: hidden;">
+                <!-- Amazon/Flipkart Style Order Header -->
+                <div style="background: var(--color-bg-subtle); border-bottom: 1px solid var(--color-border); padding: 0.85rem 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; font-size: 0.825rem;">
+                    <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+                        <div>
+                            <span style="color: var(--text-muted); text-transform: uppercase; font-size: 0.72rem; font-weight: 700; display: block;">ORDER PLACED</span>
+                            <span style="font-weight: 600; color: var(--text-primary);">${formatDate(order.createdAt)}</span>
+                        </div>
+                        <div>
+                            <span style="color: var(--text-muted); text-transform: uppercase; font-size: 0.72rem; font-weight: 700; display: block;">TOTAL</span>
+                            <span style="font-weight: 800; color: var(--color-primary);">${formatPrice(order.amount)}</span>
+                        </div>
+                        <div>
+                            <span style="color: var(--text-muted); text-transform: uppercase; font-size: 0.72rem; font-weight: 700; display: block;">STATUS</span>
+                            <span style="font-weight: 800; color: var(--color-success);">✓ Paid & Verified</span>
+                        </div>
                     </div>
-                    <button class="btn btn-outline btn-sm invoice-btn" data-order-index="${index}">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-                        <span>Print Invoice</span>
-                    </button>
+                    <div style="text-align: right;">
+                        <span style="color: var(--text-muted); text-transform: uppercase; font-size: 0.72rem; font-weight: 700; display: block;">ORDER # ${order.id.slice(0, 10).toUpperCase()}</span>
+                        <button type="button" class="order-invoice-link-btn" data-order-index="${index}" style="background: none; border: none; padding: 0; color: var(--color-primary); font-weight: 700; cursor: pointer; text-decoration: underline; font-size: 0.825rem;">View Tax Invoice</button>
+                    </div>
+                </div>
+
+                <!-- Product Details & Actions Row -->
+                <div style="padding: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.25rem;">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        ${primaryImg ? `
+                            <img src="${getImageUrl(primaryImg)}" alt="${order.productName || 'BUSSID Mod'}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=800';" style="width: 80px; height: 56px; object-fit: cover; border-radius: var(--radius-sm); border: 1px solid var(--color-border);">
+                        ` : `
+                            <div style="width: 80px; height: 56px; background: var(--color-primary-light); color: var(--color-primary); display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); border: 1px solid var(--color-border); font-size: 1.5rem;">🚍</div>
+                        `}
+                        <div>
+                            <h4 style="font-size: 1.1rem; font-weight: 700; margin: 0 0 4px 0; color: var(--text-primary);">${order.productName || 'BUSSID Vehicle Mod'}</h4>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 2px;">
+                                Digital Product: <strong>${orderProduct?.category || 'BUSSID Mod / Livery'}</strong>
+                            </div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">
+                                Payment Ref: <code style="font-family: monospace; font-size: 0.75rem;">${order.paymentId || 'pay_verified'}</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Direct Action Buttons -->
+                    <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                        <button type="button" class="btn btn-primary btn-sm order-download-btn" data-url="${downloadLink}" data-name="${(order.productName || '').replace(/"/g, '&quot;')}" style="gap: 6px;">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            <span>Mod / Livery Download</span>
+                        </button>
+                        <button type="button" class="btn btn-outline btn-sm order-invoice-btn" data-order-index="${index}" style="gap: 6px;">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                            <span>Invoice Download</span>
+                        </button>
+                        ${order.productId ? `
+                            <a href="product.html?id=${order.productId}" class="btn btn-outline btn-sm" title="View Mod Page">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                            </a>
+                        ` : ''}
+                    </div>
                 </div>
             </div>
         `;
@@ -1335,20 +1635,95 @@ const renderOrdersTab = () => {
 
     contentArea.innerHTML = `
         <div style="margin-bottom: var(--spacing-6);">
-            <h2 style="font-size: 1.5rem; font-weight: 800; margin: 0; color: var(--text-primary);">Order Invoices & Receipts</h2>
-            <p class="text-secondary" style="font-size: 0.875rem; margin: 2px 0 0 0;">Official commercial receipts verified with Razorpay payment tokens.</p>
+            <h2 style="font-size: 1.5rem; font-weight: 800; margin: 0; color: var(--text-primary);">My Orders & Downloads</h2>
+            <p class="text-secondary" style="font-size: 0.875rem; margin: 2px 0 0 0;">Access your authorized digital files, updates, and official commercial tax receipts.</p>
         </div>
         <div>
             ${ordersHtml}
         </div>
     `;
 
-    document.querySelectorAll('.invoice-btn').forEach(btn => {
+    // Download action
+    contentArea.querySelectorAll('.order-download-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const url = btn.getAttribute('data-url');
+            executeDirectDownload(url, btn);
+        });
+    });
+
+    // Invoice actions
+    contentArea.querySelectorAll('.order-invoice-btn, .order-invoice-link-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const idx = parseInt(btn.getAttribute('data-order-index'));
             showInvoice(cachedOrders[idx]);
         });
     });
+};
+
+// ----------------------------------------------------
+// TAB 5: Help & Support (Task 8.4)
+// ----------------------------------------------------
+const renderHelpTab = () => {
+    contentArea.innerHTML = `
+        <div style="margin-bottom: var(--spacing-6);">
+            <h2 style="font-size: 1.5rem; font-weight: 800; margin: 0; color: var(--text-primary);">Customer Help & Assistance</h2>
+            <p class="text-secondary" style="font-size: 0.875rem; margin: 2px 0 0 0;">Get immediate assistance with BUSSID mod installations, downloads, or payment queries.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--spacing-6); margin-bottom: var(--spacing-6);">
+            <!-- Topic 1 -->
+            <div style="background: var(--bg-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                    <div style="width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--color-primary-light); color: var(--color-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    </div>
+                    <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0; color: var(--text-primary);">How to Install BUSSID Mods</h3>
+                </div>
+                <p class="text-secondary" style="font-size: 0.875rem; line-height: 1.6; margin-bottom: 0.75rem;">
+                    Follow these simple steps on your Android device:
+                </p>
+                <ol style="font-size: 0.875rem; color: var(--text-primary); line-height: 1.7; padding-left: 1.25rem; margin: 0 0 1rem 0;">
+                    <li>Download your purchased <code>.bussidmod</code> or <code>.bussidvehicle</code> file from your Orders tab.</li>
+                    <li>Open your device's <strong>File Manager</strong> and locate the file in your <code>Download</code> folder.</li>
+                    <li>Move or copy the file into <code>Internal Storage &gt; BUSSID &gt; Mods</code>.</li>
+                    <li>Launch <strong>Bus Simulator Indonesia</strong>, open your Garage, and activate your new vehicle!</li>
+                </ol>
+            </div>
+
+            <!-- Topic 2 -->
+            <div style="background: var(--bg-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                    <div style="width: 36px; height: 36px; border-radius: var(--radius-sm); background: rgba(35, 134, 54, 0.1); color: #238636; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    </div>
+                    <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0; color: var(--text-primary);">Download Troubleshooting</h3>
+                </div>
+                <p class="text-secondary" style="font-size: 0.875rem; line-height: 1.6; margin-bottom: 0.75rem;">
+                    If your download does not initiate immediately:
+                </p>
+                <ul style="font-size: 0.875rem; color: var(--text-primary); line-height: 1.7; padding-left: 1.25rem; margin: 0 0 1rem 0;">
+                    <li>Ensure your browser pop-up blocker is not preventing automatic file downloads.</li>
+                    <li>Our secure download system connects to verified cloud storage. Click the button again if your network had a momentary drop.</li>
+                    <li>All purchased mods remain permanently accessible in your account with unlimited re-downloads.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Official Contact Card -->
+        <div style="background: var(--color-bg-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.75rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
+            <div>
+                <h3 style="font-size: 1.2rem; font-weight: 800; margin: 0 0 6px 0; color: var(--text-primary);">Need Direct Support?</h3>
+                <p class="text-secondary" style="font-size: 0.9rem; margin-bottom: 0.75rem;">Our customer support team is available to assist you with any order or compatibility questions.</p>
+                <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.875rem;">
+                    <div>📧 Email: <a href="mailto:enroutestorein@gmail.com" style="color: var(--color-primary); font-weight: 700; text-decoration: none;">enroutestorein@gmail.com</a></div>
+                    <div>📞 Phone: <strong style="color: var(--text-primary);">+91 7621000916</strong></div>
+                    <div>🕒 Hours: <span class="text-secondary">Mon – Sat, 10:00 AM – 7:00 PM IST</span></div>
+                </div>
+            </div>
+            <a href="contact.html" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">Open Support Page</a>
+        </div>
+    `;
 };
 
 const showInvoice = (order) => {
@@ -1440,19 +1815,32 @@ const showInvoice = (order) => {
 };
 
 // ----------------------------------------------------
-// Tab Navigation Events
+// Tab Navigation Events (Tasks 8.1 - 8.4)
 // ----------------------------------------------------
 const activateTab = (tabName, activeEl) => {
     currentTab = tabName;
-    [tabGarage, tabWishlist, tabRequests, tabOrders].forEach(t => t?.classList.remove('active'));
+    [tabOverview, tabOrders, tabWishlist, tabRequests, tabHelp].forEach(t => t?.classList.remove('active'));
     activeEl?.classList.add('active');
     renderCurrentTab();
 };
 
-tabGarage?.addEventListener('click', (e) => { e.preventDefault(); activateTab('garage', tabGarage); });
+tabOverview?.addEventListener('click', (e) => { e.preventDefault(); activateTab('overview', tabOverview); });
+tabOrders?.addEventListener('click', (e) => { e.preventDefault(); activateTab('orders', tabOrders); });
 tabWishlist?.addEventListener('click', (e) => { e.preventDefault(); activateTab('wishlist', tabWishlist); });
 tabRequests?.addEventListener('click', (e) => { e.preventDefault(); activateTab('requests', tabRequests); });
-tabOrders?.addEventListener('click', (e) => { e.preventDefault(); activateTab('orders', tabOrders); });
+tabHelp?.addEventListener('click', (e) => { e.preventDefault(); activateTab('help', tabHelp); });
+
+// Hash Routing Handler
+const handleUrlHash = () => {
+    const hash = (window.location.hash || '').replace('#', '').toLowerCase();
+    if (hash === 'orders') activateTab('orders', tabOrders);
+    else if (hash === 'wishlist') activateTab('wishlist', tabWishlist);
+    else if (hash === 'requests' || hash === 'community') activateTab('requests', tabRequests);
+    else if (hash === 'help') activateTab('help', tabHelp);
+    else if (hash === 'overview' || hash === '') activateTab('overview', tabOverview);
+};
+
+window.addEventListener('hashchange', handleUrlHash);
 
 logoutBtn?.addEventListener('click', () => {
     signOut(auth).then(() => {

@@ -346,43 +346,43 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
                 .captcha-modal {
                     background: #ffffff;
                     border: 1px solid var(--color-border);
-                    border-radius: var(--radius-2xl); padding: 2.25rem 2rem;
+                    border-radius: var(--radius-lg); padding: 2rem 1.75rem;
                     max-width: 400px; width: 90%;
-                    box-shadow: var(--shadow-xl);
+                    box-shadow: var(--shadow-lg);
                     text-align: center; animation: captchaSlideUp 0.3s ease;
                     user-select: none; position: relative;
                 }
                 @keyframes captchaSlideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-                .captcha-modal h3 { margin: 0 0 0.35rem; font-size: 1.3rem; font-family: 'Space Grotesk', sans-serif; font-weight: 700; color: #090d16; }
-                .captcha-modal p.desc { color: #64748b; font-size: 0.85rem; margin: 0 0 1.5rem; }
+                .captcha-modal h3 { margin: 0 0 0.35rem; font-size: 1.25rem; font-weight: 700; color: #252923; }
+                .captcha-modal p.desc { color: #77786F; font-size: 0.85rem; margin: 0 0 1.5rem; }
                 .captcha-lock { font-size: 2.25rem; margin-bottom: 0.5rem; }
 
                 /* Puzzle area */
                 .puzzle-area {
                     position: relative; width: 100%; height: 140px;
-                    background: var(--bg-tertiary);
-                    border-radius: var(--radius-xl); overflow: hidden; margin-bottom: 1.25rem;
+                    background: #F8F6F0;
+                    border-radius: var(--radius-md); overflow: hidden; margin-bottom: 1.25rem;
                     border: 1px solid var(--color-border);
                 }
                 .puzzle-pattern {
                     position: absolute; top: 0; left: 0; right: 0; bottom: 0;
                     background-image:
-                        radial-gradient(circle at 20% 30%, rgba(37,99,235,0.08) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 70%, rgba(14,165,233,0.08) 0%, transparent 50%),
-                        radial-gradient(circle at 50% 50%, rgba(15,23,42,0.04) 0%, transparent 60%);
+                        radial-gradient(circle at 20% 30%, rgba(36,74,60,0.06) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(200,121,96,0.06) 0%, transparent 50%),
+                        radial-gradient(circle at 50% 50%, rgba(37,41,35,0.03) 0%, transparent 60%);
                 }
                 .puzzle-target {
                     position: absolute; top: 50%; transform: translateY(-50%);
-                    width: 48px; height: 48px; border-radius: 10px;
-                    border: 2px dashed rgba(37,99,235,0.6);
-                    background: rgba(37,99,235,0.08);
+                    width: 48px; height: 48px; border-radius: 6px;
+                    border: 2px dashed rgba(36,74,60,0.6);
+                    background: rgba(36,74,60,0.08);
                     transition: border-color 0.2s, background 0.2s;
                 }
                 .puzzle-piece {
                     position: absolute; top: 50%; transform: translateY(-50%);
-                    width: 48px; height: 48px; border-radius: 10px;
+                    width: 48px; height: 48px; border-radius: 6px;
                     background: #ffffff;
-                    box-shadow: 0 4px 12px rgba(15,23,42,0.15);
+                    box-shadow: 0 4px 12px rgba(36,74,60,0.12);
                     border: 1px solid var(--color-border);
                     display: flex; align-items: center; justify-content: center;
                     transition: filter 0.2s, box-shadow 0.2s;
@@ -390,35 +390,35 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
                 }
                 .puzzle-piece img { width: 32px; height: 32px; object-fit: contain; }
                 .puzzle-piece.matched {
-                    box-shadow: 0 0 20px rgba(16,185,129,0.5);
-                    border-color: #10b981;
+                    box-shadow: 0 0 16px rgba(50,115,84,0.4);
+                    border-color: #327354;
                 }
 
                 /* Slider track */
                 .slider-track {
-                    position: relative; width: 100%; height: 50px;
-                    background: var(--bg-tertiary);
-                    border-radius: var(--radius-full);
+                    position: relative; width: 100%; height: 48px;
+                    background: #F8F6F0;
+                    border-radius: 24px;
                     border: 1px solid var(--color-border);
                     overflow: hidden;
                     margin-bottom: 1rem;
                 }
                 .slider-fill {
                     position: absolute; top: 0; left: 0; bottom: 0; width: 0;
-                    background: linear-gradient(90deg, rgba(37,99,235,0.15), rgba(37,99,235,0.3));
-                    border-radius: var(--radius-full); transition: background 0.2s;
+                    background: rgba(36,74,60,0.15);
+                    border-radius: 24px; transition: background 0.2s;
                     pointer-events: none;
                 }
-                .slider-fill.matched { background: rgba(16,185,129,0.25); }
+                .slider-fill.matched { background: rgba(50,115,84,0.25); }
                 .slider-label {
                     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-                    color: #64748b; font-size: 0.8rem; font-weight: 700;
+                    color: #77786F; font-size: 0.8rem; font-weight: 700;
                     pointer-events: none; white-space: nowrap;
                     letter-spacing: 0.5px; text-transform: uppercase;
                 }
                 .slider-thumb {
-                    position: absolute; top: 4px; left: 4px;
-                    width: 42px; height: 42px; border-radius: 50%;
+                    position: absolute; top: 3px; left: 3px;
+                    width: 40px; height: 40px; border-radius: 50%;
                     background: #ffffff;
                     border: 1.5px solid var(--color-border-strong);
                     display: flex; align-items: center; justify-content: center;
@@ -428,24 +428,24 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
                     z-index: 2;
                 }
                 .slider-thumb:active { cursor: grabbing; box-shadow: var(--shadow-xs); }
-                .slider-thumb:hover { border-color: var(--color-primary); box-shadow: 0 0 12px rgba(37,99,235,0.25); }
-                .slider-thumb svg { width: 18px; height: 18px; color: #090d16; }
-                .slider-thumb.matched { border-color: #10b981; background: #10b981; box-shadow: 0 0 16px rgba(16,185,129,0.4); }
+                .slider-thumb:hover { border-color: var(--color-primary); box-shadow: 0 0 12px rgba(36,74,60,0.2); }
+                .slider-thumb svg { width: 18px; height: 18px; color: #252923; }
+                .slider-thumb.matched { border-color: #327354; background: #327354; box-shadow: 0 0 16px rgba(50,115,84,0.3); }
                 .slider-thumb.matched svg { color: #fff; }
 
                 .captcha-status {
-                    font-size: 0.85rem; color: #64748b; min-height: 1.25rem;
+                    font-size: 0.85rem; color: #77786F; min-height: 1.25rem;
                     margin-bottom: 1rem; font-weight: 600;
                 }
-                .captcha-status.success { color: #10b981; }
-                .captcha-status.fail { color: #dc2626; }
+                .captcha-status.success { color: #327354; }
+                .captcha-status.fail { color: #B7473F; }
 
                 .captcha-btn-cancel {
                     padding: 0.6rem 1.5rem;
                     border: 1px solid var(--color-border);
-                    border-radius: var(--radius-md);
-                    background: var(--bg-tertiary);
-                    color: var(--text-secondary); font-size: 0.85rem; font-weight: 700;
+                    border-radius: var(--radius-sm);
+                    background: #F8F6F0;
+                    color: #77786F; font-size: 0.85rem; font-weight: 700;
                     cursor: pointer; font-family: inherit; transition: all 0.2s;
                 }
                 .captcha-btn-cancel:hover {
@@ -832,11 +832,11 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
                                         <span style="background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 2px 8px; border-radius: var(--radius-full); font-size: 0.72rem; font-weight: 800;">SAVE ${Math.round(((origPrice - offerPrice) / origPrice) * 100)}%</span>
                                     </div>
                                     <div style="display: flex; align-items: baseline; gap: 0.75rem;">
-                                        <span style="font-size: 2.25rem; font-weight: 800; font-family: var(--font-heading); color: var(--color-primary);">${formatPrice(offerPrice)}</span>
+                                        <span style="font-size: 2.25rem; font-weight: 800; font-family: var(--font-heading); color: var(--text-primary);">${formatPrice(offerPrice)}</span>
                                         <span style="font-size: 1.25rem; font-weight: 600; text-decoration: line-through; color: var(--text-muted);">${formatPrice(origPrice)}</span>
                                     </div>
                                 </div>
-                                <span style="font-size: 0.875rem; font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 0.45rem; background: var(--color-primary-light); padding: 0.5rem 1.15rem; border-radius: var(--radius-full); border: 1px solid rgba(37, 99, 235, 0.2);">
+                                <span style="font-size: 0.875rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.45rem; background: var(--color-primary-light); padding: 0.5rem 1.15rem; border-radius: var(--radius-full); border: 1px solid var(--color-border);">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                                     ${totalDownloads} Downloads
                                 </span>
@@ -857,9 +857,9 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
                         <div class="product-price" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.75rem; padding: 1.15rem 1.35rem; background: var(--bg-secondary); border-radius: var(--radius-xl); border: 1px solid var(--color-border);">
                             <div>
                                 <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); display: block; margin-bottom: 0.2rem;">Price</span>
-                                <span style="font-size: 2.25rem; font-weight: 800; font-family: var(--font-heading); color: var(--color-primary);">${formatPrice(origPrice)}</span>
+                                <span style="font-size: 2.25rem; font-weight: 800; font-family: var(--font-heading); color: var(--text-primary);">${formatPrice(origPrice)}</span>
                             </div>
-                            <span style="font-size: 0.875rem; font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 0.45rem; background: var(--color-primary-light); padding: 0.5rem 1.15rem; border-radius: var(--radius-full); border: 1px solid rgba(37, 99, 235, 0.2);">
+                            <span style="font-size: 0.875rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.45rem; background: var(--color-primary-light); padding: 0.5rem 1.15rem; border-radius: var(--radius-full); border: 1px solid var(--color-border);">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                                 ${totalDownloads} Downloads
                             </span>
@@ -1040,8 +1040,27 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
                 svg.style.color = '#ef4444';
             }
             localStorage.setItem('enroute_wishlist', JSON.stringify(wishlist));
+            window.dispatchEvent(new Event('enroute-wishlist-updated'));
+            updateHeaderWishBadge();
         });
     }
+
+    const updateHeaderWishBadge = () => {
+        try {
+            const saved = JSON.parse(localStorage.getItem('enroute_wishlist') || '[]');
+            const badge = document.querySelector('.nav-wish-badge');
+            if (badge) {
+                if (saved.length > 0) {
+                    badge.textContent = saved.length > 99 ? '99+' : saved.length;
+                    badge.style.display = 'inline-flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        } catch(e) {}
+    };
+    updateHeaderWishBadge();
+    window.addEventListener('storage', updateHeaderWishBadge);
 
     // Thumbnail switching logic
     const thumbItems = document.querySelectorAll('.thumbnail-item');

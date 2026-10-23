@@ -33,7 +33,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
     
     <!-- CSS -->
     <link rel="stylesheet" href="css/index.css">
@@ -44,21 +44,21 @@
 
         .dashboard-layout {
             display: grid;
-            grid-template-columns: 320px 1fr;
-            gap: var(--spacing-8);
-            margin-top: var(--spacing-8);
+            grid-template-columns: 300px 1fr;
+            gap: var(--spacing-6);
+            margin-top: var(--spacing-6);
             margin-bottom: var(--spacing-16);
             align-items: start;
         }
 
         /* Driver Passport / VIP License Card */
         .driver-passport-card {
-            background: linear-gradient(135deg, #090d16 0%, #172554 100%);
+            background: linear-gradient(135deg, #153247 0%, #242A30 100%);
             color: #ffffff;
-            border-radius: var(--radius-2xl);
+            border-radius: var(--radius-lg);
             padding: var(--spacing-6);
-            box-shadow: 0 16px 36px rgba(9, 13, 22, 0.25);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(255, 194, 32, 0.35);
             position: relative;
             overflow: hidden;
             margin-bottom: var(--spacing-6);
@@ -71,7 +71,7 @@
             right: -50%;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle, rgba(37, 99, 235, 0.35) 0%, transparent 65%);
+            background: radial-gradient(circle, rgba(255, 194, 32, 0.15) 0%, transparent 65%);
             pointer-events: none;
         }
 
@@ -89,7 +89,7 @@
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            color: #93c5fd;
+            color: var(--color-accent, #FFC220);
             display: flex;
             align-items: center;
             gap: 6px;
@@ -98,9 +98,9 @@
         .passport-chip {
             width: 28px;
             height: 22px;
-            background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
-            border-radius: 4px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(135deg, #FFC220 0%, #E5A900 100%);
+            border-radius: 3px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
             border: 1px solid rgba(255,255,255,0.4);
         }
 
@@ -112,19 +112,19 @@
         }
 
         .passport-avatar {
-            width: 64px;
-            height: 64px;
-            border-radius: var(--radius-xl);
-            background: linear-gradient(135deg, #2563eb, #3b82f6);
-            color: #ffffff;
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius-md);
+            background: #153247;
+            color: #FFC220;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             font-weight: 800;
             font-family: var(--font-heading);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            border: 2px solid #FFC220;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
             flex-shrink: 0;
         }
 
@@ -139,9 +139,10 @@
 
         .passport-meta p {
             font-size: 0.78rem;
-            color: #94a3b8;
+            color: #E8EEE5;
             margin: 0 0 6px 0;
             word-break: break-all;
+            opacity: 0.85;
         }
 
         .rank-pill {
@@ -149,12 +150,12 @@
             align-items: center;
             gap: 5px;
             font-size: 0.72rem;
-            font-weight: 800;
-            padding: 3px 10px;
-            border-radius: var(--radius-full);
-            background: rgba(37, 99, 235, 0.35);
-            color: #bfdbfe;
-            border: 1px solid rgba(96, 165, 250, 0.4);
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: var(--radius-sm);
+            background: rgba(255, 194, 32, 0.15);
+            color: #FFC220;
+            border: 1px solid rgba(255, 194, 32, 0.35);
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
@@ -173,17 +174,17 @@
             font-family: monospace;
             font-weight: 700;
             letter-spacing: 0.08em;
-            color: #60a5fa;
+            color: #FFC220;
         }
 
         .passport-share-btn {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.12);
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: #ffffff;
-            border-radius: var(--radius-full);
-            padding: 3px 10px;
-            font-size: 0.72rem;
-            font-weight: 700;
+            border-radius: var(--radius-md);
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
             cursor: pointer;
             transition: all var(--transition-fast);
             display: inline-flex;
@@ -192,16 +193,16 @@
         }
 
         .passport-share-btn:hover {
-            background: #2563eb;
-            border-color: #2563eb;
+            background: var(--color-primary);
+            border-color: var(--color-primary);
         }
 
         /* Sidebar Nav Track */
         .sidebar {
-            background: var(--bg-secondary);
-            border-radius: var(--radius-2xl);
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg);
             border: 1px solid var(--color-border);
-            padding: var(--spacing-6);
+            padding: var(--spacing-4);
             box-shadow: var(--shadow-sm);
         }
 
@@ -209,7 +210,7 @@
             list-style: none;
             display: flex;
             flex-direction: column;
-            gap: var(--spacing-2);
+            gap: var(--spacing-1);
             margin: 0;
             padding: 0;
         }
@@ -218,26 +219,26 @@
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            padding: 0.85rem 1.15rem;
+            padding: 0.75rem 1rem;
             color: var(--text-secondary);
-            font-weight: 700;
-            font-size: 0.925rem;
-            border-radius: var(--radius-xl);
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-radius: var(--radius-md);
             transition: all var(--transition-fast);
             border: 1px solid transparent;
             text-decoration: none;
         }
 
         .nav-menu li a:hover {
-            background: var(--bg-primary);
+            background: var(--color-primary-soft);
             color: var(--color-primary);
         }
 
         .nav-menu li a.active {
-            background: var(--color-primary-light);
+            background: var(--color-primary-soft);
             color: var(--color-primary);
-            border: 1px solid rgba(37, 99, 235, 0.25);
-            font-weight: 800;
+            border: 1px solid rgba(0, 125, 198, 0.2);
+            font-weight: 700;
         }
 
         .nav-menu li a svg {
@@ -246,12 +247,12 @@
 
         .nav-counter {
             margin-left: auto;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            font-size: 0.75rem;
-            padding: 2px 8px;
-            border-radius: var(--radius-full);
-            font-weight: 800;
+            background: var(--bg-surface);
+            color: var(--text-secondary);
+            font-size: 0.72rem;
+            padding: 2px 7px;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
             border: 1px solid var(--color-border);
         }
 
@@ -263,10 +264,10 @@
 
         /* Main Workspace Container */
         .main-content {
-            background: var(--bg-secondary);
-            border-radius: var(--radius-2xl);
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg);
             border: 1px solid var(--color-border);
-            padding: var(--spacing-8);
+            padding: var(--spacing-6);
             box-shadow: var(--shadow-sm);
             min-height: 520px;
         }
@@ -276,10 +277,10 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 1rem 1.25rem;
-            background: var(--bg-primary);
+            padding: 0.85rem 1.15rem;
+            background: var(--color-bg-subtle);
             border: 1px solid var(--color-border);
-            border-radius: var(--radius-xl);
+            border-radius: var(--radius-md);
             margin-bottom: var(--spacing-6);
             flex-wrap: wrap;
             gap: var(--spacing-4);
@@ -292,9 +293,9 @@
         }
 
         .radar-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
+            width: 34px;
+            height: 34px;
+            border-radius: var(--radius-sm);
             background: var(--color-primary-light);
             color: var(--color-primary);
             display: flex;
@@ -306,14 +307,14 @@
         /* Garage Showcase Grid */
         .garage-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: var(--spacing-6);
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--spacing-5);
         }
 
         .garage-card {
-            background: var(--bg-primary);
+            background: var(--bg-surface);
             border: 1px solid var(--color-border);
-            border-radius: var(--radius-xl);
+            border-radius: var(--radius-lg);
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -322,15 +323,15 @@
         }
 
         .garage-card:hover {
-            transform: translateY(-3px);
+            transform: translateY(-2px);
             border-color: var(--color-border-hover);
             box-shadow: var(--shadow-md);
         }
 
         .garage-media {
-            height: 180px;
+            height: 175px;
             width: 100%;
-            background: var(--bg-tertiary);
+            background: var(--color-bg-subtle);
             position: relative;
             overflow: hidden;
         }
@@ -339,15 +340,15 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.4s ease;
+            transition: transform 0.3s ease;
         }
 
         .garage-card:hover .garage-media img {
-            transform: scale(1.05);
+            transform: scale(1.03);
         }
 
         .garage-body {
-            padding: var(--spacing-5);
+            padding: var(--spacing-4);
             display: flex;
             flex-direction: column;
             flex: 1;
@@ -357,11 +358,11 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 0.4rem;
-            background: var(--bg-secondary);
-            padding: 0.65rem;
-            border-radius: var(--radius-md);
-            margin: var(--spacing-3) 0 var(--spacing-4);
-            font-size: 0.78rem;
+            background: var(--color-bg-subtle);
+            padding: 0.6rem;
+            border-radius: var(--radius-sm);
+            margin: var(--spacing-2) 0 var(--spacing-3);
+            font-size: 0.75rem;
             color: var(--text-secondary);
             border: 1px solid var(--color-border-subtle);
         }
@@ -371,11 +372,11 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: var(--spacing-4) var(--spacing-5);
-            background: var(--bg-primary);
+            padding: var(--spacing-4);
+            background: var(--bg-surface);
             border: 1px solid var(--color-border);
-            border-radius: var(--radius-xl);
-            margin-bottom: var(--spacing-4);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--spacing-3);
             gap: var(--spacing-4);
             flex-wrap: wrap;
             transition: all var(--transition-fast);
@@ -383,28 +384,28 @@
 
         .wishlist-card:hover {
             border-color: var(--color-primary);
-            transform: translateY(-2px);
+            transform: translateY(-1px);
             box-shadow: var(--shadow-sm);
         }
 
         /* Community Voting Hub */
         .request-input-card {
-            background: var(--bg-primary);
+            background: var(--bg-surface);
             border: 1px solid var(--color-border);
-            border-radius: var(--radius-xl);
-            padding: var(--spacing-6);
-            margin-bottom: var(--spacing-8);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-5);
+            margin-bottom: var(--spacing-6);
         }
 
         .vote-item-card {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: var(--spacing-5);
-            background: var(--bg-primary);
+            padding: var(--spacing-4);
+            background: var(--bg-surface);
             border: 1px solid var(--color-border);
-            border-radius: var(--radius-xl);
-            margin-bottom: var(--spacing-4);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--spacing-3);
             gap: var(--spacing-4);
             transition: all var(--transition-fast);
         }
@@ -419,16 +420,16 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-width: 58px;
-            padding: 0.6rem 0.5rem;
-            border-radius: var(--radius-lg);
-            background: var(--bg-secondary);
+            min-width: 52px;
+            padding: 0.5rem 0.4rem;
+            border-radius: var(--radius-md);
+            background: var(--color-bg-subtle);
             border: 1px solid var(--color-border);
             cursor: pointer;
             transition: all var(--transition-fast);
             color: var(--text-primary);
-            font-weight: 800;
-            font-size: 0.95rem;
+            font-weight: 700;
+            font-size: 0.9rem;
         }
 
         .upvote-btn:hover,
@@ -449,13 +450,13 @@
             position: fixed;
             bottom: 24px;
             right: 24px;
-            background: #090d16;
+            background: var(--color-primary-dark);
             color: #ffffff;
-            padding: 12px 20px;
-            border-radius: var(--radius-full);
-            font-size: 0.9rem;
+            padding: 10px 18px;
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
             font-weight: 700;
-            box-shadow: var(--shadow-xl);
+            box-shadow: var(--shadow-lg);
             border: 1px solid rgba(255,255,255,0.15);
             z-index: 10000;
             display: flex;
@@ -483,8 +484,8 @@
             display: none;
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(9, 13, 22, 0.7);
-            backdrop-filter: blur(8px);
+            background: rgba(24, 56, 47, 0.7);
+            backdrop-filter: blur(4px);
             z-index: 9999;
             overflow-y: auto;
             padding: 2rem 1rem;
@@ -496,31 +497,32 @@
         }
         .invoice {
             background: #ffffff;
-            color: #090d16;
+            color: var(--text-primary);
             max-width: 720px;
             width: 100%;
-            border-radius: var(--radius-2xl);
+            border-radius: var(--radius-lg);
             overflow: hidden;
-            box-shadow: var(--shadow-2xl);
+            box-shadow: var(--shadow-xl);
             border: 1px solid var(--color-border);
         }
         .invoice-header {
-            background: linear-gradient(135deg, #090d16 0%, #1e3a8a 100%);
+            background: linear-gradient(135deg, #111215 0%, #202124 100%);
             color: #fff;
-            padding: 2.25rem 2rem;
+            padding: 2rem;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
+            border-bottom: 3px solid var(--color-primary);
         }
-        .invoice-brand h2 { font-size: 1.75rem; font-weight: 800; margin: 0; color: #ffffff; font-family: var(--font-heading); }
-        .invoice-brand h2 span { color: #60a5fa; }
+        .invoice-brand h2 { font-size: 1.6rem; font-weight: 800; margin: 0; color: #ffffff; font-family: var(--font-heading); }
+        .invoice-brand h2 span { color: var(--color-primary); }
         .invoice-badge {
-            background: rgba(16, 185, 129, 0.2);
-            color: #34d399;
-            border: 1px solid rgba(52, 211, 153, 0.4);
-            padding: 0.35rem 1rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
+            background: rgba(35, 134, 54, 0.15);
+            color: #238636;
+            border: 1px solid rgba(35, 134, 54, 0.35);
+            padding: 0.3rem 0.85rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
             font-weight: 800;
             text-transform: uppercase;
         }
@@ -545,25 +547,25 @@
             border-bottom: 2px solid var(--color-border); font-weight: 700;
         }
         .invoice-table thead th:last-child { text-align: right; }
-        .invoice-table tbody td { padding: 1.1rem 0; border-bottom: 1px solid var(--color-border-subtle); font-size: 0.95rem; }
+        .invoice-table tbody td { padding: 1rem 0; border-bottom: 1px solid var(--color-border-subtle); font-size: 0.925rem; }
         .invoice-table tbody td:last-child { text-align: right; font-weight: 700; color: var(--color-primary); }
         .invoice-totals {
             display: flex; flex-direction: column; align-items: flex-end;
-            gap: 0.5rem; padding-top: 1rem; border-top: 2px solid var(--text-primary);
+            gap: 0.5rem; padding-top: 1rem; border-top: 2px solid var(--color-border);
         }
         .invoice-total-row { display: flex; justify-content: space-between; width: 260px; font-size: 0.95rem; }
         .invoice-total-row.grand {
-            font-size: 1.35rem; font-weight: 800; color: var(--text-primary);
+            font-size: 1.25rem; font-weight: 800; color: var(--color-primary);
             padding-top: 0.5rem; border-top: 1px solid var(--color-border);
             font-family: var(--font-heading);
         }
         .invoice-footer {
-            background: var(--bg-secondary); padding: 1.5rem 2rem; text-align: center;
-            font-size: 0.825rem; color: var(--text-muted); border-top: 1px solid var(--color-border);
+            background: var(--color-bg-subtle); padding: 1.25rem 2rem; text-align: center;
+            font-size: 0.8rem; color: var(--text-secondary); border-top: 1px solid var(--color-border);
         }
         .invoice-actions {
             display: flex; gap: 1rem; justify-content: center;
-            padding: 1.5rem 2rem; background: var(--bg-secondary); border-top: 1px solid var(--color-border);
+            padding: 1.25rem 2rem; background: var(--color-bg-subtle); border-top: 1px solid var(--color-border);
         }
 
         @media print {
@@ -585,6 +587,12 @@
                 EnrouteIn<span>.</span>
                 <span class="logo-badge">Store</span>
             </a>
+            <form class="nav-search-form" id="header-search-form" action="products.html" method="GET">
+                <input type="text" name="search" id="header-search-input" class="nav-search-input" placeholder="Search BUSSID mods, bus liveries, maps..." autocomplete="off">
+                <button type="submit" class="nav-search-submit" title="Search Store">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </button>
+            </form>
             <ul class="nav-links">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="products.html">Store</a></li>
@@ -596,7 +604,7 @@
                     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
                     <span class="nav-cart-badge" id="nav-cart-badge" style="display: none;">0</span>
                 </button>
-                <button class="btn btn-outline" id="logout-btn" style="width: 40px; height: 40px; min-width: 40px; padding: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; aspect-ratio: 1/1;" title="Sign Out">
+                <button class="btn btn-outline" id="logout-btn" style="width: 38px; height: 38px; min-width: 38px; padding: 0; border-radius: var(--radius-md); display: inline-flex; align-items: center; justify-content: center;" title="Sign Out">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
                 </button>
             </div>
@@ -604,7 +612,7 @@
     </header>
 
     <div class="container" style="margin-top: var(--spacing-6); margin-bottom: var(--spacing-6);">
-        <!-- 🪪 TOP VIP DRIVER PASSPORT HERO BANNER -->
+        <!-- TOP VIP DRIVER PASSPORT HERO BANNER -->
         <div class="driver-passport-card" id="driver-passport" style="margin-bottom: 0; cursor: pointer;">
             <div class="passport-header">
                 <span class="passport-title">
@@ -639,15 +647,15 @@
 
                 <!-- Top Quick Action 3 Buttons -->
                 <div style="display: flex; gap: var(--spacing-3); align-items: center; flex-wrap: wrap;">
-                    <button type="button" id="top-view-license-btn" class="passport-share-btn" style="background: rgba(255,255,255,0.12); padding: 0.5rem 1rem; font-size: 0.8rem; border-radius: var(--radius-full);">
+                    <button type="button" id="top-view-license-btn" class="passport-share-btn" style="background: rgba(255,255,255,0.12); padding: 0.5rem 0.9rem; font-size: 0.8rem; border-radius: var(--radius-md);">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                         <span>View License</span>
                     </button>
-                    <button type="button" id="top-download-btn" class="passport-share-btn" style="background: rgba(255,255,255,0.12); padding: 0.5rem 1rem; font-size: 0.8rem; border-radius: var(--radius-full);">
+                    <button type="button" id="top-download-btn" class="passport-share-btn" style="background: rgba(255,255,255,0.12); padding: 0.5rem 0.9rem; font-size: 0.8rem; border-radius: var(--radius-md);">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                         <span>Download ID</span>
                     </button>
-                    <button type="button" id="open-share-modal-btn" class="passport-share-btn" style="background: #2563eb; border-color: #3b82f6; padding: 0.5rem 1.15rem; font-size: 0.8rem; border-radius: var(--radius-full); box-shadow: 0 4px 14px rgba(37,99,235,0.4);">
+                    <button type="button" id="open-share-modal-btn" class="passport-share-btn" style="background: var(--color-accent); border-color: var(--color-accent); color: #242A30; font-weight: 700; padding: 0.5rem 1rem; font-size: 0.8rem; border-radius: var(--radius-md); box-shadow: var(--shadow-sm);">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
                         <span>Share VIP License</span>
                     </button>
@@ -663,35 +671,41 @@
                 <div id="admin-link-container" style="display: none; margin-bottom: var(--spacing-4);">
                     <a href="admin/dashboard.html" class="btn btn-primary btn-sm" style="width: 100%; justify-content: center;">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                        <span>Admin Studio</span>
+                        <span>Merchant Studio</span>
                     </a>
                 </div>
 
                 <ul class="nav-menu">
                     <li>
-                        <a href="#" class="active" id="tab-garage">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C2.1 11.2 2 11.6 2 12v4c0 .6.4 1 1 1h2"></path><circle cx="7" cy="17" r="2"></circle><path d="M9 17h6"></path><circle cx="17" cy="17" r="2"></circle></svg>
-                            <span>My Virtual Garage</span>
+                        <a href="#overview" class="active" id="tab-overview">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                            <span>Overview</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#orders" id="tab-orders">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                            <span>My Orders & Downloads</span>
                             <span class="nav-counter" id="garage-counter">0</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#" id="tab-wishlist">
+                        <a href="#wishlist" id="tab-wishlist">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                            <span>Garage Wishlist</span>
+                            <span>Saved Wishlist</span>
                             <span class="nav-counter" id="wishlist-counter">0</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#" id="tab-requests">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                            <span>Community Mod Voting</span>
+                        <a href="#community" id="tab-requests">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                            <span>Mod Voting Hub</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#" id="tab-orders">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
-                            <span>Order Invoices</span>
+                        <a href="#help" id="tab-help">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                            <span>Help & Support</span>
                         </a>
                     </li>
                 </ul>
@@ -715,31 +729,31 @@
 
     <!-- VIP Driver ID Share & Preview Modal -->
     <div class="modal-overlay" id="share-modal">
-        <div class="modal-content" style="max-width: 740px; text-align: center; padding: var(--spacing-6); border-radius: var(--radius-2xl);">
+        <div class="modal-content" style="max-width: 740px; text-align: center; padding: var(--spacing-6); border-radius: var(--radius-lg);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-4); border-bottom: 1px solid var(--color-border); padding-bottom: var(--spacing-3);">
                 <div style="text-align: left;">
                     <h3 style="font-size: 1.25rem; font-weight: 800; margin: 0; color: var(--text-primary); font-family: var(--font-heading);">Official VIP Driver ID Passport</h3>
                     <p class="text-secondary" style="font-size: 0.8rem; margin: 2px 0 0 0;">Your personalized motorsport simulation credentials.</p>
                 </div>
-                <button type="button" class="close-btn" id="close-share-modal-btn" style="background: var(--bg-tertiary); border: 1px solid var(--color-border); width: 34px; height: 34px; border-radius: 50%; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-primary); transition: all 0.2s ease;" title="Close Window">&times;</button>
+                <button type="button" class="close-btn" id="close-share-modal-btn" style="background: var(--color-bg-subtle); border: 1px solid var(--color-border); width: 34px; height: 34px; border-radius: 50%; font-size: 1.3rem; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-primary); transition: all 0.2s ease;" title="Close Window">&times;</button>
             </div>
 
             <!-- Canvas Card Preview -->
-            <div style="position: relative; border-radius: var(--radius-xl); overflow: hidden; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12); margin-bottom: var(--spacing-5); border: 1px solid var(--color-border); background: #ffffff;">
-                <canvas id="driver-license-canvas" width="1200" height="675" style="width: 100%; height: auto; display: block; border-radius: var(--radius-xl);"></canvas>
+            <div style="position: relative; border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-md); margin-bottom: var(--spacing-5); border: 1px solid var(--color-border); background: #ffffff;">
+                <canvas id="driver-license-canvas" width="1200" height="675" style="width: 100%; height: auto; display: block; border-radius: var(--radius-md);"></canvas>
             </div>
 
             <!-- Share Buttons Row -->
             <div style="display: flex; gap: var(--spacing-3); justify-content: center; flex-wrap: wrap;">
-                <button type="button" id="whatsapp-share-btn" class="btn" style="background: #25D366; color: #ffffff; border: none; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.5rem 1.1rem; font-size: 0.825rem; border-radius: var(--radius-full); cursor: pointer;">
+                <button type="button" id="whatsapp-share-btn" class="btn" style="background: #25D366; color: #ffffff; border: none; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.5rem 1.1rem; font-size: 0.825rem; border-radius: var(--radius-md); cursor: pointer;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.155.57 4.178 1.564 5.926l-1.664 6.074 6.26-1.642c1.701.927 3.649 1.442 5.84 1.442 6.627 0 12-5.373 12-12s-5.373-12-12-12z"/></svg>
                     <span>Share on WhatsApp</span>
                 </button>
-                <button id="download-license-btn" class="btn btn-primary" style="font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.5rem 1.1rem; font-size: 0.825rem; border-radius: var(--radius-full);">
+                <button id="download-license-btn" class="btn btn-primary" style="font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.5rem 1.1rem; font-size: 0.825rem; border-radius: var(--radius-md);">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                     <span>Download ID Image</span>
                 </button>
-                <button id="copy-share-msg-btn" class="btn btn-outline" style="border-radius: var(--radius-full); padding: 0.5rem 1.1rem; font-size: 0.825rem; display: inline-flex; align-items: center; gap: 0.45rem;">
+                <button id="copy-share-msg-btn" class="btn btn-outline" style="border-radius: var(--radius-md); padding: 0.5rem 1.1rem; font-size: 0.825rem; display: inline-flex; align-items: center; gap: 0.45rem;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                     <span>Copy Text</span>
                 </button>

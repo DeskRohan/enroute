@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Editor - Merchant Panel</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap"
+        rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="icon" type="image/png" href="../assets/images/fevicon.png">
+
+    <style>
+        /* ====================================================
+           Full-Page Product Editor Studio Styles
+           ==================================================== */
+        :root {
+            --studio-blue: #007DC6;
+            --studio-blue-text: #FFFFFF;
+            --studio-blue-hover: #005A91;
+            --studio-blue-light: #EAF5FC;
+            --studio-blue-subtle: rgba(0, 125, 198, 0.12);
+            --studio-blue-border: #007DC6;
+            --studio-purple: #153247;
+            --studio-purple-light: #F5F7F9;
+            --studio-amber: #946200;
+            --studio-amber-light: #FFF4D6;
+            --studio-emerald: #218838;
+            --studio-emerald-light: #EAF6ED;
+            --studio-slate-border: #DFE5EA;
+            --studio-card-bg: #FFFFFF;
+        }
+
+        .studio-topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.85rem 0 1rem 0;
+            border-bottom: 1px solid var(--studio-slate-border);
+            margin-bottom: 1.15rem;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .studio-breadcrumbs {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.82rem;
+            color: var(--admin-text-muted);
+            margin-bottom: 0.25rem;
+            font-weight: 600;
+        }
+
+        .studio-breadcrumbs a {
+            color: var(--admin-text-secondary);
+            text-decoration: none;
+            transition: color 0.15s ease;
+        }
+
+        .studio-breadcrumbs a:hover {
+            color: var(--admin-text-primary);
+        }
+
+        .studio-header-title {
+            font-size: 1.65rem;
+            font-weight: 800;
+            color: var(--admin-text-primary);
+            letter-spacing: -0.03em;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+        }
+
+        .studio-badge-mode {
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 2px 9px;
+            border-radius: var(--radius-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: var(--studio-blue-light);
+            color: var(--studio-blue-text);
+            border: 1px solid var(--studio-blue-border);
+        }
+
+        /* Strict Single-Column Form Layout across all viewports */
+        .studio-layout {
+            display: block;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .studio-form-canvas {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .studio-sidebar-inspector {
+            display: none !important;
+        }
+
+        /* Section Cards - Clean human-crafted proportions with no AI bloated margins */
+        .studio-card {
+            background: #ffffff;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--studio-slate-border);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+            padding: 1.25rem 1.4rem;
+            margin-bottom: 0;
+            position: relative;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .studio-card:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .studio-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .studio-card-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: var(--studio-blue-light);
+            color: var(--studio-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            border: 1px solid rgba(37, 99, 235, 0.15);
+        }
+
+        .studio-card-icon.purple {
+            background: var(--studio-purple-light);
+            color: var(--studio-purple);
+            border-color: rgba(124, 58, 237, 0.15);
+        }
+
+        .studio-card-icon.amber {
+            background: var(--studio-amber-light);
+            color: var(--studio-amber);
+            border-color: rgba(217, 119, 6, 0.15);
+        }
+
+        .studio-card-icon.emerald {
+            background: var(--studio-emerald-light);
+            color: var(--studio-emerald);
+            border-color: rgba(5, 150, 105, 0.15);
+        }
+
+        .studio-card-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--admin-text-primary);
+            margin: 0 0 0.2rem 0;
+            font-family: 'Space Grotesk', sans-serif !important;
+        }
+
+        .studio-card-desc {
+            font-size: 0.82rem;
+            color: var(--admin-text-muted);
+            margin: 0;
+            line-height: 1.45;
+        }
+
+        /* Form Elements Enhancement */
+        .studio-form-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: var(--admin-text-primary);
+            margin-bottom: 0.45rem;
+        }
+
+        .studio-form-label .req {
+            color: var(--studio-blue);
+            margin-left: 2px;
+        }
+
+        .studio-form-label .help-tag {
+            font-size: 0.72rem;
+            font-weight: 500;
+            color: var(--admin-text-muted);
+        }
+
+        .studio-input {
+            width: 100%;
+            background: #ffffff;
+            border: 1.5px solid var(--studio-slate-border);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            font-size: 0.92rem;
+            color: var(--admin-text-primary);
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+            font-family: inherit;
+        }
+
+        .studio-input:focus {
+            outline: none;
+            border-color: var(--studio-blue);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+        }
+
+        .studio-input::placeholder {
+            color: #94a3b8;
+            font-weight: 400;
+        }
+
+        .studio-field-hint {
+            font-size: 0.74rem;
+            color: var(--admin-text-muted);
+            margin-top: 0.35rem;
+            display: block;
+            line-height: 1.4;
+        }
+
+        /* Selector Cards */
+        .studio-segmented-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.85rem;
+        }
+
+        .studio-choice-card {
+            border: 1.5px solid var(--studio-slate-border);
+            border-radius: 14px;
+            padding: 1rem 1.15rem;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            position: relative;
+        }
+
+        .studio-choice-card:hover {
+            border-color: #cbd5e1;
+            background: #ffffff;
+        }
+
+        .studio-choice-card.active {
+            border-color: var(--studio-blue);
+            background: var(--studio-blue-light);
+            box-shadow: 0 4px 14px rgba(36, 74, 60, 0.12);
+        }
+
+        .studio-choice-card.active-emerald {
+            border-color: var(--studio-emerald);
+            background: var(--studio-emerald-light);
+            box-shadow: 0 4px 14px rgba(50, 115, 84, 0.12);
+        }
+
+        .studio-choice-card.active-purple {
+            border-color: var(--studio-purple);
+            background: var(--studio-purple-light);
+            box-shadow: 0 4px 14px rgba(200, 121, 96, 0.12);
+        }
+
+        .studio-choice-indicator {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid #cbd5e1;
+            margin-top: 2px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .studio-choice-card.active .studio-choice-indicator {
+            border-color: var(--studio-blue);
+            background: var(--studio-blue);
+        }
+
+        .studio-choice-card.active-purple .studio-choice-indicator {
+            border-color: var(--studio-purple);
+            background: var(--studio-purple);
+        }
+
+        .studio-choice-card.active-emerald .studio-choice-indicator {
+            border-color: var(--studio-emerald);
+            background: var(--studio-emerald);
+        }
+
+        .studio-choice-indicator::after {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #ffffff;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all 0.2s ease;
+        }
+
+        .studio-choice-card.active .studio-choice-indicator::after,
+        .studio-choice-card.active-purple .studio-choice-indicator::after,
+        .studio-choice-card.active-emerald .studio-choice-indicator::after {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .studio-choice-title {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--admin-text-primary);
+            margin-bottom: 0.2rem;
+        }
+
+        .studio-choice-desc {
+            font-size: 0.74rem;
+            color: var(--admin-text-muted);
+            line-height: 1.35;
+        }
+
+        /* Upcoming / Pre-booking Banner Box */
+        .studio-preorder-box {
+            background: var(--studio-purple-light);
+            border: 1px solid var(--studio-slate-border);
+            border-radius: var(--radius-md);
+            padding: 1.35rem 1.5rem;
+            margin-top: 1.25rem;
+            box-shadow: var(--shadow-sm);
+            animation: fadeInAdmin 0.3s ease;
+        }
+
+        .studio-preorder-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: var(--studio-purple);
+            color: #ffffff;
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-radius: var(--radius-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.65rem;
+        }
+
+        /* Live Preview Sticky Card */
+        .studio-preview-sticky {
+            position: sticky;
+            top: 2rem;
+        }
+
+        .studio-live-card {
+            background: #ffffff;
+            border: 1px solid var(--studio-slate-border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08);
+            transition: all 0.25s ease;
+        }
+
+        .studio-live-card-thumb {
+            width: 100%;
+            height: 190px;
+            background: #f1f5f9;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .studio-live-card-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .studio-live-badge-slot {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            z-index: 2;
+        }
+
+        .studio-live-pill {
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 3px 9px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .studio-live-pill.live {
+            background: #327354;
+            color: #ffffff;
+        }
+
+        .studio-live-pill.upcoming {
+            background: var(--studio-purple);
+            color: #ffffff;
+        }
+
+        .studio-live-pill.scheduled {
+            background: var(--studio-amber);
+            color: #ffffff;
+        }
+
+        .studio-live-card-body {
+            padding: 1.25rem 1.35rem;
+        }
+
+        /* Image slots grid */
+        .studio-image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .studio-image-slot {
+            border: 1px solid var(--studio-slate-border);
+            border-radius: 14px;
+            padding: 0.85rem;
+            background: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+            transition: all 0.2s ease;
+        }
+
+        .studio-image-slot:hover {
+            border-color: #cbd5e1;
+            background: #ffffff;
+        }
+
+        .studio-slot-preview-box {
+            width: 100%;
+            height: 105px;
+            border-radius: 10px;
+            background: #f1f5f9;
+            border: 1px dashed #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: #94a3b8;
+            font-size: 0.74rem;
+        }
+
+        .studio-slot-preview-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Primary Action Buttons */
+        .btn-studio-save {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.55rem;
+            background: var(--studio-blue);
+            color: var(--studio-blue-text) !important;
+            border: 1px solid var(--studio-blue-hover);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 1.6rem;
+            font-weight: 700;
+            font-size: 0.92rem;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition-fast);
+            text-decoration: none;
+        }
+
+        .btn-studio-save:hover {
+            background: var(--studio-blue-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-studio-outline {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #ffffff;
+            color: var(--admin-text-secondary) !important;
+            border: 1.5px solid var(--studio-slate-border);
+            border-radius: 12px;
+            padding: 0.75rem 1.35rem;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-studio-outline:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+            color: var(--admin-text-primary) !important;
+        }
+
+        .btn-studio-danger {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: #fee2e2;
+            color: #dc2626 !important;
+            border: 1px solid #fca5a5;
+            border-radius: 12px;
+            padding: 0.75rem 1.25rem;
+            font-weight: 700;
+            font-size: 0.86rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-studio-danger:hover {
+            background: #fecaca;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="mobile-admin-header">
+        <div class="admin-logo" style="border: none; padding: 0;">EnrouteIn<span>Merchant</span></div>
+    </div>
+
+    <!-- Admin Sidebar -->
+    <aside class="admin-sidebar">
+        <div class="admin-logo">
+            EnrouteIn<span>Merchant</span>
+        </div>
+        <ul class="admin-nav">
+            <li><a href="dashboard.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg> <span class="nav-text">Dashboard</span></a></li>
+            <li><a href="products.html" class="active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+                        </path>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg> <span class="nav-text">Products</span></a></li>
+            <li><a href="orders.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg> <span class="nav-text">Orders</span></a></li>
+            <li><a href="reports.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg> <span class="nav-text">Reports</span></a></li>
+            <li><a href="account.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                        </path>
+                    </svg> <span class="nav-text">Profile</span></a></li>
+        </ul>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="admin-main">
+        <!-- Top Navigation Bar -->
+        <div class="studio-topbar">
+            <div>
+                <div class="studio-breadcrumbs">
+                    <a href="dashboard.html">Dashboard</a>
+                    <span>/</span>
+                    <a href="products.html">Products</a>
+                    <span>/</span>
+                    <span id="breadcrumb-current-action">Add Product</span>
+                </div>
+                <h1 class="studio-header-title">
+                    <a href="products.html" class="btn-studio-outline" id="studio-cancel-btn" title="Back to Products" aria-label="Back to Products" onclick="try{sessionStorage.removeItem('editProductId')}catch(_){}" style="width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; flex-shrink: 0;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                    </a>
+                    <span id="studio-page-title">Add New Product</span>
+                    <span class="studio-badge-mode" id="studio-mode-pill">Creating Mod</span>
+                </h1>
+            </div>
+
+            <!-- Top Actions: Delete button (visible in edit mode) -->
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <button type="button" class="btn-studio-danger" id="studio-delete-btn" title="Delete Product" aria-label="Delete Product" style="display: none; width: 36px; height: 36px; padding: 0; align-items: center; justify-content: center; border-radius: 8px;">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <form id="product-editor-form" novalidate>
+            <input type="hidden" id="p-id">
+            <input type="hidden" id="p-added-by">
+
+            <div class="studio-layout">
+                <!-- ==============================================
+                     LEFT COLUMN: Full-Feature Form Canvas
+                     ============================================== -->
+                <div class="studio-form-canvas">
+
+                    <!-- SECTION 1: Product Identity & Classification -->
+                    <div class="studio-card">
+                        <div class="studio-card-header">
+                            <div class="studio-card-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5">
+                                    <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                                    <polyline points="2 17 12 22 22 17"></polyline>
+                                    <polyline points="2 12 12 17 22 12"></polyline>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="studio-card-title">Product Identity & Classification</h3>
+                                <p class="studio-card-desc">Define product title, category, edition name, and commercial
+                                    licensing model</p>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1.25rem;">
+                            <label class="studio-form-label">
+                                <span>Product Title <span class="req">*</span></span>
+                                <span class="help-tag" id="title-char-count">0/100 chars</span>
+                            </label>
+                            <input type="text" id="p-name" class="studio-input"
+                                placeholder="e.g., BharatBenz 1617 Sleeper Coach 2026 Special Edition" required
+                                maxlength="120">
+                            <span class="studio-field-hint">A clear, descriptive name visible on search, store catalog
+                                and invoices.</span>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1.25rem;">
+                            <label class="studio-form-label">
+                                <span>Pricing License Model <span class="req">*</span></span>
+                            </label>
+                            <select id="p-pricing-type" class="studio-input" required>
+                                <option value="paid">Commercial (Paid Mod)</option>
+                                <option value="free">Community Free (Sub2Unlock Gate)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1.25rem;">
+                            <label class="studio-form-label">
+                                <span>Catalog Category <span class="req">*</span></span>
+                            </label>
+                            <select id="p-category" class="studio-input" required>
+                                <option value="mod">Vehicle Mod</option>
+                                <option value="livery">Vehicle Livery / Skin</option>
+                                <option value="sound">Sound & Horn Mod</option>
+                                <option value="map">Map / Route Mod</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="studio-form-label">
+                                <span>Edition / Variant Title for THIS Product</span>
+                                <span class="help-tag">Optional</span>
+                            </label>
+                            <input type="text" id="p-variant-name" class="studio-input"
+                                placeholder="e.g., Luxury AC Sleeper 4x2, Standard Chassis, Base Model">
+                            <span class="studio-field-hint">Shown on variant pill buttons on the storefront. Defaults to
+                                product name if blank.</span>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 2: Release Mode & Pre-Booking Suite -->
+                    <div class="studio-card">
+                        <div class="studio-card-header">
+                            <div class="studio-card-icon purple">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5">
+                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="studio-card-title">Release Pipeline & Upcoming Pre-Booking</h3>
+                                <p class="studio-card-desc">Publish immediately, schedule a timed drop, or list as
+                                    Upcoming with Pre-Booking Priority Reservation</p>
+                            </div>
+                        </div>
+
+                        <!-- Listing State Selector -->
+                        <div class="form-group" style="margin-bottom: 1.25rem;">
+                            <label class="studio-form-label">
+                                <span>Storefront Listing Mode <span class="req">*</span></span>
+                            </label>
+                            <div class="studio-segmented-grid">
+                                <!-- Mode 1: Live Storefront -->
+                                <label class="studio-choice-card active-emerald" id="mode-card-live">
+                                    <input type="radio" name="p-status" id="status-live" value="live" checked
+                                        style="display: none;">
+                                    <div class="studio-choice-indicator"></div>
+                                    <div>
+                                        <div class="studio-choice-title">🟢 Instant Live</div>
+                                        <div class="studio-choice-desc">Available for immediate purchase & download on
+                                            storefront.</div>
+                                    </div>
+                                </label>
+
+                                <!-- Mode 2: Upcoming with Pre-Booking -->
+                                <label class="studio-choice-card" id="mode-card-upcoming">
+                                    <input type="radio" name="p-status" id="status-upcoming" value="upcoming"
+                                        style="display: none;">
+                                    <div class="studio-choice-indicator"></div>
+                                    <div>
+                                        <div class="studio-choice-title">🚀 Upcoming Release</div>
+                                        <div class="studio-choice-desc">Showcase in catalog as upcoming with optional
+                                            Pre-Booking reservation.</div>
+                                    </div>
+                                </label>
+
+                                <!-- Mode 3: Scheduled Launch -->
+                                <label class="studio-choice-card" id="mode-card-scheduled">
+                                    <input type="radio" name="p-status" id="status-scheduled" value="scheduled"
+                                        style="display: none;">
+                                    <div class="studio-choice-indicator"></div>
+                                    <div>
+                                        <div class="studio-choice-title">⏳ Scheduled Drop</div>
+                                        <div class="studio-choice-desc">Automated release at a specific launch date &
+                                            time.</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- UPCOMING & PRE-BOOKING CONFIGURATION PANEL -->
+                        <div id="upcoming-preorder-panel" class="studio-preorder-box" style="display: none;">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                                <div>
+                                    <div class="studio-preorder-badge">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2.5">
+                                            <polygon
+                                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                                            </polygon>
+                                        </svg>
+                                        <span>Early Access & Priority Reservation</span>
+                                    </div>
+                                    <h4
+                                        style="font-size: 1.05rem; font-weight: 800; color: #4c1d95; margin: 0 0 0.2rem 0; font-family: 'Space Grotesk', sans-serif !important;">
+                                        Upcoming Mod Pre-Booking Settings
+                                    </h4>
+                                    <p style="font-size: 0.78rem; color: #6d28d9; margin: 0;">
+                                        Allow drivers to secure priority early delivery before public release.
+                                    </p>
+                                </div>
+
+                                <div
+                                    style="display: flex; align-items: center; gap: 0.65rem; background: #ffffff; padding: 6px 14px; border-radius: var(--radius-sm); border: 1px solid var(--studio-slate-border);">
+                                    <input type="checkbox" id="p-allow-prebooking" checked
+                                        style="width: 18px; height: 18px; accent-color: var(--studio-purple); cursor: pointer;">
+                                    <label for="p-allow-prebooking"
+                                        style="font-size: 0.82rem; font-weight: 700; color: var(--admin-text-primary); margin: 0; cursor: pointer;">
+                                        Enable Pre-Booking
+                                    </label>
+                                </div>
+                                                        <div id="prebooking-fields-wrap">
+                                <!-- Priority Reservation Deposit -->
+                                <div class="form-group" style="margin-bottom: 1.25rem;">
+                                    <label class="studio-form-label">
+                                        <span>Priority Reservation Deposit (₹) <span class="req">*</span></span>
+                                        <span class="help-tag" style="color: var(--studio-purple); font-weight: 700;">Advance Booking</span>
+                                    </label>
+                                    <input type="number" id="p-prebooking-deposit" class="studio-input"
+                                        placeholder="e.g., 99" min="1" step="any">
+                                    <span class="studio-field-hint">
+                                        Initial deposit paid upfront to lock in priority access. Remaining balance payable upon launch.
+                                    </span>
+                                </div>
+
+                                <!-- Expected Launch Date -->
+                                <div class="form-group" style="margin-bottom: 1.25rem;">
+                                    <label class="studio-form-label">
+                                        <span>Estimated Launch Date & Time <span class="req">*</span></span>
+                                    </label>
+                                    <input type="datetime-local" id="p-expected-date" class="studio-input">
+                                    <span class="studio-field-hint">
+                                        Displayed on storefront countdown clock and product badge.
+                                    </span>
+                                </div>
+
+                                <div class="form-group" style="margin-bottom: 1.25rem;">
+                                    <label class="studio-form-label">
+                                        <span>Early Bird VIP Slots / Allocation</span>
+                                        <span class="help-tag">Optional</span>
+                                    </label>
+                                    <input type="number" id="p-prebooking-slots" class="studio-input"
+                                        placeholder="e.g., 50 (Leave blank for Unlimited)" min="1">
+                                    <span class="studio-field-hint">Creates urgency (e.g., "Only 18 VIP Pre-Booking Slots Remaining").</span>
+                                </div>
+
+                                <div class="form-group" style="margin-bottom: 1.25rem;">
+                                    <label class="studio-form-label">
+                                        <span>Early Bird Advantage / Incentive</span>
+                                        <span class="help-tag">Optional</span>
+                                    </label>
+                                    <input type="text" id="p-prebooking-perk-note" class="studio-input"
+                                        placeholder="e.g., Save ₹100 vs Launch Price + VIP Discord Role">
+                                    <span class="studio-field-hint">Highlights the financial or exclusive benefit of reserving early.</span>
+                                </div>      </div>
+
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label class="studio-form-label">
+                                        <span>Included Pre-Booking Perks & Deliverables</span>
+                                        <span class="help-tag">Comma separated or points</span>
+                                    </label>
+                                    <input type="text" id="p-prebooking-perks" class="studio-input"
+                                        placeholder="e.g., 24h Early Access Beta, Free 4K HD Livery Pack, Priority Support, Special Mod Badge">
+                                    <span class="studio-field-hint">Perks will be highlighted as bullet points in the
+                                        product early-access card.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SCHEDULED DATE & TIME GROUP -->
+                        <div id="scheduled-datetime-group"
+                            style="display: none; background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 14px; padding: 1.25rem; margin-top: 1.15rem;">
+                            <label class="studio-form-label">
+                                <span>Target Launch Date & Time (Local Time) <span class="req">*</span></span>
+                            </label>
+                            <input type="datetime-local" id="p-scheduled-date" class="studio-input"
+                                style="max-width: 320px;">
+                            <span class="studio-field-hint">This product will remain hidden from customers until this
+                                exact timestamp.</span>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 3: Commercial Pricing & Offers -->
+                    <div class="studio-card" id="pricing-card">
+                        <div class="studio-card-header">
+                            <div class="studio-card-icon emerald">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5">
+                                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="studio-card-title">Commercial Pricing & Promotional Discounts</h3>
+                                <p class="studio-card-desc">Set the standard list price and configure limited-time
+                                    promotional rates</p>
+                            </div>
+                        </div>
+
+                        <!-- Commercial Pricing Inputs -->
+                        <div id="commercial-pricing-fields">
+                            <div class="form-group" style="margin-bottom: 1.25rem;">
+                                <label class="studio-form-label">
+                                    <span>Original Price (₹) <span class="req">*</span></span>
+                                </label>
+                                <input type="number" id="p-original-price" class="studio-input"
+                                    placeholder="e.g., 499" min="0" step="any">
+                                <span class="studio-field-hint">Standard retail catalog price.</span>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 1.25rem;">
+                                <label class="studio-form-label">
+                                    <span>Promotional Sale Price (₹)</span>
+                                    <span class="help-tag">Optional</span>
+                                </label>
+                                <input type="number" id="p-offer-price" class="studio-input" placeholder="e.g., 299"
+                                    min="0" step="any">
+                                <span class="studio-field-hint">Discounted price shown with savings percentage.</span>
+                            </div>
+
+                            <!-- Offer Duration / Window -->
+                            <div class="form-group" style="margin-bottom: 1.25rem;">
+                                <label class="studio-form-label">
+                                    <span>Promotional Sale Window</span>
+                                </label>
+                                <div class="studio-segmented-grid" style="grid-template-columns: 1fr 1fr;">
+                                    <label class="studio-choice-card active" id="offer-lifetime-choice">
+                                        <input type="radio" name="p-offer-period" id="p-offer-lifetime" value="lifetime"
+                                            checked style="display: none;">
+                                        <div class="studio-choice-indicator"></div>
+                                        <div>
+                                            <div class="studio-choice-title">Permanent Offer</div>
+                                            <div class="studio-choice-desc">No expiration date. Runs indefinitely.</div>
+                                        </div>
+                                    </label>
+
+                                    <label class="studio-choice-card" id="offer-limited-choice">
+                                        <input type="radio" name="p-offer-period" id="p-offer-limited" value="limited"
+                                            style="display: none;">
+                                        <div class="studio-choice-indicator"></div>
+                                        <div>
+                                            <div class="studio-choice-title">⚡ Limited-Time Deal</div>
+                                            <div class="studio-choice-desc">Automatically reverts to original price
+                                                after expiry.</div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Expiry date for limited offer -->
+                            <div class="form-group" id="offer-expiry-group"
+                                style="display: none; background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 14px; padding: 1.15rem; margin-bottom: 0;">
+                                <label class="studio-form-label">
+                                    <span>Sale Valid Until (Date & Time) <span class="req">*</span></span>
+                                </label>
+                                <input type="datetime-local" id="p-offer-expiry" class="studio-input"
+                                    style="max-width: 320px;">
+                                <span class="studio-field-hint">After this date, the price automatically returns to
+                                    Original Price.</span>
+                            </div>
+                        </div>
+
+                        <!-- Community Free YouTube Link (Shown when Pricing Type is Free) -->
+                        <div id="free-channel-fields"
+                            style="display: none; background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 14px; padding: 1.25rem;">
+                            <label class="studio-form-label">
+                                <span>YouTube Sub2Unlock Channel Link <span class="req">*</span></span>
+                            </label>
+                            <input type="url" id="p-channel-link" class="studio-input"
+                                placeholder="https://youtube.com/@YourChannel">
+                            <span class="studio-field-hint" style="color: #166534;">Users must subscribe to this channel
+                                before downloading the mod for free.</span>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 4: Cloud Mod Archive (ShareMods Integration) -->
+                    <div class="studio-card">
+                        <div class="studio-card-header">
+                            <div class="studio-card-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="studio-card-title">Vehicle Mod Archive File</h3>
+                                <p class="studio-card-desc">Upload vehicle mod archive (.zip, .rar, .7z, .bussidmod up to 200MB) directly to secure cloud storage</p>
+                            </div>
+                        </div>
+
+                        <!-- Cloud Upload Zone -->
+                        <div id="sharemods-upload-zone"
+                            style="border: 2px dashed var(--studio-blue-border); border-radius: var(--radius-lg); padding: 1.85rem; text-align: center; cursor: pointer; transition: all 0.2s ease; background: var(--color-bg-subtle); margin-bottom: 0;">
+                            <input type="file" id="sharemods-file-input" style="display: none;"
+                                accept=".zip,.rar,.7z,.bussidmod,.bussidvehicle">
+
+                            <div id="sharemods-upload-content">
+                                <div
+                                    style="width: 52px; height: 52px; border-radius: 50%; background: var(--studio-blue-light); color: var(--studio-blue); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0.75rem;">
+                                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="17 8 12 3 7 8"></polyline>
+                                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                                    </svg>
+                                </div>
+                                <div
+                                    style="font-weight: 800; font-size: 1.05rem; color: var(--admin-text-primary); margin-bottom: 0.25rem;">
+                                    Click to Upload or Drag & Drop Mod Archive
+                                </div>
+                                <div style="font-size: 0.82rem; color: var(--admin-text-muted);">
+                                    Supported: .zip, .rar, .7z, .bussidmod, .bussidvehicle (Cloud Storage • Max 200MB)
+                                </div>
+                            </div>
+
+                            <!-- Upload Progress State -->
+                            <div id="sharemods-upload-progress" style="display: none; padding: 0.5rem 0;">
+                                <div
+                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                    <span id="sharemods-file-name"
+                                        style="font-size: 0.9rem; font-weight: 700; color: var(--admin-text-primary); max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
+                                    <span id="sharemods-file-size"
+                                        style="font-size: 0.78rem; color: var(--admin-text-muted);"></span>
+                                </div>
+                                <div
+                                    style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 999px; overflow: hidden; margin-bottom: 0.5rem;">
+                                    <div id="sharemods-progress-bar"
+                                        style="width: 0%; height: 100%; background: var(--studio-blue); border-radius: 999px; transition: width 0.15s ease;">
+                                    </div>
+                                </div>
+                                <div
+                                    style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem;">
+                                    <span id="sharemods-progress-label"
+                                        style="color: var(--studio-blue); font-weight: 700;">Uploading Mod File to Cloud...</span>
+                                    <span id="sharemods-progress-percent"
+                                        style="color: var(--admin-text-secondary); font-weight: 800;">0%</span>
+                                </div>
+                            </div>
+
+                            <!-- Upload Success State -->
+                            <div id="sharemods-upload-success" style="display: none; padding: 0.5rem 0;">
+                                <div
+                                    style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+                                    <div style="display: flex; align-items: center; gap: 0.85rem;">
+                                        <div
+                                            style="width: 40px; height: 40px; border-radius: 50%; background: var(--studio-emerald-light); color: var(--studio-emerald); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2.5">
+                                                <polyline points="20 6 9 17 4 12"></polyline>
+                                            </svg>
+                                        </div>
+                                        <div style="text-align: left;">
+                                            <div
+                                                style="font-weight: 800; font-size: 0.95rem; color: var(--studio-emerald);">
+                                                Mod File Attached Successfully!</div>
+                                            <div id="sharemods-success-filename"
+                                                style="font-size: 0.8rem; color: var(--admin-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 350px;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <button type="button" id="sharemods-remove-file"
+                                            style="background: none; border: 1px solid #fca5a5; cursor: pointer; color: #dc2626; padding: 6px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 700;">
+                                            Remove
+                                        </button>
+                                        <button type="button" id="sharemods-reupload-btn"
+                                            style="background: none; border: 1px solid var(--studio-slate-border); cursor: pointer; color: var(--admin-text-secondary); padding: 6px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 700;">
+                                            Re-upload
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Preserved Hidden Download Link State -->
+                        <input type="hidden" id="p-download">
+                        <input type="hidden" id="p-download-source" value="manual">
+                    </div>
+
+                    <!-- SECTION 5: Showcase Visual Studio (4 Image Slots + Video) -->
+                    <div class="studio-card">
+                        <div class="studio-card-header">
+                            <div class="studio-card-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                    <polyline points="21 15 16 10 5 21"></polyline>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="studio-card-title">Product Showcase Imagery & Media</h3>
+                                <p class="studio-card-desc">Add image URLs from Google Drive, Imgur, or direct links.
+                                    Live thumbnails update automatically.</p>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 1.15rem; margin-bottom: 1.25rem;">
+                            <!-- Slot 1 -->
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="studio-form-label">
+                                    <span>Slot 1: Cover Thumbnail <span class="req">*</span></span>
+                                </label>
+                                <div style="display: flex; gap: 1rem; align-items: center;">
+                                    <div class="studio-slot-preview-box" id="slot-preview-1" style="width: 110px; height: 75px; flex-shrink: 0; border-radius: var(--radius-sm);">
+                                        <span>Cover</span>
+                                    </div>
+                                    <input type="url" id="p-image-1" class="studio-input"
+                                        placeholder="https://... Image 1 URL" required>
+                                </div>
+                            </div>
+
+                            <!-- Slot 2 -->
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="studio-form-label">
+                                    <span>Slot 2: Exterior</span>
+                                </label>
+                                <div style="display: flex; gap: 1rem; align-items: center;">
+                                    <div class="studio-slot-preview-box" id="slot-preview-2" style="width: 110px; height: 75px; flex-shrink: 0; border-radius: var(--radius-sm);">
+                                        <span>Exterior</span>
+                                    </div>
+                                    <input type="url" id="p-image-2" class="studio-input"
+                                        placeholder="https://... Image 2 URL">
+                                </div>
+                            </div>
+
+                            <!-- Slot 3 -->
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="studio-form-label">
+                                    <span>Slot 3: Cockpit / Interior</span>
+                                </label>
+                                <div style="display: flex; gap: 1rem; align-items: center;">
+                                    <div class="studio-slot-preview-box" id="slot-preview-3" style="width: 110px; height: 75px; flex-shrink: 0; border-radius: var(--radius-sm);">
+                                        <span>Cockpit</span>
+                                    </div>
+                                    <input type="url" id="p-image-3" class="studio-input"
+                                        placeholder="https://... Image 3 URL">
+                                </div>
+                            </div>
+
+                            <!-- Slot 4 -->
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="studio-form-label">
+                                    <span>Slot 4: Night / Lighting</span>
+                                </label>
+                                <div style="display: flex; gap: 1rem; align-items: center;">
+                                    <div class="studio-slot-preview-box" id="slot-preview-4" style="width: 110px; height: 75px; flex-shrink: 0; border-radius: var(--radius-sm);">
+                                        <span>Night View</span>
+                                    </div>
+                                    <input type="url" id="p-image-4" class="studio-input"
+                                        placeholder="https://... Image 4 URL">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- YouTube Cinematic Video -->
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="studio-form-label">
+                                <span>YouTube Cinematic Showcase Video URL</span>
+                                <span class="help-tag">Optional</span>
+                            </label>
+                            <input type="url" id="p-youtube" class="studio-input"
+                                placeholder="https://www.youtube.com/watch?v=...">
+                            <span class="studio-field-hint">Displays an embedded trailer on the product details
+                                page.</span>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 6: Vehicle Specs & Telemetry -->
+                    <div class="studio-card">
+                        <div class="studio-card-header">
+                            <div class="studio-card-icon amber">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5">
+                                    <path
+                                        d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="studio-card-title">Vehicle Telemetry & Technical Specs</h3>
+                                <p class="studio-card-desc">Compatibility, horsepower, 3D geometric density and physics
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1.25rem;">
+                            <label class="studio-form-label">
+                                <span>Compatible Game Version</span>
+                            </label>
+                            <input type="text" id="p-version" class="studio-input"
+                                placeholder="e.g., BUSSID v4.0 - v4.3.4">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1.25rem;">
+                            <label class="studio-form-label">
+                                <span>Manufacturer / Chassis Brand</span>
+                            </label>
+                            <input type="text" id="p-brand" class="studio-input"
+                                placeholder="e.g., BharatBenz, Volvo, Scania, Tata">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1.25rem;">
+                            <label class="studio-form-label">
+                                <span>Powertrain / Engine Output</span>
+                            </label>
+                            <input type="text" id="p-engine" class="studio-input"
+                                placeholder="e.g., 460 HP Euro 6 Turbo Diesel">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1.25rem;">
+                            <label class="studio-form-label">
+                                <span>3D Polygon Density Profile</span>
+                            </label>
+                            <select id="p-polygons" class="studio-input">
+                                <option value="">Select Geometry Profile...</option>
+                                <option value="Ultra High-Poly">Ultra High-Poly (Photorealistic Master)</option>
+                                <option value="High-Poly">High-Poly (Balanced Fidelity)</option>
+                                <option value="Optimized">Optimized (Low-End Mobile Friendly)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1.25rem;">
+                            <label class="studio-form-label">
+                                <span>Archive File Size</span>
+                            </label>
+                            <input type="text" id="p-size" class="studio-input"
+                                placeholder="e.g., 84.5 MB (.bussidmod)">
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 0.85rem; padding-top: 0.5rem;">
+                            <div style="display: flex; align-items: center; gap: 0.6rem;">
+                                <input type="checkbox" id="p-interior"
+                                    style="width: 18px; height: 18px; accent-color: var(--studio-blue); cursor: pointer;">
+                                <label for="p-interior"
+                                    style="font-size: 0.88rem; font-weight: 700; color: var(--admin-text-primary); cursor: pointer; margin: 0;">Detailed
+                                    Interior Included</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.6rem;">
+                                <input type="checkbox" id="p-featured"
+                                    style="width: 18px; height: 18px; accent-color: var(--studio-blue); cursor: pointer;">
+                                <label for="p-featured"
+                                    style="font-size: 0.88rem; font-weight: 700; color: var(--admin-text-primary); cursor: pointer; margin: 0;">Featured
+                                    Spotlight on Storefront</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 7: Dynamic Linked Variants Builder -->
+                    <div class="studio-card">
+                        <div class="studio-card-header">
+                            <div class="studio-card-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5">
+                                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="studio-card-title">Linked Product Variants</h3>
+                                <p class="studio-card-desc">Group trim levels, liveries or coach editions together on
+                                    this product page</p>
+                            </div>
+                        </div>
+
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
+                            <span
+                                style="font-size: 0.84rem; font-weight: 700; color: var(--admin-text-primary);">Configured
+                                Variants</span>
+                            <button type="button" class="btn-studio-outline" id="studio-add-variant-btn"
+                                style="padding: 0.45rem 1rem; font-size: 0.82rem;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="3">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                <span>Add Variant</span>
+                            </button>
+                        </div>
+
+                        <div id="studio-variants-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                            <!-- Variant rows injected by JS -->
+                        </div>
+                    </div>
+
+                    <!-- SECTION 8: Documentation & Editorial Guide -->
+                    <div class="studio-card" style="margin-bottom: 0;">
+                        <div class="studio-card-header">
+                            <div class="studio-card-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="studio-card-title">Documentation & Installation Guide</h3>
+                                <p class="studio-card-desc">Provide headline summary, detailed feature list and driver
+                                    installation instructions</p>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1.25rem;">
+                            <label class="studio-form-label">
+                                <span>Mod Highlights Summary (Card Headline)</span>
+                            </label>
+                            <textarea id="p-summary" class="studio-input" rows="2"
+                                placeholder="Precision crafted sleeper coach with custom LED animations, real suspension air physics and authentic horn sounds..."></textarea>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1.25rem;">
+                            <label class="studio-form-label">
+                                <span>Full Documentation & Installation Steps <span class="req">*</span></span>
+                            </label>
+                            <textarea id="p-description" class="studio-input" rows="5"
+                                placeholder="Detailed vehicle feature list, camera view keys, installation path (/BUSSID/Mods), liveries included..."
+                                required></textarea>
+                        </div>
+
+                        <!-- Related Mods Checklist -->
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="studio-form-label">
+                                <span>Recommended Fleet Addons & Associated Mods</span>
+                            </label>
+                            <div id="p-related-container"
+                                style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; max-height: 180px; overflow-y: auto; padding: 0.75rem; border: 1px solid var(--studio-slate-border); border-radius: 12px; background: #f8fafc;">
+                                <!-- Checkboxes dynamically populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Form Actions (Side-by-Side with Zero Empty Whitespace) -->
+                    <div class="studio-card" style="margin-top: 0.75rem; padding: 0.85rem 1rem;">
+                        <div style="display: grid; grid-template-columns: 1fr 1.25fr; gap: 0.65rem; width: 100%; align-items: center; box-sizing: border-box;">
+                            <a href="products.html" class="btn-studio-outline" style="width: 100%; padding: 0.75rem 0.6rem; justify-content: center; text-align: center; white-space: nowrap; font-size: 0.86rem; box-sizing: border-box;">
+                                Cancel & Return
+                            </a>
+                            <button type="submit" form="product-editor-form" class="btn-studio-save" id="studio-save-bottom-btn" style="width: 100%; padding: 0.75rem 0.75rem; justify-content: center; text-align: center; white-space: nowrap; font-size: 0.88rem; box-sizing: border-box;">
+                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink: 0;">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span id="studio-save-bottom-label">Save Product</span>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ==============================================
+                     RIGHT COLUMN: Live Preview Inspector & Release Controller
+                     ============================================== -->
+                <div class="studio-sidebar-inspector">
+                    <div class="studio-preview-sticky">
+
+                        <!-- LIVE STOREFRONT CARD PREVIEW -->
+                        <div class="studio-card" style="padding: 1.25rem; margin-bottom: 1.5rem;">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                <div
+                                    style="display: flex; align-items: center; gap: 0.4rem; font-weight: 800; font-size: 0.88rem; color: var(--admin-text-primary);">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2.5">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <polyline points="12 6 12 12 16 14"></polyline>
+                                    </svg>
+                                    <span>Real-Time Store Preview</span>
+                                </div>
+                                <span
+                                    style="font-size: 0.72rem; font-weight: 700; color: #059669; background: #ecfdf5; border: 1px solid rgba(5, 150, 105, 0.2); padding: 2px 8px; border-radius: 999px;">Live
+                                    Sync</span>
+                            </div>
+
+                            <div class="studio-live-card">
+                                <div class="studio-live-card-thumb">
+                                    <div class="studio-live-badge-slot">
+                                        <span class="studio-live-pill live" id="preview-status-pill">LIVE MOD</span>
+                                        <span class="studio-live-pill" id="preview-preorder-pill"
+                                            style="display: none; background: var(--studio-purple); color: #fff;">PRE-BOOKING
+                                            OPEN</span>
+                                    </div>
+                                    <img id="preview-cover-img"
+                                        src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=800"
+                                        alt="Cover Preview">
+                                </div>
+                                <div class="studio-live-card-body">
+                                    <span
+                                        style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase; color: var(--studio-blue); background: var(--studio-blue-light); padding: 2px 7px; border-radius: var(--radius-sm); display: inline-block; margin-bottom: 0.4rem; border: 1px solid var(--studio-blue-border);"
+                                        id="preview-category-tag">
+                                        Vehicle Mod
+                                    </span>
+                                    <h4 style="font-size: 1.05rem; font-weight: 800; color: var(--admin-text-primary); margin: 0 0 0.4rem 0; line-height: 1.3;"
+                                        id="preview-product-title">
+                                        BharatBenz 1617 Sleeper Coach 2026
+                                    </h4>
+                                    <div style="font-size: 0.76rem; color: var(--admin-text-muted); margin-bottom: 0.85rem;"
+                                        id="preview-uploader-tag">
+                                        By EnrouteIn Studio
+                                    </div>
+
+                                    <!-- Price / Pre-Booking Box in preview -->
+                                    <div style="background: var(--color-bg-subtle); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 0.75rem 0.85rem; margin-bottom: 0.85rem;"
+                                        id="preview-pricing-box">
+                                        <div style="display: flex; align-items: baseline; gap: 0.5rem;">
+                                            <span
+                                                style="font-size: 1.2rem; font-weight: 800; color: var(--studio-blue); font-family: var(--font-heading) !important;"
+                                                id="preview-price-display">
+                                                ₹499
+                                            </span>
+                                            <span
+                                                style="font-size: 0.82rem; color: var(--admin-text-muted); text-decoration: line-through;"
+                                                id="preview-original-display" style="display: none;"></span>
+                                        </div>
+                                        <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 3px;"
+                                            id="preview-price-subtext">
+                                            Instant Download & License
+                                        </div>
+                                    </div>
+
+                                    <!-- Preview Action Button -->
+                                    <div style="background: var(--studio-blue); color: #ffffff; text-align: center; padding: 0.65rem; border-radius: var(--radius-md); font-weight: 700; font-size: 0.84rem;"
+                                        id="preview-action-btn">
+                                        View Details & Buy
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PUBLISH CONTROLLER CARD -->
+                        <div class="studio-card" style="padding: 1.35rem;">
+                            <h4
+                                style="font-size: 0.95rem; font-weight: 800; color: var(--admin-text-primary); margin: 0 0 1rem 0;">
+                                Publication Status
+                            </h4>
+
+                            <div
+                                style="display: flex; flex-direction: column; gap: 0.85rem; font-size: 0.82rem; margin-bottom: 1.25rem;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--admin-text-muted);">Current Mode:</span>
+                                    <span style="font-weight: 700; color: var(--admin-text-primary);"
+                                        id="inspector-mode-text">Instant Live</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--admin-text-muted);">Pre-Booking:</span>
+                                    <span style="font-weight: 700; color: var(--studio-purple);"
+                                        id="inspector-preorder-text">Disabled</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--admin-text-muted);">Archive File:</span>
+                                    <span style="font-weight: 700; color: #059669;" id="inspector-file-text">None
+                                        Attached</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--admin-text-muted);">Creator Attribution:</span>
+                                    <span style="font-weight: 700;" id="inspector-author-text">You</span>
+                                </div>
+                            </div>
+
+                            <button type="submit" form="product-editor-form" class="btn-studio-save"
+                                id="studio-save-bottom-btn" style="width: 100%;">
+                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span id="studio-save-bottom-label">Save & Publish Product</span>
+                            </button>
+
+                            <a href="products.html" class="btn-studio-outline"
+                                style="width: 100%; margin-top: 0.65rem; justify-content: center;">
+                                Cancel & Return
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+    </main>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <nav class="mobile-admin-bottom-nav">
+        <a href="dashboard.html" class="bottom-nav-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            <span>Dashboard</span>
+        </a>
+        <a href="products.html" class="bottom-nav-item active">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path
+                    d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+                </path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
+            <span>Products</span>
+        </a>
+        <a href="orders.html" class="bottom-nav-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <span>Orders</span>
+        </a>
+        <a href="reports.html" class="bottom-nav-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+            <span>Reports</span>
+        </a>
+        <a href="account.html" class="bottom-nav-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path
+                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                </path>
+            </svg>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <!-- Logic -->
+    <script type="module">
+        import { requireAdmin } from '../js/admin/admin-auth.js';
+        requireAdmin();
+    </script>
+    <script type="module" src="../js/admin/admin-product-editor.js?v=20261022_4"></script>
+</body>
+
+</html>

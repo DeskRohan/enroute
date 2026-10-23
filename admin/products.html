@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Products - Enroute Admin</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <title>Manage Products - Merchant Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
     <!-- CSS -->
     <link rel="stylesheet" href="../css/index.css">
     <link rel="stylesheet" href="../css/components.css">
@@ -14,53 +14,52 @@
 
     <style id="boho-theme-styles">
         /* ====================================================
-           Web Blue Theme for Add/Edit Product Multi-Step Wizard
+           EnrouteIn E-Commerce Theme Tokens
            ==================================================== */
         :root {
-            /* Web Blue Theme Design Tokens */
-            --theme-blue: #2563eb;
-            --theme-blue-hover: #1d4ed8;
-            --theme-blue-light: #eff6ff;
-            --theme-blue-subtle: rgba(37, 99, 235, 0.12);
-            --theme-blue-glow: rgba(37, 99, 235, 0.25);
-            --theme-blue-border: rgba(37, 99, 235, 0.35);
+            --theme-blue: #007DC6;
+            --theme-blue-hover: #005A91;
+            --theme-blue-light: #EAF5FC;
+            --theme-blue-subtle: rgba(0, 125, 198, 0.12);
+            --theme-blue-glow: rgba(0, 125, 198, 0.25);
+            --theme-blue-border: #007DC6;
 
-            --theme-success: #059669;
-            --theme-success-light: #ecfdf5;
-            --theme-warning: #f59e0b;
-            --theme-warning-light: #fef3c7;
+            --theme-success: #218838;
+            --theme-success-light: #EAF6ED;
+            --theme-warning: #946200;
+            --theme-warning-light: #FFF4D6;
 
-            /* Neutral Slate Palette */
-            --theme-bg-modal: #ffffff;
-            --theme-bg-canvas: #f8fafc;
-            --theme-border: #e2e8f0;
-            --theme-border-strong: #cbd5e1;
-            --theme-text-dark: #0f172a;
-            --theme-text-secondary: #475569;
-            --theme-text-muted: #94a3b8;
+            /* Neutral Commercial Palette */
+            --theme-bg-modal: #FFFFFF;
+            --theme-bg-canvas: #F5F7F9;
+            --theme-border: #DFE5EA;
+            --theme-border-strong: #C5CFD8;
+            --theme-text-dark: #242A30;
+            --theme-text-secondary: #626C76;
+            --theme-text-muted: #89939D;
 
-            /* Mappings for Wizard Components */
-            --boho-clay: var(--theme-blue);
-            --boho-clay-hover: var(--theme-blue-hover);
-            --boho-clay-light: var(--theme-blue-light);
-            --boho-clay-glow: var(--theme-blue-glow);
-            --boho-sage: var(--theme-success);
-            --boho-sage-light: var(--theme-success-light);
-            --boho-sand: var(--theme-bg-modal);
-            --boho-oat: var(--theme-bg-canvas);
-            --boho-border: var(--theme-border);
-            --boho-border-strong: var(--theme-border-strong);
-            --boho-espresso: var(--theme-text-dark);
-            --boho-warm-brown: var(--theme-text-secondary);
-            --boho-muted: var(--theme-text-muted);
+            /* Mappings for Components */
+            --boho-clay: #153247;
+            --boho-clay-hover: #005A91;
+            --boho-clay-light: #EAF5FC;
+            --boho-clay-glow: rgba(0, 125, 198, 0.2);
+            --boho-sage: #218838;
+            --boho-sage-light: #EAF6ED;
+            --boho-sand: #FFFFFF;
+            --boho-oat: #F5F7F9;
+            --boho-border: #DFE5EA;
+            --boho-border-strong: #C5CFD8;
+            --boho-espresso: #242A30;
+            --boho-warm-brown: #626C76;
+            --boho-muted: #89939D;
         }
 
         #product-modal .modal-content.boho-modal-content {
-            background: #ffffff;
+            background: #FFFFFF;
             max-width: 860px;
-            border-radius: 20px;
+            border-radius: var(--radius-xl);
             border: 1px solid var(--theme-border);
-            box-shadow: 0 20px 60px -15px rgba(15, 23, 42, 0.16), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+            box-shadow: 0 10px 30px -5px rgba(37, 41, 35, 0.15);
             padding: 0;
             overflow: hidden;
             display: flex;
@@ -69,8 +68,8 @@
         }
 
         .boho-modal-header {
-            padding: 1.35rem 2rem 1.15rem 2rem;
-            background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+            padding: 1.15rem 1.75rem 1rem 1.75rem;
+            background: var(--theme-bg-canvas);
             border-bottom: 1px solid var(--theme-border);
             display: flex;
             justify-content: space-between;
@@ -82,20 +81,20 @@
             display: inline-flex;
             align-items: center;
             gap: 0.35rem;
-            background: #eff6ff;
-            color: #2563eb;
-            border: 1px solid rgba(37, 99, 235, 0.22);
-            padding: 3px 10px;
-            border-radius: 999px;
-            font-size: 0.72rem;
+            background: var(--boho-clay-light);
+            color: var(--boho-clay);
+            border: 1px solid var(--theme-border);
+            padding: 2px 8px;
+            border-radius: var(--radius-xs);
+            font-size: 0.68rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            margin-bottom: 0.35rem;
+            margin-bottom: 0.25rem;
         }
 
         .boho-modal-title {
-            font-size: 1.35rem;
+            font-size: 1.25rem;
             font-weight: 800;
             color: var(--theme-text-dark);
             margin: 0;
@@ -103,16 +102,16 @@
         }
 
         .boho-modal-desc {
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             color: var(--theme-text-secondary);
-            margin: 0.2rem 0 0 0;
+            margin: 0.15rem 0 0 0;
         }
 
         /* Stepper Navigation */
         .boho-stepper-wrap {
-            background: #ffffff;
+            background: #FFFFFF;
             border-bottom: 1px solid var(--theme-border);
-            padding: 0.85rem 1.75rem;
+            padding: 0.75rem 1.5rem;
         }
 
         .boho-stepper {
@@ -126,13 +125,13 @@
         .boho-step-item {
             display: flex;
             align-items: center;
-            gap: 0.55rem;
+            gap: 0.5rem;
             cursor: pointer;
             background: transparent;
             border: none;
-            padding: 0.4rem 0.65rem;
-            border-radius: 999px;
-            transition: all 0.2s ease;
+            padding: 0.35rem 0.6rem;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
             user-select: none;
         }
 
@@ -141,8 +140,8 @@
         }
 
         .boho-step-circle {
-            width: 28px;
-            height: 28px;
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
             background: var(--boho-oat);
             color: var(--boho-muted);
@@ -150,9 +149,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             font-weight: 800;
-            transition: all 0.2s ease;
+            transition: all var(--transition-fast);
             flex-shrink: 0;
         }
 
@@ -161,15 +160,14 @@
         }
 
         .boho-step-item.active .boho-step-circle {
-            background: linear-gradient(135deg, var(--boho-clay), var(--boho-clay-hover));
-            color: #ffffff;
+            background: var(--boho-clay);
+            color: #FFFFFF;
             border-color: var(--boho-clay);
-            box-shadow: 0 0 0 3px var(--boho-clay-glow);
         }
 
         .boho-step-item.completed .boho-step-circle {
             background: var(--boho-sage);
-            color: #ffffff;
+            color: #FFFFFF;
             border-color: var(--boho-sage);
         }
 
@@ -188,7 +186,7 @@
         }
 
         .boho-step-mini-tag {
-            font-size: 0.65rem;
+            font-size: 0.62rem;
             font-weight: 700;
             color: var(--boho-muted);
             text-transform: uppercase;
@@ -197,7 +195,7 @@
         }
 
         .boho-step-label {
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             font-weight: 700;
             color: var(--boho-warm-brown);
             white-space: nowrap;
@@ -214,7 +212,7 @@
             background: var(--boho-border);
             margin: 0 0.35rem;
             border-radius: 2px;
-            transition: background 0.3s ease;
+            transition: background var(--transition-fast);
         }
 
         .boho-step-divider.completed {
@@ -223,7 +221,7 @@
 
         /* Wizard Form Body */
         .boho-wizard-body {
-            padding: 1.5rem 2rem;
+            padding: 1.25rem 1.75rem;
             overflow-y: auto;
             flex: 1;
         }
@@ -234,46 +232,34 @@
 
         .boho-step-pane.active {
             display: block;
-            animation: bohoFadeSlide 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes bohoFadeSlide {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         /* Boho Card */
         .boho-card {
-            background: #ffffff;
+            background: #FFFFFF;
             border: 1px solid var(--boho-border);
-            border-radius: 18px;
-            padding: 1.35rem 1.5rem;
-            margin-bottom: 1.15rem;
-            box-shadow: 0 2px 12px -2px rgba(80, 50, 30, 0.04);
+            border-radius: var(--radius-lg);
+            padding: 1.15rem 1.35rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-xs);
         }
 
         .boho-card-header {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            padding-bottom: 0.75rem;
-            margin-bottom: 1.1rem;
+            gap: 0.65rem;
+            padding-bottom: 0.65rem;
+            margin-bottom: 0.95rem;
             border-bottom: 1px solid var(--boho-border);
         }
 
         .boho-card-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 10px;
-            background: #eff6ff;
-            color: #2563eb;
-            border: 1px solid rgba(37, 99, 235, 0.18);
+            width: 30px;
+            height: 30px;
+            border-radius: var(--radius-md);
+            background: var(--boho-clay-light);
+            color: var(--boho-clay);
+            border: 1px solid var(--theme-border);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -281,7 +267,7 @@
         }
 
         .boho-card-title {
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             font-weight: 800;
             color: var(--boho-espresso);
             letter-spacing: -0.01em;
@@ -289,7 +275,7 @@
         }
 
         .boho-card-desc {
-            font-size: 0.76rem;
+            font-size: 0.74rem;
             color: var(--boho-muted);
             margin: 2px 0 0 0;
         }
@@ -297,41 +283,41 @@
         /* Boho Form Controls */
         .boho-modal-content .form-label {
             color: var(--boho-warm-brown) !important;
-            font-size: 0.76rem !important;
+            font-size: 0.75rem !important;
             font-weight: 700 !important;
             letter-spacing: 0.04em !important;
-            margin-bottom: 0.35rem !important;
+            margin-bottom: 0.3rem !important;
         }
 
         .boho-modal-content .form-control {
-            background: #f8fafc !important;
-            border: 1.5px solid var(--boho-border) !important;
-            border-radius: 10px !important;
+            background: #FFFFFF !important;
+            border: 1px solid var(--boho-border) !important;
+            border-radius: var(--radius-md) !important;
             color: var(--boho-espresso) !important;
-            padding: 0.65rem 0.85rem !important;
-            font-size: 0.88rem !important;
-            transition: all 0.2s ease !important;
+            padding: 0.6rem 0.8rem !important;
+            font-size: 0.86rem !important;
+            transition: all var(--transition-fast) !important;
         }
 
         .boho-modal-content .form-control:focus {
             border-color: var(--boho-clay) !important;
-            background: #ffffff !important;
-            box-shadow: 0 0 0 3px var(--boho-clay-glow) !important;
+            background: #FFFFFF !important;
+            box-shadow: 0 0 0 2px var(--boho-clay-glow) !important;
             outline: none !important;
         }
 
         /* Status cards in Boho */
         .boho-modal-content .status-option-card {
-            border: 1.5px solid var(--boho-border) !important;
-            background: #f8fafc !important;
-            border-radius: 12px !important;
-            padding: 0.85rem 1rem !important;
-            transition: all 0.2s ease !important;
+            border: 1px solid var(--boho-border) !important;
+            background: var(--boho-oat) !important;
+            border-radius: var(--radius-md) !important;
+            padding: 0.75rem 0.9rem !important;
+            transition: all var(--transition-fast) !important;
         }
 
         .boho-modal-content .status-option-card:hover {
-            border-color: #93c5fd !important;
-            background: #eff6ff !important;
+            border-color: var(--boho-clay) !important;
+            background: #FFFFFF !important;
         }
 
         .boho-modal-content .status-option-card.active {
@@ -344,24 +330,24 @@
         .boho-image-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 0.85rem;
+            gap: 0.75rem;
         }
 
         .boho-image-slot {
             display: flex;
             gap: 0.65rem;
             align-items: center;
-            background: #f8fafc;
+            background: var(--boho-oat);
             border: 1px solid var(--boho-border);
-            border-radius: 12px;
-            padding: 0.5rem 0.65rem;
+            border-radius: var(--radius-md);
+            padding: 0.45rem 0.6rem;
         }
 
         .boho-image-thumb {
-            width: 44px;
-            height: 44px;
-            border-radius: 8px;
-            background: #f1f5f9;
+            width: 42px;
+            height: 42px;
+            border-radius: var(--radius-sm);
+            background: #FFFFFF;
             border: 1px solid var(--boho-border);
             display: flex;
             align-items: center;
@@ -369,7 +355,7 @@
             color: var(--boho-muted);
             overflow: hidden;
             flex-shrink: 0;
-            font-size: 0.7rem;
+            font-size: 0.68rem;
         }
 
         .boho-image-thumb img {
@@ -380,8 +366,8 @@
 
         /* Sticky Wizard Footer */
         .boho-wizard-footer {
-            padding: 0.9rem 2rem;
-            background: #ffffff;
+            padding: 0.85rem 1.75rem;
+            background: #FFFFFF;
             border-top: 1px solid var(--boho-border);
             display: flex;
             justify-content: space-between;
@@ -392,19 +378,19 @@
         .boho-step-pill-tracker {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            background: #f1f5f9;
+            gap: 0.45rem;
+            background: var(--boho-oat);
             border: 1px solid var(--boho-border);
-            padding: 5px 14px;
-            border-radius: 999px;
-            font-size: 0.76rem;
+            padding: 4px 12px;
+            border-radius: var(--radius-full);
+            font-size: 0.74rem;
             font-weight: 700;
             color: var(--boho-warm-brown);
         }
 
         .boho-step-indicator-dot {
-            width: 8px;
-            height: 8px;
+            width: 7px;
+            height: 7px;
             border-radius: 50%;
             background: var(--boho-clay);
         }
@@ -412,37 +398,35 @@
         .boho-btn-next {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            background: linear-gradient(135deg, var(--boho-clay), var(--boho-clay-hover));
-            color: #ffffff !important;
+            gap: 0.45rem;
+            background: var(--boho-clay);
+            color: #FFFFFF !important;
             border: none;
-            border-radius: 12px;
-            padding: 0.72rem 1.6rem;
+            border-radius: var(--radius-md);
+            padding: 0.65rem 1.4rem;
             font-weight: 700;
-            font-size: 0.88rem;
+            font-size: 0.86rem;
             cursor: pointer;
-            box-shadow: 0 4px 14px var(--boho-clay-glow);
-            transition: all 0.2s ease;
+            transition: all var(--transition-fast);
         }
 
         .boho-btn-next:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+            background: var(--boho-clay-hover);
         }
 
         .boho-btn-prev {
             display: inline-flex;
             align-items: center;
-            gap: 0.4rem;
-            background: #ffffff;
+            gap: 0.35rem;
+            background: #FFFFFF;
             color: var(--boho-warm-brown) !important;
-            border: 1.5px solid var(--boho-border);
-            border-radius: 12px;
-            padding: 0.72rem 1.35rem;
+            border: 1px solid var(--boho-border);
+            border-radius: var(--radius-md);
+            padding: 0.65rem 1.25rem;
             font-weight: 700;
-            font-size: 0.88rem;
+            font-size: 0.86rem;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all var(--transition-fast);
         }
 
         .boho-btn-prev:hover {
@@ -454,22 +438,20 @@
         .boho-btn-save {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            background: linear-gradient(135deg, #059669, #047857);
-            color: #ffffff !important;
+            gap: 0.45rem;
+            background: var(--boho-sage);
+            color: #FFFFFF !important;
             border: none;
-            border-radius: 12px;
-            padding: 0.72rem 1.85rem;
+            border-radius: var(--radius-md);
+            padding: 0.65rem 1.6rem;
             font-weight: 800;
-            font-size: 0.88rem;
+            font-size: 0.86rem;
             cursor: pointer;
-            box-shadow: 0 4px 14px rgba(5, 150, 105, 0.3);
-            transition: all 0.2s ease;
+            transition: all var(--transition-fast);
         }
 
         .boho-btn-save:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 18px rgba(5, 150, 105, 0.4);
+            background: #255b42;
         }
 
         @media (max-width: 768px) {
@@ -477,8 +459,8 @@
                 display: none;
             }
             .boho-modal-header, .boho-stepper-wrap, .boho-wizard-body, .boho-wizard-footer {
-                padding-left: 1.25rem;
-                padding-right: 1.25rem;
+                padding-left: 1rem;
+                padding-right: 1rem;
             }
             .boho-image-grid {
                 grid-template-columns: 1fr;
@@ -491,21 +473,19 @@
 <body>
 
     <div class="mobile-admin-header">
-        <div class="admin-logo" style="border: none; padding: 0;">EnrouteIn<span>Admin</span></div>
+        <div class="admin-logo" style="border: none; padding: 0;">EnrouteIn<span>Merchant</span></div>
     </div>
 
     <aside class="admin-sidebar">
         <div class="admin-logo">
-            EnrouteIn<span>Admin</span>
+            EnrouteIn<span>Merchant</span>
         </div>
         <ul class="admin-nav">
             <li><a href="dashboard.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> <span class="nav-text">Dashboard</span></a></li>
             <li><a href="products.html" class="active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg> <span class="nav-text">Products</span></a></li>
             <li><a href="orders.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> <span class="nav-text">Orders</span></a></li>
-            <li><a href="users.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> <span class="nav-text">Users</span></a></li>
             <li><a href="reports.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg> <span class="nav-text">Reports</span></a></li>
-            <li><a href="messages.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> <span class="nav-text">Messages</span></a></li>
-            <li><a href="account.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> <span class="nav-text">Account</span></a></li>
+            <li><a href="account.html"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> <span class="nav-text">Profile</span></a></li>
         </ul>
     </aside>
 
@@ -513,11 +493,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
             <h1>Manage Products</h1>
             <div style="display: flex; gap: 0.75rem; align-items: center;">
-                <button class="btn btn-outline" id="transfer-mods-btn" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 700; border-color: #8b5cf6; color: #8b5cf6;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"></path><line x1="4" y1="20" x2="21" y2="3"></line><path d="M21 16v5h-5"></path><line x1="15" y1="15" x2="21" y2="21"></line></svg>
-                    Transfer Mods
-                </button>
-                <button class="btn btn-primary" id="add-product-btn">+ Add Product</button>
+                <a href="product-editor.html" class="btn btn-primary" id="add-product-btn">+ Add Product</a>
             </div>
         </div>
 
@@ -560,7 +536,7 @@
                 <div>
                     <div class="boho-badge-pill">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                        <span>Product Studio</span>
+                        <span>Product Editor</span>
                     </div>
                     <h3 id="modal-title" class="boho-modal-title">Craft Product</h3>
                     <p class="boho-modal-desc">Configure vehicle specs, media assets, pricing telemetry & release state.</p>
@@ -739,29 +715,29 @@
                         <!-- ShareMods Cloud File Upload -->
                         <div class="boho-card">
                             <div class="boho-card-header">
-                                <div class="boho-card-icon" style="background: #eff6ff; color: #2563eb;">
+                                <div class="boho-card-icon" style="background: var(--boho-clay-light); color: var(--boho-clay);">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                                 </div>
                                 <div>
-                                    <div class="boho-card-title">Vehicle Mod Archive File <span style="color:#2563eb">*</span></div>
+                                    <div class="boho-card-title">Vehicle Mod Archive File <span style="color:var(--boho-clay)">*</span></div>
                                     <div class="boho-card-desc">Upload vehicle mod archive (.zip, .rar, .7z, .bussidmod up to 200MB)</div>
                                 </div>
                             </div>
 
                             <!-- ShareMods Upload Zone -->
-                            <div id="sharemods-upload-zone" style="border: 2px dashed rgba(37, 99, 235, 0.35); border-radius: 16px; padding: 1.6rem; text-align: center; cursor: pointer; transition: all 0.2s ease; background: #f8fafc; margin-bottom: 0.5rem;" 
-                                 onmouseenter="this.style.borderColor='#2563eb'; this.style.background='#eff6ff'" 
-                                 onmouseleave="if(!this.classList.contains('has-file')){this.style.borderColor='rgba(37, 99, 235, 0.35)'; this.style.background='#f8fafc';}">
+                            <div id="sharemods-upload-zone" style="border: 2px dashed var(--boho-border-strong); border-radius: var(--radius-lg); padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s ease; background: var(--boho-oat); margin-bottom: 0.5rem;" 
+                                 onmouseenter="this.style.borderColor='var(--boho-clay)'; this.style.background='var(--boho-clay-light)'" 
+                                 onmouseleave="if(!this.classList.contains('has-file')){this.style.borderColor='var(--boho-border-strong)'; this.style.background='var(--boho-oat)';}">
                                 <input type="file" id="sharemods-file-input" style="display: none;" accept=".zip,.rar,.7z,.bussidmod,.bussidvehicle">
                                 
                                 <div id="sharemods-upload-content">
-                                    <div style="width: 44px; height: 44px; border-radius: 50%; background: #eff6ff; color: #2563eb; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0.6rem;">
-                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                    <div style="width: 42px; height: 42px; border-radius: 50%; background: var(--boho-clay-light); color: var(--boho-clay); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 0.5rem;">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                                     </div>
-                                    <div style="font-weight: 800; font-size: 0.95rem; color: var(--boho-espresso); margin-bottom: 0.25rem;">
+                                    <div style="font-weight: 800; font-size: 0.92rem; color: var(--boho-espresso); margin-bottom: 0.2rem;">
                                         Click to Upload or Drag & Drop Mod Archive
                                     </div>
-                                    <div style="font-size: 0.78rem; color: var(--boho-muted);">
+                                    <div style="font-size: 0.76rem; color: var(--boho-muted);">
                                         Supported: .zip, .rar, .7z, .bussidmod (Cloud Storage • Max 200MB)
                                     </div>
                                 </div>
@@ -772,11 +748,11 @@
                                         <span id="sharemods-file-name" style="font-size: 0.85rem; font-weight: 700; color: var(--boho-espresso); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
                                         <span id="sharemods-file-size" style="font-size: 0.75rem; color: var(--boho-muted);"></span>
                                     </div>
-                                    <div style="width: 100%; height: 7px; background: #e2e8f0; border-radius: 999px; overflow: hidden; margin-bottom: 0.4rem;">
-                                        <div id="sharemods-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(135deg, #2563eb, #059669); border-radius: 999px; transition: width 0.15s ease;"></div>
+                                    <div style="width: 100%; height: 6px; background: var(--boho-border); border-radius: 999px; overflow: hidden; margin-bottom: 0.4rem;">
+                                        <div id="sharemods-progress-bar" style="width: 0%; height: 100%; background: var(--boho-clay); border-radius: 999px; transition: width 0.15s ease;"></div>
                                     </div>
                                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem;">
-                                        <span id="sharemods-progress-label" style="color: #2563eb; font-weight: 700;">Uploading Mod File...</span>
+                                        <span id="sharemods-progress-label" style="color: var(--boho-clay); font-weight: 700;">Uploading Mod File...</span>
                                         <span id="sharemods-progress-percent" style="color: var(--boho-warm-brown); font-weight: 800;">0%</span>
                                     </div>
                                 </div>
@@ -1068,18 +1044,18 @@
             <!-- Step Indicator -->
             <div id="transfer-step-indicator" style="display: flex; align-items: center; gap: 0; margin-bottom: 1.5rem; padding: 0 0.25rem;">
                 <div class="transfer-step-dot active" data-step="1" style="display: flex; align-items: center; gap: 0.4rem;">
-                    <div style="width: 28px; height: 28px; border-radius: 50%; background: #8b5cf6; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800;">1</div>
-                    <span style="font-size: 0.78rem; font-weight: 700; color: #8b5cf6;">Select Mods</span>
+                    <div style="width: 28px; height: 28px; border-radius: 4px; background: #202124; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800;">1</div>
+                    <span style="font-size: 0.78rem; font-weight: 700; color: #202124;">Select Mods</span>
                 </div>
-                <div style="flex: 1; height: 2px; background: #e2e8f0; margin: 0 0.5rem;" id="transfer-line-1-2"></div>
+                <div style="flex: 1; height: 2px; background: #E2E5E9; margin: 0 0.5rem;" id="transfer-line-1-2"></div>
                 <div class="transfer-step-dot" data-step="2" style="display: flex; align-items: center; gap: 0.4rem;">
-                    <div style="width: 28px; height: 28px; border-radius: 50%; background: #e2e8f0; color: #94a3b8; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800;" id="transfer-step-2-circle">2</div>
-                    <span style="font-size: 0.78rem; font-weight: 700; color: #94a3b8;" id="transfer-step-2-label">Select Admin</span>
+                    <div style="width: 28px; height: 28px; border-radius: 4px; background: #FFF2E8; color: #565D6D; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800;" id="transfer-step-2-circle">2</div>
+                    <span style="font-size: 0.78rem; font-weight: 700; color: #565D6D;" id="transfer-step-2-label">Select Admin</span>
                 </div>
-                <div style="flex: 1; height: 2px; background: #e2e8f0; margin: 0 0.5rem;" id="transfer-line-2-3"></div>
+                <div style="flex: 1; height: 2px; background: #E5E7EB; margin: 0 0.5rem;" id="transfer-line-2-3"></div>
                 <div class="transfer-step-dot" data-step="3" style="display: flex; align-items: center; gap: 0.4rem;">
-                    <div style="width: 28px; height: 28px; border-radius: 50%; background: #e2e8f0; color: #94a3b8; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800;" id="transfer-step-3-circle">3</div>
-                    <span style="font-size: 0.78rem; font-weight: 700; color: #94a3b8;" id="transfer-step-3-label">Confirm</span>
+                    <div style="width: 28px; height: 28px; border-radius: 4px; background: #FFF2E8; color: #565D6D; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800;" id="transfer-step-3-circle">3</div>
+                    <span style="font-size: 0.78rem; font-weight: 700; color: #565D6D;" id="transfer-step-3-label">Confirm</span>
                 </div>
             </div>
 
@@ -1087,30 +1063,30 @@
             <div id="transfer-step-1">
                 <div style="margin-bottom: 1rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                        <label class="form-label" style="margin-bottom: 0; font-size: 0.9rem; font-weight: 800; color: #1e293b;">Your Products</label>
-                        <span id="transfer-selected-count" style="font-size: 0.78rem; font-weight: 700; color: #8b5cf6; background: rgba(139,92,246,0.1); padding: 2px 10px; border-radius: 20px;">0 selected</span>
+                        <label class="form-label" style="margin-bottom: 0; font-size: 0.9rem; font-weight: 800; color: #14171F;">Your Products</label>
+                        <span id="transfer-selected-count" style="font-size: 0.78rem; font-weight: 700; color: #14171F; background: #FFF2E8; padding: 2px 10px; border-radius: 4px; border: 1px solid rgba(250, 84, 28, 0.35);">0 selected</span>
                     </div>
                     <div id="transfer-products-list" style="max-height: 340px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; padding-right: 0.25rem;">
                         <!-- Product checkboxes injected by JS -->
                     </div>
                 </div>
-                <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
+                <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid #E2E5E9;">
                     <button type="button" class="btn btn-outline" id="transfer-cancel-btn">Cancel</button>
-                    <button type="button" class="btn" id="transfer-next-1-btn" disabled style="background: #8b5cf6; color: #fff; padding: 0.65rem 1.75rem; font-weight: 700;">Next →</button>
+                    <button type="button" class="btn btn-primary" id="transfer-next-1-btn" disabled style="padding: 0.65rem 1.75rem; font-weight: 700; border-radius: 4px;">Next →</button>
                 </div>
             </div>
 
             <!-- Step 2: Select Target Admin -->
             <div id="transfer-step-2" style="display: none;">
                 <div style="margin-bottom: 1rem;">
-                    <label class="form-label" style="margin-bottom: 0.75rem; font-size: 0.9rem; font-weight: 800; color: #1e293b;">Transfer To</label>
+                    <label class="form-label" style="margin-bottom: 0.75rem; font-size: 0.9rem; font-weight: 800; color: #202124;">Transfer To</label>
                     <div id="transfer-admins-list" style="max-height: 340px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; padding-right: 0.25rem;">
                         <!-- Admin radio buttons injected by JS -->
                     </div>
                 </div>
-                <div style="display: flex; justify-content: space-between; gap: 0.75rem; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
+                <div style="display: flex; justify-content: space-between; gap: 0.75rem; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid #E2E5E9;">
                     <button type="button" class="btn btn-outline" id="transfer-back-2-btn">← Back</button>
-                    <button type="button" class="btn" id="transfer-next-2-btn" disabled style="background: #8b5cf6; color: #fff; padding: 0.65rem 1.75rem; font-weight: 700;">Next →</button>
+                    <button type="button" class="btn btn-primary" id="transfer-next-2-btn" disabled style="padding: 0.65rem 1.75rem; font-weight: 700; border-radius: 4px;">Next →</button>
                 </div>
             </div>
 
@@ -1150,17 +1126,13 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
             <span>Orders</span>
         </a>
-        <a href="messages.html" class="bottom-nav-item">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-            <span>Messages</span>
-        </a>
         <a href="reports.html" class="bottom-nav-item">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
             <span>Reports</span>
         </a>
         <a href="account.html" class="bottom-nav-item">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-            <span>Account</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            <span>Profile</span>
         </a>
     </nav>
 
@@ -1169,7 +1141,6 @@
         import { requireAdmin } from '../js/admin/admin-auth.js';
         requireAdmin();
     </script>
-    <script type="module" src="../js/admin/admin-products.js"></script>
-    <script type="module" src="../js/admin/admin-ticker.js"></script>
+    <script type="module" src="../js/admin/admin-products.js?v=20261022_4"></script>
 </body>
 </html>
