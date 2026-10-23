@@ -208,12 +208,6 @@ h4 { font-size: 1.05rem; font-weight: 600; }
   padding: 0 var(--spacing-6);
 }
 
-<<<<<<< HEAD
-@media (max-width: 768px) {
-  .container {
-    padding: 0 12px;
-  }
-=======
 @media (max-width: 820px) {
   .container {
     padding: 0 12px;
@@ -256,7 +250,6 @@ h4 { font-size: 1.05rem; font-weight: 600; }
     max-width: 100% !important;
     margin: 0 !important;
   }
->>>>>>> 4036292 (header update)
 }
 
 /* Footer Enroute Brand & Logo Styling */
