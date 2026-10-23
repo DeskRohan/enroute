@@ -78,7 +78,7 @@ body {
   background-color: var(--admin-bg);
   color: var(--admin-text-primary);
   font-family: var(--font-sans);
-  padding-top: 0;
+  padding-top: 0 !important;
   margin: 0;
   display: flex;
   min-height: 100vh;
@@ -906,6 +906,7 @@ textarea.form-control {
 @media (max-width: 960px) {
   body {
     flex-direction: column;
+    padding-top: 0 !important;
     padding-bottom: 95px !important;
   }
 
@@ -914,23 +915,49 @@ textarea.form-control {
   }
 
   .mobile-admin-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.75rem 1rem;
-    background: #FFFFFF;
-    border-bottom: 1px solid var(--admin-border);
-    position: sticky;
-    top: 0;
-    z-index: 999;
-    box-shadow: var(--admin-shadow-sm);
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0.6rem 1rem !important;
+    background: #FFFFFF !important;
+    border-bottom: 1px solid var(--admin-border) !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 999 !important;
+    box-shadow: var(--admin-shadow-sm) !important;
+  }
+
+  .mobile-admin-header .admin-logo,
+  .admin-header .admin-logo {
+    color: var(--color-primary, #007DC6) !important;
+    font-size: 1.25rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.02em !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+    text-decoration: none !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  .mobile-admin-header .admin-logo span,
+  .admin-header .admin-logo span {
+    color: var(--color-accent, #FFC220) !important;
+    background: var(--color-dark-navy, #153247) !important;
+    font-size: 0.65rem !important;
+    font-weight: 800 !important;
+    padding: 2px 6px !important;
+    border-radius: var(--radius-xs) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
   }
 
   .admin-main {
     margin-left: 0 !important;
-    padding: 1rem 0.85rem 6.5rem 0.85rem !important;
+    padding: 0.65rem 0.85rem 6.5rem 0.85rem !important;
     width: 100% !important;
-    box-sizing: border-box;
+    box-sizing: border-box !important;
   }
 
   .admin-main h1 {

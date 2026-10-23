@@ -218,14 +218,26 @@ h4 { font-size: 1.05rem; font-weight: 600; }
   .container {
     padding: 0 12px;
   }
+  body:has(.header),
+  body:not(:has(.mobile-admin-header)):not(:has(.admin-sidebar)) {
+    padding-top: 100px !important;
+  }
+  body {
+    padding-top: 100px;
+  }
+  body:has(.mobile-admin-header),
+  body:has(.admin-sidebar),
+  .admin-body {
+    padding-top: 0 !important;
+  }
   .nav {
     display: flex !important;
     flex-wrap: wrap !important;
     justify-content: space-between !important;
     align-items: center !important;
     height: auto !important;
-    padding: 8px 0 10px 0 !important;
-    row-gap: 8px !important;
+    padding: 6px 0 8px 0 !important;
+    row-gap: 6px !important;
   }
   .logo {
     order: 1 !important;
@@ -242,9 +254,21 @@ h4 { font-size: 1.05rem; font-weight: 600; }
     flex: 0 0 100% !important;
     flex-basis: 100% !important;
     max-width: 100% !important;
-    margin: 4px 0 0 0 !important;
+    margin: 0 !important;
   }
 >>>>>>> 4036292 (header update)
+}
+
+/* Footer Enroute Brand & Logo Styling */
+.footer .logo,
+.footer a.logo,
+.footer-col .logo {
+  color: var(--color-accent, #FFC220) !important;
+}
+
+.footer .enroute-text,
+.footer-bottom .enroute-text {
+  color: var(--color-accent, #FFC220) !important;
 }
 
 /* Card Utilities */

@@ -3,9 +3,11 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/fi
 import { doc, getDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 let currentAuthUser = auth.currentUser;
-onAuthStateChanged(auth, (user) => {
-    currentAuthUser = user;
-});
+let currentProductData = null;
+let currentUploaderData = null;
+let currentTotalDownloads = 0;
+let currentLinkedVariants = [];
+let currentUserOwnedOrder = null;
 
 const productContainer = document.getElementById('product-container');
 
@@ -16,7 +18,8 @@ const productId = urlParams.get('id') || sessionStorage.getItem('viewProductId')
 const formatPrice = (price) => {
     return new Intl.NumberFormat('en-IN', {
         style: 'currency',
-        currency: 'INR'
+        currency: 'INR',
+        maximumFractionDigits: 0
     }).format(price || 0);
 };
 
@@ -57,18 +60,119 @@ function getImageUrl(url) {
     return cleanUrl;
 }
 
+// Check purchase entitlement securely from Firestore orders
+async function checkUserOwnership(user, prodId) {
+    if (!user || !prodId) return null;
+    try {
+        const q = query(
+            collection(db, "orders"),
+            where("userId", "==", user.uid)
+        );
+        const snap = await getDocs(q);
+        for (const docSnap of snap.docs) {
+            const orderData = docSnap.data();
+            if (orderData.status === 'cancelled' || orderData.status === 'failed') continue;
+
+            const matchesSingle = orderData.productId === prodId;
+            const matchesItems = Array.isArray(orderData.items) && orderData.items.some(
+                item => item.id === prodId || item.productId === prodId
+            );
+
+            if (matchesSingle || matchesItems) {
+                return { id: docSnap.id, ...orderData };
+            }
+        }
+    } catch (e) {
+        console.warn("Could not check ownership:", e);
+    }
+    return null;
+}
+
+// Download executor matching dashboard.js implementation
+async function initiateDownload(url, filename, btn) {
+    if (!url || url === '#' || url.trim() === '') {
+        alert("The download file link is currently unavailable. Please reach out to customer support.");
+        return;
+    }
+
+    const originalHtml = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path></svg>
+            <span>Preparing Download...</span>
+        `;
+    }
+
+    try {
+        if (url.includes('sharemods.com') || /^[a-z0-9]{12}$/i.test(url.trim())) {
+            const apiBase = (window.location.hostname === 'localhost' && window.location.port !== '3001') ? 'http://localhost:3001' : '';
+            const res = await fetch(`${apiBase}/api/direct-download?url=${encodeURIComponent(url)}`);
+            const data = await res.json();
+            if (data.ok && data.directUrl) {
+                if (btn) btn.innerHTML = `<span>✓ Downloading...</span>`;
+                const a = document.createElement('a');
+                a.href = data.directUrl;
+                if (data.filename) a.download = data.filename;
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    if (document.body.contains(a)) document.body.removeChild(a);
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = originalHtml;
+                    }
+                }, 3000);
+                return;
+            }
+        }
+
+        // Direct link fallback
+        const a = document.createElement('a');
+        a.href = url;
+        if (filename) a.download = filename;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+            if (document.body.contains(a)) document.body.removeChild(a);
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        }, 2000);
+    } catch (err) {
+        console.error("Download error:", err);
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        }
+        window.open(url, '_blank', 'noopener,noreferrer');
+    }
+}
+
+// React to auth state changes to dynamically reflect ownership
+onAuthStateChanged(auth, async (user) => {
+    currentAuthUser = user;
+    if (productId && currentProductData) {
+        const owned = await checkUserOwnership(user, productId);
+        if (owned !== currentUserOwnedOrder) {
+            currentUserOwnedOrder = owned;
+            renderProduct(currentProductData, productId, currentUploaderData, currentTotalDownloads, currentLinkedVariants, currentUserOwnedOrder);
+        }
+    }
+});
+
 const loadProduct = async () => {
     if (!productId) {
         productContainer.innerHTML = `
-            <div class="text-center mt-8">
-                <h3>Product not found</h3>
-                <p style="color:#ef4444;margin:1rem 0;">
-                    Debug: No ID found in URL.
-                    <br>
-                    Current URL: ${window.location.href}
-                </p>
-                <a href="products.html" class="btn btn-primary mt-4">
-                    Back to Store
+            <div class="text-center mt-8" style="padding: 3rem 1rem;">
+                <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Product Not Found</h3>
+                <p class="text-secondary" style="margin-bottom: 1.5rem;">The product you are looking for does not exist or may have been moved.</p>
+                <a href="products.html" class="btn btn-primary">
+                    Return to Store Catalog
                 </a>
             </div>
         `;
@@ -79,132 +183,140 @@ const loadProduct = async () => {
         const docRef = doc(db, "products", productId);
         const docSnap = await getDoc(docRef);
 
-        if (docSnap.exists()) {
-            const product = docSnap.data();
-
-            // Block access to scheduled products for non-admins
-            const isAdmin = localStorage.getItem('userRole') === 'admin';
-            const isScheduled = product.status === 'scheduled' && (!product.scheduledDate || new Date(product.scheduledDate) > new Date());
-            
-            if (isScheduled && !isAdmin) {
-                const formattedTime = product.scheduledDate ? new Date(product.scheduledDate).toLocaleString('en-IN', {
-                    day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
-                }) : 'soon';
-                productContainer.innerHTML = `
-                    <div class="text-center mt-8" style="max-width: 500px; margin: var(--spacing-16) auto; padding: var(--spacing-8); background: var(--bg-secondary); border-radius: var(--radius-lg); border: 1px solid var(--color-border); box-shadow: var(--shadow-md);">
-                        <div style="font-size: 3rem; margin-bottom: var(--spacing-4);">🗓️</div>
-                        <h3 style="margin-bottom: var(--spacing-2);">Product Scheduled</h3>
-                        <p class="text-secondary" style="margin-bottom: var(--spacing-6);">This product is scheduled to go live on <br><strong style="color: var(--text-primary); font-size: 1.1rem;">${formattedTime}</strong>.</p>
-                        <a href="products.html" class="btn btn-primary" style="width: 100%;">
-                            Return to Store
-                        </a>
-                    </div>
-                `;
-                return;
-            }
-
-            let uploader = { name: 'Admin', isVerified: false };
-            if (product.addedBy) {
-                // Main admin is always verified
-                if (product.addedBy === 'admin@enroute.in') {
-                    uploader = { name: 'EnrouteIn', isVerified: true };
-                } else {
-                    try {
-                        const uq = query(collection(db, "users"), where("email", "==", product.addedBy));
-                        const uSnap = await getDocs(uq);
-                        if (!uSnap.empty) {
-                            const ud = uSnap.docs[0].data();
-                            uploader.name = ud.name || 'Admin';
-                            uploader.isVerified = ud.isVerified || false;
-                        }
-                    } catch (e) {
-                        console.warn("Could not fetch uploader info:", e);
-                    }
-                }
-            }
-
-            // Query database orders collection to count total downloads/purchases for this mod
-            let dbOrderCount = 0;
-            try {
-                const ordersQuery = query(collection(db, "orders"), where("productId", "==", productId));
-                const ordersSnap = await getDocs(ordersQuery);
-                dbOrderCount = ordersSnap.size;
-            } catch (e) {
-                console.warn("Could not query orders count:", e);
-            }
-
-            const totalDownloads = Math.max(dbOrderCount, (product.downloadCount || 0));
-
-            // Load linked variant products
-            let linkedVariants = [];
-            if (product.variants && Array.isArray(product.variants) && product.variants.length > 0) {
-                try {
-                    const variantPromises = product.variants.map(async (v) => {
-                        const vId = (typeof v === 'object' && v !== null) ? v.id : v;
-                        const customLabel = (typeof v === 'object' && v !== null) ? v.label : '';
-                        if (!vId || vId === productId) return null;
-                        try {
-                            const vDocRef = doc(db, "products", vId);
-                            const vDocSnap = await getDoc(vDocRef);
-                            if (vDocSnap.exists()) {
-                                const vData = vDocSnap.data();
-                                return {
-                                    id: vId,
-                                    name: customLabel || vData.variantName || vData.name,
-                                    price: vData.price,
-                                    originalPrice: vData.originalPrice,
-                                    offerPrice: vData.offerPrice,
-                                    offerPeriodType: vData.offerPeriodType,
-                                    offerExpiryDate: vData.offerExpiryDate,
-                                    pricingType: vData.pricingType,
-                                    image: vData.image || (vData.images && vData.images[0])
-                                };
-                            }
-                        } catch (err) {
-                            console.warn("Error fetching variant product:", vId, err);
-                        }
-                        return null;
-                    });
-                    const results = await Promise.all(variantPromises);
-                    linkedVariants = results.filter(v => v !== null);
-                } catch (vErr) {
-                    console.warn("Could not load product variants:", vErr);
-                }
-            }
-
-            renderProduct(product, productId, uploader, totalDownloads, linkedVariants);
-        } else {
+        if (!docSnap.exists()) {
             productContainer.innerHTML = `
-                <div class="text-center mt-8">
-                    <h3>Product not found</h3>
-                    <a href="products.html" class="btn btn-primary mt-4">
-                        Back to Store
+                <div class="text-center mt-8" style="padding: 3rem 1rem;">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Product Not Found</h3>
+                    <p class="text-secondary" style="margin-bottom: 1.5rem;">We couldn't locate this mod in our fleet records.</p>
+                    <a href="products.html" class="btn btn-primary">
+                        Browse All BUSSID Mods
                     </a>
                 </div>
             `;
+            return;
         }
+
+        const product = docSnap.data();
+
+        // Check if scheduled
+        const isAdmin = localStorage.getItem('userRole') === 'admin';
+        const isScheduled = product.status === 'scheduled' && (!product.scheduledDate || new Date(product.scheduledDate) > new Date());
+        
+        if (isScheduled && !isAdmin) {
+            const formattedTime = product.scheduledDate ? new Date(product.scheduledDate).toLocaleString('en-IN', {
+                day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+            }) : 'soon';
+            productContainer.innerHTML = `
+                <div class="text-center mt-8" style="max-width: 520px; margin: 3rem auto; padding: 2.5rem; background: #FFFFFF; border-radius: var(--radius-md); border: 1px solid var(--color-border); box-shadow: var(--shadow-sm);">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🗓️</div>
+                    <h3 style="margin-bottom: 0.5rem; font-family: var(--font-heading); font-size: 1.4rem;">Product Scheduled</h3>
+                    <p class="text-secondary" style="margin-bottom: 1.5rem; line-height: 1.5;">This mod is scheduled for official release on <br><strong style="color: var(--text-primary); font-size: 1.05rem;">${formattedTime}</strong>.</p>
+                    <a href="products.html" class="btn btn-primary" style="width: 100%;">
+                        Return to Store
+                    </a>
+                </div>
+            `;
+            return;
+        }
+
+        let uploader = { name: 'EnrouteIn Studio', isVerified: true };
+        if (product.addedBy) {
+            if (product.addedBy === 'admin@enroute.in') {
+                uploader = { name: 'EnrouteIn Studio', isVerified: true };
+            } else {
+                try {
+                    const uq = query(collection(db, "users"), where("email", "==", product.addedBy));
+                    const uSnap = await getDocs(uq);
+                    if (!uSnap.empty) {
+                        const ud = uSnap.docs[0].data();
+                        uploader.name = ud.name || 'Community Creator';
+                        uploader.isVerified = ud.isVerified || false;
+                    } else {
+                        uploader.name = product.addedBy.split('@')[0] || 'Community Creator';
+                        uploader.isVerified = false;
+                    }
+                } catch (e) {
+                    console.warn("Could not fetch uploader info:", e);
+                }
+            }
+        }
+
+        // Query database orders collection to count total downloads/purchases for this mod
+        let dbOrderCount = 0;
+        try {
+            const ordersQuery = query(collection(db, "orders"), where("productId", "==", productId));
+            const ordersSnap = await getDocs(ordersQuery);
+            dbOrderCount = ordersSnap.size;
+        } catch (e) {
+            console.warn("Could not query orders count:", e);
+        }
+
+        const totalDownloads = Math.max(dbOrderCount, (product.downloadCount || 0));
+
+        // Load linked variant products
+        let linkedVariants = [];
+        if (product.variants && Array.isArray(product.variants) && product.variants.length > 0) {
+            try {
+                const variantPromises = product.variants.map(async (v) => {
+                    const vId = (typeof v === 'object' && v !== null) ? v.id : v;
+                    const customLabel = (typeof v === 'object' && v !== null) ? v.label : '';
+                    if (!vId || vId === productId) return null;
+                    try {
+                        const vDocRef = doc(db, "products", vId);
+                        const vDocSnap = await getDoc(vDocRef);
+                        if (vDocSnap.exists()) {
+                            const vData = vDocSnap.data();
+                            return {
+                                id: vId,
+                                name: customLabel || vData.variantName || vData.name,
+                                price: vData.price,
+                                originalPrice: vData.originalPrice,
+                                offerPrice: vData.offerPrice,
+                                offerPeriodType: vData.offerPeriodType,
+                                offerExpiryDate: vData.offerExpiryDate,
+                                pricingType: vData.pricingType,
+                                image: vData.image || (vData.images && vData.images[0])
+                            };
+                        }
+                    } catch (err) {
+                        console.warn("Error fetching variant product:", vId, err);
+                    }
+                    return null;
+                });
+                const results = await Promise.all(variantPromises);
+                linkedVariants = results.filter(v => v !== null);
+            } catch (vErr) {
+                console.warn("Could not load product variants:", vErr);
+            }
+        }
+
+        // Check ownership for authenticated user
+        currentUserOwnedOrder = await checkUserOwnership(currentAuthUser, productId);
+
+        // Store active data
+        currentProductData = product;
+        currentUploaderData = uploader;
+        currentTotalDownloads = totalDownloads;
+        currentLinkedVariants = linkedVariants;
+
+        renderProduct(product, productId, uploader, totalDownloads, linkedVariants, currentUserOwnedOrder);
+
     } catch (error) {
         console.error("Error fetching product:", error);
-
         productContainer.innerHTML = `
-            <div class="text-center mt-8">
-                <h3>Error loading product</h3>
-                <p>Please try again later.</p>
-                <p style="color:#ef4444;margin:1rem 0;font-size:0.8rem;word-break:break-all;">
-                    Debug: ${error.code || 'unknown'} - ${error.message || error}
-                    <br>Product ID: ${productId}
-                    <br>URL: ${window.location.href}
-                </p>
-                <a href="products.html" class="btn btn-primary mt-4">
-                    Back to Store
+            <div class="text-center mt-8" style="padding: 3rem 1rem;">
+                <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Error Loading Product</h3>
+                <p class="text-secondary" style="margin-bottom: 1.5rem;">Unable to load mod details right now. Please check your internet connection.</p>
+                <a href="products.html" class="btn btn-primary">
+                    Return to Store
                 </a>
             </div>
         `;
     }
 };
 
-const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants = []) => {
-    document.title = `${product.name || 'Product'} - EnrouteIn.Store`;
+const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants = [], userOwnedOrder = null) => {
+    document.title = `${product.name || 'Product'} | EnrouteIn BUSSID Store`;
 
     const isFree = product.pricingType === 'free' || product.price === 0;
     const origPrice = product.originalPrice ?? product.price ?? 0;
@@ -213,8 +325,12 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
     const isLimited = product.offerPeriodType === 'limited';
     const isExpired = isLimited && product.offerExpiryDate && new Date(product.offerExpiryDate) <= new Date();
     const isOfferActive = hasOffer && !isExpired;
+    const currentPrice = isFree ? 0 : (isOfferActive ? Number(offerPrice) : Number(product.price ?? origPrice));
+    const discountPct = isOfferActive ? Math.round(((origPrice - offerPrice) / origPrice) * 100) : 0;
     const isOutOfStock = Boolean(product.outOfStock);
+    const isUserOwned = Boolean(userOwnedOrder);
 
+    // Buy Now Handler (Preserves existing direct checkout logic)
     const handleBuyNow = () => {
         if (isOutOfStock) {
             alert('This product is currently out of stock.');
@@ -227,7 +343,7 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
             return;
         }
 
-        // Save single product checkout state first
+        // Save single product checkout state
         try {
             sessionStorage.setItem('checkoutMode', 'single');
             sessionStorage.setItem(
@@ -246,17 +362,16 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
 
         const user = currentAuthUser || auth.currentUser;
         if (!user) {
-            // Seamlessly redirect to login and then directly to checkout
             window.location.href = `login.html?redirect=${encodeURIComponent(`checkout.html?id=${id}`)}`;
             return;
         }
 
-        // Direct Buy Now redirects straight to checkout for this product
         window.location.href = `checkout.html?id=${id}`;
     };
 
+    // Cart Button Sync
     const updateCartButtonState = () => {
-        if (isFree) return;
+        if (isFree || isUserOwned) return;
         const cart = (window.EnrouteCart && window.EnrouteCart.getCart) ? window.EnrouteCart.getCart() : JSON.parse(localStorage.getItem('enroute_cart') || '[]');
         const isInCart = cart.some(item => item.id === id);
 
@@ -266,7 +381,7 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
         if (isInCart) {
             if (addCartBtnEl) {
                 addCartBtnEl.innerHTML = `
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path><polyline points="13 9 16 12 13 15"></polyline><line x1="9" y1="12" x2="16" y2="12"></line></svg>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path><polyline points="13 9 16 12 13 15"></polyline><line x1="9" y1="12" x2="16" y2="12"></line></svg>
                     <span>Go to Cart</span>
                 `;
                 addCartBtnEl.classList.add('in-cart-btn');
@@ -274,7 +389,7 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
             }
             if (stickyAddCartBtnEl) {
                 stickyAddCartBtnEl.innerHTML = `
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path><polyline points="13 9 16 12 13 15"></polyline><line x1="9" y1="12" x2="16" y2="12"></line></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path><polyline points="13 9 16 12 13 15"></polyline><line x1="9" y1="12" x2="16" y2="12"></line></svg>
                     <span>Go to Cart</span>
                 `;
                 stickyAddCartBtnEl.classList.add('in-cart-btn');
@@ -283,7 +398,7 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
         } else {
             if (addCartBtnEl) {
                 addCartBtnEl.innerHTML = `
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
                     <span>Add to Cart</span>
                 `;
                 addCartBtnEl.classList.remove('in-cart-btn');
@@ -291,7 +406,7 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
             }
             if (stickyAddCartBtnEl) {
                 stickyAddCartBtnEl.innerHTML = `
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
                     <span>Add to Cart</span>
                 `;
                 stickyAddCartBtnEl.classList.remove('in-cart-btn');
@@ -305,7 +420,7 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
         const isInCart = cart.some(item => item.id === id);
 
         if (isInCart) {
-            if (window.EnrouteCart) {
+            if (window.EnrouteCart && window.EnrouteCart.openCart) {
                 window.EnrouteCart.openCart();
             }
         } else {
@@ -317,387 +432,40 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
                 offerPrice: isOfferActive ? offerPrice : null,
                 isOfferActive
             };
-            if (window.EnrouteCart) {
+            if (window.EnrouteCart && window.EnrouteCart.addToCart) {
                 window.EnrouteCart.addToCart(productPayload);
             }
             updateCartButtonState();
         }
     };
 
-    window.showCaptchaModal = (onSuccess) => {
-        const existing = document.getElementById('captcha-overlay');
-        if (existing) existing.remove();
-
-        // Puzzle position (random X between 40%-75% of track)
-        const puzzleTarget = 40 + Math.floor(Math.random() * 35);
-        const tolerance = 4; // % tolerance
-
-        const overlay = document.createElement('div');
-        overlay.id = 'captcha-overlay';
-        overlay.innerHTML = `
-            <style>
-                #captcha-overlay {
-                    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-                    background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px);
-                    z-index: 10000; display: flex; align-items: center; justify-content: center;
-                    animation: captchaFadeIn 0.25s ease;
-                }
-                @keyframes captchaFadeIn { from { opacity: 0; } to { opacity: 1; } }
-                .captcha-modal {
-                    background: #ffffff;
-                    border: 1px solid var(--color-border);
-                    border-radius: var(--radius-lg); padding: 2rem 1.75rem;
-                    max-width: 400px; width: 90%;
-                    box-shadow: var(--shadow-lg);
-                    text-align: center; animation: captchaSlideUp 0.3s ease;
-                    user-select: none; position: relative;
-                }
-                @keyframes captchaSlideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-                .captcha-modal h3 { margin: 0 0 0.35rem; font-size: 1.25rem; font-weight: 700; color: #252923; }
-                .captcha-modal p.desc { color: #77786F; font-size: 0.85rem; margin: 0 0 1.5rem; }
-                .captcha-lock { font-size: 2.25rem; margin-bottom: 0.5rem; }
-
-                /* Puzzle area */
-                .puzzle-area {
-                    position: relative; width: 100%; height: 140px;
-                    background: #F8F6F0;
-                    border-radius: var(--radius-md); overflow: hidden; margin-bottom: 1.25rem;
-                    border: 1px solid var(--color-border);
-                }
-                .puzzle-pattern {
-                    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-                    background-image:
-                        radial-gradient(circle at 20% 30%, rgba(36,74,60,0.06) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 70%, rgba(200,121,96,0.06) 0%, transparent 50%),
-                        radial-gradient(circle at 50% 50%, rgba(37,41,35,0.03) 0%, transparent 60%);
-                }
-                .puzzle-target {
-                    position: absolute; top: 50%; transform: translateY(-50%);
-                    width: 48px; height: 48px; border-radius: 6px;
-                    border: 2px dashed rgba(36,74,60,0.6);
-                    background: rgba(36,74,60,0.08);
-                    transition: border-color 0.2s, background 0.2s;
-                }
-                .puzzle-piece {
-                    position: absolute; top: 50%; transform: translateY(-50%);
-                    width: 48px; height: 48px; border-radius: 6px;
-                    background: #ffffff;
-                    box-shadow: 0 4px 12px rgba(36,74,60,0.12);
-                    border: 1px solid var(--color-border);
-                    display: flex; align-items: center; justify-content: center;
-                    transition: filter 0.2s, box-shadow 0.2s;
-                    pointer-events: none;
-                }
-                .puzzle-piece img { width: 32px; height: 32px; object-fit: contain; }
-                .puzzle-piece.matched {
-                    box-shadow: 0 0 16px rgba(50,115,84,0.4);
-                    border-color: #327354;
-                }
-
-                /* Slider track */
-                .slider-track {
-                    position: relative; width: 100%; height: 48px;
-                    background: #F8F6F0;
-                    border-radius: 24px;
-                    border: 1px solid var(--color-border);
-                    overflow: hidden;
-                    margin-bottom: 1rem;
-                }
-                .slider-fill {
-                    position: absolute; top: 0; left: 0; bottom: 0; width: 0;
-                    background: rgba(36,74,60,0.15);
-                    border-radius: 24px; transition: background 0.2s;
-                    pointer-events: none;
-                }
-                .slider-fill.matched { background: rgba(50,115,84,0.25); }
-                .slider-label {
-                    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-                    color: #77786F; font-size: 0.8rem; font-weight: 700;
-                    pointer-events: none; white-space: nowrap;
-                    letter-spacing: 0.5px; text-transform: uppercase;
-                }
-                .slider-thumb {
-                    position: absolute; top: 3px; left: 3px;
-                    width: 40px; height: 40px; border-radius: 50%;
-                    background: #ffffff;
-                    border: 1.5px solid var(--color-border-strong);
-                    display: flex; align-items: center; justify-content: center;
-                    cursor: grab; touch-action: none;
-                    box-shadow: var(--shadow-sm);
-                    transition: border-color 0.2s, box-shadow 0.2s;
-                    z-index: 2;
-                }
-                .slider-thumb:active { cursor: grabbing; box-shadow: var(--shadow-xs); }
-                .slider-thumb:hover { border-color: var(--color-primary); box-shadow: 0 0 12px rgba(36,74,60,0.2); }
-                .slider-thumb svg { width: 18px; height: 18px; color: #252923; }
-                .slider-thumb.matched { border-color: #327354; background: #327354; box-shadow: 0 0 16px rgba(50,115,84,0.3); }
-                .slider-thumb.matched svg { color: #fff; }
-
-                .captcha-status {
-                    font-size: 0.85rem; color: #77786F; min-height: 1.25rem;
-                    margin-bottom: 1rem; font-weight: 600;
-                }
-                .captcha-status.success { color: #327354; }
-                .captcha-status.fail { color: #B7473F; }
-
-                .captcha-btn-cancel {
-                    padding: 0.6rem 1.5rem;
-                    border: 1px solid var(--color-border);
-                    border-radius: var(--radius-sm);
-                    background: #F8F6F0;
-                    color: #77786F; font-size: 0.85rem; font-weight: 700;
-                    cursor: pointer; font-family: inherit; transition: all 0.2s;
-                }
-                .captcha-btn-cancel:hover {
-                    color: var(--text-primary); border-color: var(--color-border-hover);
-                    background: #ffffff;
-                }
-            </style>
-            <div class="captcha-modal">
-                <div class="captcha-lock">🛡️</div>
-                <h3>Security Verification</h3>
-                <p class="desc">Slide to align the puzzle piece</p>
-                <div class="puzzle-area">
-                    <div class="puzzle-pattern"></div>
-                    <div class="puzzle-target" id="captcha-target" style="left: ${puzzleTarget}%;"></div>
-                    <div class="puzzle-piece" id="captcha-piece" style="left: 2%;">
-                        <img src="assets/images/fevicon.png" alt="Captcha Piece">
-                    </div>
-                </div>
-                <div class="slider-track" id="captcha-track">
-                    <div class="slider-fill" id="captcha-fill"></div>
-                    <div class="slider-label" id="captcha-label">⟶ Slide to verify</div>
-                    <div class="slider-thumb" id="captcha-thumb">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
-                    </div>
-                </div>
-                <div class="captcha-status" id="captcha-status"></div>
-                <button class="captcha-btn-cancel" id="captcha-cancel">Cancel</button>
-            </div>
-        `;
-
-        document.body.appendChild(overlay);
-
-        const thumb = document.getElementById('captcha-thumb');
-        const fill = document.getElementById('captcha-fill');
-        const piece = document.getElementById('captcha-piece');
-        const track = document.getElementById('captcha-track');
-        const label = document.getElementById('captcha-label');
-        const status = document.getElementById('captcha-status');
-        let isDragging = false;
-        let startX = 0;
-        let verified = false;
-
-        const getPercent = (clientX) => {
-            const rect = track.getBoundingClientRect();
-            const thumbW = 48;
-            const maxLeft = rect.width - thumbW;
-            const x = Math.min(Math.max(clientX - rect.left - thumbW / 2, 0), maxLeft);
-            return (x / maxLeft) * 100;
-        };
-
-        const updatePosition = (pct) => {
-            const rect = track.getBoundingClientRect();
-            const thumbW = 48;
-            const maxLeft = rect.width - thumbW;
-            const px = (pct / 100) * maxLeft;
-            thumb.style.left = px + 2 + 'px';
-            fill.style.width = px + thumbW / 2 + 'px';
-            piece.style.left = 2 + (pct / 100) * (92) + '%';
-            label.style.opacity = pct > 10 ? '0' : '1';
-        };
-
-        const onStart = (e) => {
-            if (verified) return;
-            isDragging = true;
-            startX = e.clientX || e.touches[0].clientX;
-            thumb.style.transition = 'none';
-            fill.style.transition = 'none';
-            piece.style.transition = 'none';
-        };
-
-        const onMove = (e) => {
-            if (!isDragging || verified) return;
-            e.preventDefault();
-            const clientX = e.clientX || e.touches[0].clientX;
-            const pct = getPercent(clientX);
-            updatePosition(pct);
-        };
-
-        const onEnd = (e) => {
-            if (!isDragging || verified) return;
-            isDragging = false;
-            thumb.style.transition = 'left 0.3s ease';
-            fill.style.transition = 'width 0.3s ease';
-            piece.style.transition = 'left 0.3s ease';
-
-            const clientX = e.clientX || (e.changedTouches && e.changedTouches[0].clientX) || 0;
-            const pct = getPercent(clientX);
-
-            if (Math.abs(pct - puzzleTarget) <= tolerance) {
-                // SUCCESS
-                verified = true;
-                updatePosition(puzzleTarget);
-                thumb.classList.add('matched');
-                fill.classList.add('matched');
-                piece.classList.add('matched');
-                thumb.innerHTML = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>';
-                status.textContent = '✅ Verified! Redirecting...';
-                status.className = 'captcha-status success';
-                document.getElementById('captcha-target').style.borderColor = '#22c55e';
-                document.getElementById('captcha-target').style.background = 'rgba(34,197,94,0.1)';
-                setTimeout(() => { overlay.remove(); onSuccess(); }, 800);
-            } else {
-                // FAIL — reset
-                status.textContent = 'Not quite — try again!';
-                status.className = 'captcha-status fail';
-                setTimeout(() => {
-                    updatePosition(0);
-                    setTimeout(() => { status.textContent = ''; }, 1000);
-                }, 300);
-            }
-        };
-
-        // Mouse events
-        thumb.addEventListener('mousedown', onStart);
-        document.addEventListener('mousemove', onMove);
-        document.addEventListener('mouseup', onEnd);
-
-        // Touch events
-        thumb.addEventListener('touchstart', onStart, { passive: true });
-        document.addEventListener('touchmove', onMove, { passive: false });
-        document.addEventListener('touchend', onEnd);
-
-        // Cancel
-        document.getElementById('captcha-cancel').addEventListener('click', () => overlay.remove());
-        overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
-
-        // Cleanup listeners on remove
-        const observer = new MutationObserver(() => {
-            if (!document.getElementById('captcha-overlay')) {
-                document.removeEventListener('mousemove', onMove);
-                document.removeEventListener('mouseup', onEnd);
-                document.removeEventListener('touchmove', onMove);
-                document.removeEventListener('touchend', onEnd);
-                observer.disconnect();
-            }
-        });
-        observer.observe(document.body, { childList: true });
-    };
-
-    let formattedDate = "N/A";
-    try {
-        if (product.createdAt) {
-            formattedDate = new Date(product.createdAt).toLocaleDateString();
-        }
-    } catch (e) {
-        console.warn("Invalid Date:", product.createdAt);
-    }
-
-    // YouTube Embed Link
-    let youtubeEmbedHtml = '';
-    if (product.youtube) {
-        let videoId = null;
-        const ytMatch = product.youtube.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-        if (ytMatch && ytMatch[1]) {
-            videoId = ytMatch[1];
-        }
-
-        if (videoId) {
-            youtubeEmbedHtml = `
-                <div class="video-container" style="margin-top: var(--spacing-8);">
-                    <iframe src="https://www.youtube.com/embed/${videoId}" title="Product Video Review" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                </div>
-            `;
-        }
-    }
-
-    // Process Images
+    // Images Processing
     const rawImages = product.images || [product.image];
-    const images = rawImages.filter(img => img && img.trim() !== '').map(img => getImageUrl(img));
-    if (images.length === 0) images.push("https://via.placeholder.com/800x600?text=No+Image");
+    const images = rawImages.filter(img => img && typeof img === 'string' && img.trim() !== '').map(img => getImageUrl(img));
+    if (images.length === 0) images.push("https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=800");
 
-    // Thumbnails HTML
+    // Gallery Thumbnails HTML
     let thumbnailsHtml = '';
     if (images.length > 1) {
         thumbnailsHtml = `
-            <div class="thumbnail-strip" style="margin-top: var(--spacing-4);">
+            <div class="amazon-thumbnails-strip" role="group" aria-label="Product image thumbnails">
                 ${images.map((imgUrl, idx) => `
-                    <div class="thumbnail-item ${idx === 0 ? 'active' : ''}" data-idx="${idx}">
-                        <img src="${imgUrl}" alt="${product.name} Thumbnail ${idx + 1}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=800';">
+                    <div class="amazon-thumbnail-item ${idx === 0 ? 'active' : ''}" data-idx="${idx}" tabindex="0" role="button" aria-label="View product image ${idx + 1}">
+                        <img src="${imgUrl}" alt="${(product.name || 'Product').replace(/"/g, '&quot;')} thumbnail ${idx + 1}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=800';">
                     </div>
                 `).join('')}
             </div>
         `;
     }
 
-    // Summary Text
-    const summaryCardHtml = product.summary ? `
-        <div class="product-summary" style="margin-top: var(--spacing-4);">
-            <strong>Mod Summary:</strong> ${product.summary}
-        </div>
-    ` : '';
-
-    // Specifications HTML
-    const specs = [
-        { 
-            icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>`, 
-            label: 'Game Version', 
-            value: product.version || 'BUSSID v3.8+' 
-        },
-        { 
-            icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>`, 
-            label: 'Brand / Make', 
-            value: product.brand || 'Custom Coach' 
-        },
-        { 
-            icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="m4.93 4.93 4.24 4.24"></path><path d="m14.83 9.17 4.24-4.24"></path><path d="m14.83 14.83 4.24 4.24"></path><path d="m9.17 14.83-4.24 4.24"></path><circle cx="12" cy="12" r="4"></circle></svg>`, 
-            label: 'Engine Specs', 
-            value: product.engine || 'High Power Transmission' 
-        },
-        { 
-            icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>`, 
-            label: 'Poly Quality', 
-            value: product.polygons || 'Ultra High-Poly' 
-        },
-        { 
-            icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`, 
-            label: 'Download Size', 
-            value: product.size || '35 MB' 
-        },
-        { 
-            icon: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`, 
-            label: 'Interior Cockpit', 
-            value: product.interior ? 'Fully Detailed Interior' : 'Exterior Only' 
-        }
-    ];
-
-    const specsHtml = specs.map(s => `
-        <div class="spec-item">
-            <span class="spec-label">
-                ${s.icon}
-                ${s.label}
-            </span>
-            <span class="spec-value">${s.value}</span>
-        </div>
-    `).join('');
-
-    // Description formatted text
-    const formattedDescription = (product.description || 'No description available.').replace(/\n/g, '<br>');
-
-    // Verified badge for uploader
-    const verificationBadge = uploader.isVerified ? `<img src="assets/images/varified.png" title="Verified Admin" style="height: 1.15em; vertical-align: middle; margin-left: 4px; display: inline-block;">` : '';
-
-    // Build Minimalist Product Variants Selector (placed below image showcase)
+    // Variants HTML (if linked variants exist)
     let variantsHtml = '';
     if (linkedVariants && linkedVariants.length > 0) {
         const allVariantsList = [
             {
                 id: id,
-                name: product.variantName || product.name,
+                name: product.variantName || product.name || 'Standard Edition',
                 finalPrice: isFree ? 'FREE' : formatPrice(currentPrice),
-                origPriceFormatted: (isOfferActive && origPrice) ? formatPrice(origPrice) : null,
-                discountPct: isOfferActive ? Math.round(((origPrice - offerPrice) / origPrice) * 100) : 0,
                 isCurrent: true
             },
             ...linkedVariants.map(v => {
@@ -714,23 +482,18 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
                     id: v.id,
                     name: v.name,
                     finalPrice: vIsFree ? 'FREE' : formatPrice(vEffectivePrice),
-                    origPriceFormatted: (vIsOfferActive && vOrigPrice) ? formatPrice(vOrigPrice) : null,
-                    discountPct: vIsOfferActive ? Math.round(((vOrigPrice - vOfferPrice) / vOrigPrice) * 100) : 0,
                     isCurrent: false
                 };
             })
         ];
 
         variantsHtml = `
-            <div class="product-variants-minimal" style="margin-top: var(--spacing-4);">
-                <div class="variants-minimal-header">
-                    <span class="variants-minimal-title">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
-                        Available Editions & Variants
-                    </span>
-                    <span class="variants-minimal-count">${allVariantsList.length} Options</span>
+            <div class="product-variants-box">
+                <div class="variants-header-title">
+                    <span>Available Editions & Variants</span>
+                    <span style="color: var(--color-primary);">${allVariantsList.length} Options</span>
                 </div>
-                <div class="variants-minimal-grid">
+                <div class="variants-pill-group">
                     ${allVariantsList.map(v => {
                         if (v.isCurrent) {
                             return `
@@ -754,184 +517,346 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
         `;
     }
 
+    // Dynamic Specifications List (Only includes genuine existing fields!)
+    const specsList = [];
+    if (product.category) {
+        const catLabel = product.category.toLowerCase() === 'livery' ? 'Vehicle Livery / Skin' : (product.category.toUpperCase() + ' Mod');
+        specsList.push({ label: 'Product Type', value: catLabel });
+    }
+    if (product.brand) {
+        specsList.push({ label: 'Bus Model / Chassis', value: product.brand });
+    }
+    if (product.version) {
+        specsList.push({ label: 'Game Compatibility', value: `Bus Simulator Indonesia ${product.version}` });
+    }
+    if (product.engine) {
+        specsList.push({ label: 'Engine & Sound Transmission', value: product.engine });
+    }
+    if (product.polygons) {
+        specsList.push({ label: '3D Mesh Quality', value: product.polygons });
+    }
+    if (product.size) {
+        specsList.push({ label: 'Package Download Size', value: product.size });
+    }
+    if (product.interior !== undefined && product.interior !== null && product.interior !== '') {
+        const hasInterior = product.interior === true || product.interior === 'true' || product.interior === 'Detailed' || product.interior === 'Yes';
+        specsList.push({ label: 'Cabin Interior', value: hasInterior ? 'Fully Detailed Driver & Passenger Cabin' : 'Exterior Body Modeling' });
+    }
+    if (product.format) {
+        specsList.push({ label: 'Mod File Format', value: product.format });
+    }
+    if (product.createdAt) {
+        try {
+            const dateObj = new Date(product.createdAt);
+            if (!isNaN(dateObj.getTime())) {
+                specsList.push({ label: 'Release Date', value: dateObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) });
+            }
+        } catch(e){}
+    }
+
+    const specsTableHtml = specsList.length > 0 ? `
+        <table class="amazon-specs-table">
+            <tbody>
+                ${specsList.map(s => `
+                    <tr>
+                        <th>${s.label}</th>
+                        <td>${s.value}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    ` : `<p class="text-secondary" style="font-size: 0.9rem; margin: 0;">Standard Bus Simulator Indonesia digital add-on package.</p>`;
+
+    // Feature Highlights ("About this mod" bullets)
+    const bullets = [
+        `<strong>Compatible with BUSSID</strong>: Digital asset built specifically for Bus Simulator Indonesia.`,
+        `<strong>Genuine Developer Release</strong>: Published and maintained by ${uploader.name}.`
+    ];
+    if (product.summary) {
+        bullets.push(`<strong>Overview</strong>: ${product.summary}`);
+    }
+    if (product.brand) {
+        bullets.push(`<strong>Authentic Vehicle Design</strong>: Realistic styling modeled after ${product.brand}.`);
+    }
+    if (product.size) {
+        bullets.push(`<strong>Download Package</strong>: Fast, high-speed cloud file access (${product.size}).`);
+    }
+    bullets.push(`<strong>Instant Digital Delivery</strong>: File download is granted immediately through your account upon order.`);
+
+    // YouTube Video Showcase Check
+    let ytEmbedUrl = null;
+    if (product.youtube) {
+        const ytMatch = product.youtube.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        if (ytMatch && ytMatch[1]) {
+            ytEmbedUrl = `https://www.youtube.com/embed/${ytMatch[1]}`;
+        }
+    }
+
+    const formattedDescription = (product.description || 'No detailed description provided for this product.').replace(/\n/g, '<br>');
+
+    // Category Pill label
+    const categoryName = (product.category || 'Mod').toUpperCase();
+
+    // RENDER MAIN 3-REGION AMAZON LAYOUT
     productContainer.innerHTML = `
-        <nav class="breadcrumb" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: var(--spacing-6); font-size: 0.85rem; color: var(--text-secondary);">
-            <a href="index.html" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 0.35rem;">
+        <!-- Breadcrumbs Navigation -->
+        <nav class="breadcrumb-wrap" style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.5rem; margin-bottom: 0.85rem; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.4; width: 100%; box-sizing: border-box;">
+            <a href="index.html" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 0.35rem; flex-shrink: 0;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                 Home
             </a>
-            <span class="separator">/</span>
-            <a href="products.html" style="color: inherit; text-decoration: none;">Store</a>
-            <span class="separator">/</span>
-            <span style="color: var(--text-primary); font-weight: 600;">${product.name || 'Details'}</span>
+            <span class="separator" style="color: var(--color-border); flex-shrink: 0;">/</span>
+            <a href="products.html" style="color: inherit; text-decoration: none; flex-shrink: 0;">Store</a>
+            <span class="separator" style="color: var(--color-border); flex-shrink: 0;">/</span>
+            <a href="products.html?category=${encodeURIComponent(product.category || 'mod')}" style="color: inherit; text-decoration: none; flex-shrink: 0;">${categoryName}</a>
+            <span class="separator" style="color: var(--color-border); flex-shrink: 0;">/</span>
+            <span style="color: var(--text-primary); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; display: inline-block; vertical-align: middle;">${product.name || 'Details'}</span>
         </nav>
 
-        <div class="product-grid">
-            <div class="product-gallery">
-                <div class="main-image-wrapper">
-                    <img id="main-product-image" src="${images[0]}" alt="${product.name}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=800';">
-                </div>
-                ${thumbnailsHtml}
-                
-                <!-- Minimal Variants Placed Directly Below Images -->
-                ${variantsHtml}
-
-                ${summaryCardHtml}
-
-                <!-- Mod Description Section -->
-                <div style="margin-top: var(--spacing-6); background: #ffffff; border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--spacing-6); box-shadow: var(--shadow-sm);">
-                    <h3 style="font-size: 1.25rem; font-family: var(--font-heading); margin-bottom: var(--spacing-4); color: var(--text-primary);">Vehicle Overview & Documentation</h3>
-                    <div style="font-size: 0.95rem; line-height: 1.7; color: var(--text-secondary); word-break: break-word;">
-                        ${formattedDescription}
+        <div class="product-amazon-layout">
+            <!-- COLUMN 1: LEFT GALLERY & HIGHLIGHTS -->
+            <div class="product-amazon-gallery">
+                <!-- Title & Creator in Column 1 -->
+                <div class="amazon-title-block">
+                    <h1>${product.name || 'Unnamed Mod'}</h1>
+                    <div class="amazon-creator-row">
+                        <span>Published by <strong>${uploader.name}</strong></span>
+                        ${uploader.isVerified ? `<img src="assets/images/varified.png" title="Verified Creator" style="height: 1.1em; vertical-align: middle; display: inline-block;">` : ''}
+                        <span>&bull;</span>
+                        <span style="color: var(--text-secondary);">${totalDownloads} Total Downloads</span>
                     </div>
                 </div>
 
-                ${youtubeEmbedHtml}
+                <div class="amazon-divider" style="margin: 0.65rem 0 1rem;"></div>
+
+                <div class="gallery-sticky-wrap">
+                    <div class="amazon-main-image-wrap" id="main-image-trigger" title="Click to view full image">
+                        <div class="gallery-badges-wrap">
+                            <span class="gallery-badge cat">${categoryName}</span>
+                            <span class="gallery-badge assured">★ Verified Mod</span>
+                        </div>
+                        <img id="main-product-image" src="${images[0]}" alt="${(product.name || 'Product').replace(/"/g, '&quot;')}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=800';">
+                    </div>
+
+                    ${thumbnailsHtml}
+                    ${variantsHtml}
+                </div>
             </div>
 
-            <div class="product-info">
-                <div class="product-info-container">
-                    ${isOutOfStock ? `
-                        <div style="background: #fef2f2; border: 1.5px solid #fecaca; border-radius: var(--radius-xl); padding: 1.15rem 1.35rem; margin-bottom: 1.25rem; display: flex; align-items: flex-start; gap: 0.85rem;">
-                            <div style="width: 36px; height: 36px; border-radius: 10px; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                            </div>
-                            <div>
-                                <h4 style="margin: 0 0 0.25rem; color: #991b1b; font-size: 0.98rem; font-weight: 800;">Currently Out of Stock</h4>
-                                <p style="margin: 0; color: #b91c1c; font-size: 0.84rem; line-height: 1.45;">The creator of this mod has temporarily set their store offline or this item is out of stock. Purchases and downloads are temporarily disabled.</p>
-                            </div>
-                        </div>
-                    ` : ''}
-                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
-                        <span class="category-pill">${product.category === 'livery' ? 'Vehicle Livery/Skin' : 'Vehicle Mod'}</span>
-                        <span class="trust-badge"><span style="color: #f59e0b;">★</span> Verified Mod</span>
-                    </div>
-                    <h1 style="margin-bottom: 0.75rem; font-size: 2rem; font-family: var(--font-heading);">${product.name || 'Unnamed Product'}</h1>
-                    <div class="uploader-info" style="margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-secondary);">
-                        <span>Published By:</span>
-                        <strong style="color: var(--text-primary); margin-left: 0.35rem;">${uploader.name}</strong>${verificationBadge}
+            <!-- COLUMN 2: CENTER PRODUCT DETAILS & SPECS -->
+            <div class="product-amazon-center">
+                <!-- Feature Bullets (About this digital mod) -->
+                <div class="amazon-about-box">
+                    <h3>About this digital mod</h3>
+                    <ul class="amazon-bullet-list">
+                        ${bullets.map(b => `<li>${b}</li>`).join('')}
+                    </ul>
+                </div>
+
+                <!-- Structured Tabs Section -->
+                <div class="amazon-tabs-card">
+                    <div class="amazon-tabs-nav" role="tablist">
+                        <button class="amazon-tab-btn active" data-tab="tab-desc" role="tab" aria-selected="true">
+                            Overview & Description
+                        </button>
+                        <button class="amazon-tab-btn" data-tab="tab-specs" role="tab" aria-selected="false">
+                            Specifications
+                        </button>
+                        ${ytEmbedUrl ? `
+                            <button class="amazon-tab-btn" data-tab="tab-video" role="tab" aria-selected="false">
+                                Video Showcase
+                            </button>
+                        ` : ''}
+                        <button class="amazon-tab-btn" data-tab="tab-policies" role="tab" aria-selected="false">
+                            Delivery & Support
+                        </button>
                     </div>
 
-                    ${isFree ? `
-                        <div class="product-price" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.75rem; padding: 1.15rem 1.35rem; background: var(--bg-secondary); border-radius: var(--radius-xl); border: 1px solid var(--color-border);">
-                            <div>
-                                <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); display: block; margin-bottom: 0.2rem;">Price</span>
-                                <span style="font-size: 2.25rem; font-weight: 800; font-family: var(--font-heading); color: var(--color-success);">FREE</span>
+                    <div class="amazon-tab-content">
+                        <!-- Tab 1: Description -->
+                        <div class="amazon-tab-pane active" id="tab-desc" role="tabpanel">
+                            <div class="amazon-desc-text">
+                                ${formattedDescription}
                             </div>
-                            <span style="font-size: 0.875rem; font-weight: 700; color: var(--color-primary); display: flex; align-items: center; gap: 0.45rem; background: var(--color-primary-light); padding: 0.5rem 1.15rem; border-radius: var(--radius-full); border: 1px solid rgba(37, 99, 235, 0.2);">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                                ${totalDownloads} Downloads
-                            </span>
                         </div>
-                    ` : (isOfferActive ? `
-                        <div class="product-price" style="display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 1.75rem; padding: 1.25rem 1.35rem; background: var(--bg-secondary); border-radius: var(--radius-xl); border: 1px solid var(--color-border);">
-                            <div style="display: flex; align-items: center; justify-content: space-between;">
-                                <div>
-                                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-                                        <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">Offer Price</span>
-                                        <span style="background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 2px 8px; border-radius: var(--radius-full); font-size: 0.72rem; font-weight: 800;">SAVE ${Math.round(((origPrice - offerPrice) / origPrice) * 100)}%</span>
-                                    </div>
-                                    <div style="display: flex; align-items: baseline; gap: 0.75rem;">
-                                        <span style="font-size: 2.25rem; font-weight: 800; font-family: var(--font-heading); color: var(--text-primary);">${formatPrice(offerPrice)}</span>
-                                        <span style="font-size: 1.25rem; font-weight: 600; text-decoration: line-through; color: var(--text-muted);">${formatPrice(origPrice)}</span>
-                                    </div>
+
+                        <!-- Tab 2: Specifications -->
+                        <div class="amazon-tab-pane" id="tab-specs" role="tabpanel">
+                            ${specsTableHtml}
+                        </div>
+
+                        <!-- Tab 3: Video Showcase (if available) -->
+                        ${ytEmbedUrl ? `
+                            <div class="amazon-tab-pane" id="tab-video" role="tabpanel">
+                                <div class="video-container">
+                                    <iframe src="${ytEmbedUrl}" title="Product Video Review" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                                 </div>
-                                <span style="font-size: 0.875rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.45rem; background: var(--color-primary-light); padding: 0.5rem 1.15rem; border-radius: var(--radius-full); border: 1px solid var(--color-border);">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                                    ${totalDownloads} Downloads
-                                </span>
+                            </div>
+                        ` : ''}
+
+                        <!-- Tab 4: Delivery & Policies -->
+                        <div class="amazon-tab-pane" id="tab-policies" role="tabpanel">
+                            <div style="display: flex; flex-direction: column; gap: 0.85rem; font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6;">
+                                <p style="margin: 0;"><strong style="color: var(--text-primary);">Instant Digital Access:</strong> Following a successful order, your mod files are made immediately available in your <a href="dashboard.html#garage" style="color: var(--color-primary); font-weight: 700;">Virtual Garage</a> and Orders history.</p>
+                                <p style="margin: 0;"><strong style="color: var(--text-primary);">Installation Guide:</strong> Transfer the downloaded <code>.bussidmod</code> or <code>.bussidvehicle</code> file to your device's <code>BUSSID/Mods</code> directory, then enable it inside the Bus Simulator Indonesia Garage menu.</p>
+                                <p style="margin: 0;"><strong style="color: var(--text-primary);">Support & Inquiries:</strong> Facing an issue with this mod? Review our <a href="refund.html" style="color: var(--color-primary); font-weight: 600;">Refund & Return Policy</a> or contact our support team at <a href="contact.html" style="color: var(--color-primary); font-weight: 600;">Customer Support</a>.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLUMN 3: RIGHT PURCHASE PANEL (THE BUY BOX) -->
+            <div class="product-amazon-buybox">
+                <div class="buybox-card">
+                    <!-- Price Presentation -->
+                    <div class="buybox-price-wrap">
+                        ${isFree ? `
+                            <div class="buybox-price-main free">FREE</div>
+                            <span class="buybox-taxes-sub">Free community edition for BUSSID</span>
+                        ` : (isOfferActive ? `
+                            <div style="display: flex; align-items: baseline; gap: 8px;">
+                                <div class="buybox-price-main">${formatPrice(offerPrice)}</div>
+                                <span class="buybox-mrp">${formatPrice(origPrice)}</span>
+                            </div>
+                            <div class="buybox-offer-row">
+                                <span class="buybox-discount-pill">SAVE ${discountPct}%</span>
+                                <span class="buybox-taxes-sub">Inclusive of all taxes & licensing</span>
                             </div>
                             ${isLimited ? `
-                                <div style="display: flex; align-items: center; gap: 0.5rem; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); padding: 0.5rem 0.85rem; border-radius: var(--radius-md); font-size: 0.82rem; color: #b45309; font-weight: 600;">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                                    <span>Limited Time Deal &bull; Offer valid until <strong>${new Date(product.offerExpiryDate).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</strong></span>
+                                <div style="font-size: 0.74rem; color: #b45309; font-weight: 700; background: rgba(245, 158, 11, 0.1); padding: 3px 8px; border-radius: var(--radius-xs); border: 1px solid rgba(245, 158, 11, 0.25);">
+                                    Limited Deal: Ends ${new Date(product.offerExpiryDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                                 </div>
-                            ` : `
-                                <div style="display: flex; align-items: center; gap: 0.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); padding: 0.5rem 0.85rem; border-radius: var(--radius-md); font-size: 0.82rem; color: #065f46; font-weight: 600;">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                                    <span>Lifetime Promotional Offer &bull; Permanent special price for this mod</span>
-                                </div>
-                            `}
-                        </div>
-                    ` : `
-                        <div class="product-price" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.75rem; padding: 1.15rem 1.35rem; background: var(--bg-secondary); border-radius: var(--radius-xl); border: 1px solid var(--color-border);">
-                            <div>
-                                <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); display: block; margin-bottom: 0.2rem;">Price</span>
-                                <span style="font-size: 2.25rem; font-weight: 800; font-family: var(--font-heading); color: var(--text-primary);">${formatPrice(origPrice)}</span>
-                            </div>
-                            <span style="font-size: 0.875rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.45rem; background: var(--color-primary-light); padding: 0.5rem 1.15rem; border-radius: var(--radius-full); border: 1px solid var(--color-border);">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                                ${totalDownloads} Downloads
-                            </span>
-                        </div>
-                    `)}
-
-                    <div class="specs-grid">
-                        ${specsHtml}
+                            ` : ''}
+                        ` : `
+                            <div class="buybox-price-main">${formatPrice(origPrice)}</div>
+                            <span class="buybox-taxes-sub">Inclusive of all taxes & licensing</span>
+                        `)}
                     </div>
 
-                    <div class="buy-card">
-                        <div class="download-stats-card" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; padding: 0.85rem 1.15rem; background: var(--bg-primary); border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
-                            <div style="display: flex; align-items: center; gap: 0.65rem;">
-                                <div style="width: 36px; height: 36px; border-radius: 8px; background: var(--color-primary-light); color: var(--color-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                                </div>
-                                <div>
-                                    <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);">Database Telemetry</div>
-                                    <div style="font-size: 0.95rem; font-weight: 800; font-family: var(--font-heading); color: var(--text-primary);"><span style="color: var(--color-primary);">${totalDownloads}</span> Total Downloads</div>
-                                </div>
+                    <!-- Availability Status -->
+                    <div class="buybox-stock-status ${isOutOfStock ? 'out-of-stock' : 'in-stock'}">
+                        <span class="buybox-stock-dot"></span>
+                        <span>${isOutOfStock ? 'Currently Out of Stock' : 'In Stock &bull; Instant Download'}</span>
+                    </div>
+
+                    <!-- Digital Delivery Notice -->
+                    <div class="buybox-delivery-note">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span><strong>Digital Product:</strong> Files are accessible in your account immediately after purchase.</span>
+                    </div>
+
+                    <!-- Actions or Purchased State -->
+                    ${isUserOwned ? `
+                        <!-- Customer Purchased State (Task 7) -->
+                        <div class="buybox-owned-card">
+                            <div class="buybox-owned-title">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                </svg>
+                                <span>You Own This Mod</span>
                             </div>
-                            <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 700; color: #059669; background: rgba(16, 185, 129, 0.1); padding: 4px 10px; border-radius: var(--radius-full); border: 1px solid rgba(16, 185, 129, 0.25);">
-                                <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981;"></span> Instant Access
-                            </span>
+                            <p class="buybox-owned-desc">
+                                Verified order entitlement. You have lifetime access to download this mod file.
+                            </p>
                         </div>
 
-                        <div style="display: flex; gap: var(--spacing-3); width: 100%;">
+                        <div class="buybox-actions">
+                            <button id="owned-download-btn" class="btn-buy-now" title="Download Purchased Mod">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                <span>Download Mod Files</span>
+                            </button>
+
+                            <a href="dashboard.html#garage" class="btn-add-cart" style="text-decoration: none;" title="Go to Virtual Garage">
+                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="3" y1="9" x2="21" y2="9"></line>
+                                    <line x1="9" y1="21" x2="9" y2="9"></line>
+                                </svg>
+                                <span>View in Virtual Garage</span>
+                            </a>
+                        </div>
+                    ` : `
+                        <!-- Normal Purchase Actions -->
+                        <div class="buybox-actions">
                             ${isOutOfStock ? `
-                                <button class="btn btn-secondary btn-lg" disabled style="flex: 1; font-size: 0.98rem; padding: 0.9rem; border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; gap: 0.5rem; opacity: 0.65; cursor: not-allowed; background: #f1f5f9; color: #64748b; border: 1.5px solid #cbd5e1; font-weight: 700;">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
-                                    <span>Currently Unavailable (Out of Stock)</span>
+                                <button class="btn-buy-now" disabled style="opacity: 0.6; cursor: not-allowed; background: #64748b;">
+                                    Out of Stock
                                 </button>
-                            ` : (!isFree ? `
-                                <button id="add-to-cart-btn" class="btn btn-outline btn-lg" style="flex: 1; font-size: 0.98rem; padding: 0.9rem; border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; gap: 0.5rem;" title="Add to Cart">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-                                    <span>Add to Cart</span>
-                                </button>
-                                <button id="buy-btn" class="btn btn-primary btn-lg" style="flex: 1.25; font-size: 1rem; padding: 0.9rem; border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; gap: 0.5rem;" title="Buy Now & Download">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                                    <span>Buy Now</span>
-                                </button>
-                            ` : `
-                                <button id="buy-btn" class="btn btn-primary btn-lg" style="flex: 1; font-size: 1.05rem; padding: 0.95rem; border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            ` : (isFree ? `
+                                <button id="buy-btn" class="btn-buy-now" title="Unlock Free Download">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="7 10 12 15 17 10"></polyline>
+                                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                                    </svg>
                                     <span>Free Instant Download</span>
                                 </button>
+                            ` : `
+                                <button id="buy-btn" class="btn-buy-now" title="Buy Now & Download">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                    </svg>
+                                    <span>Buy Now</span>
+                                </button>
+                                <button id="add-to-cart-btn" class="btn-add-cart" title="Add to Cart">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="9" cy="21" r="1"></circle>
+                                        <circle cx="20" cy="21" r="1"></circle>
+                                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                    </svg>
+                                    <span>Add to Cart</span>
+                                </button>
                             `)}
-                            <button id="detail-wishlist-btn" class="btn btn-outline" style="padding: 0 1.15rem; border-radius: var(--radius-xl);" title="Save to Garage Wishlist">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+
+                            <button id="detail-wishlist-btn" class="btn-wishlist-toggle" title="Add to Garage Wishlist">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                </svg>
+                                <span class="wishlist-btn-text">Add to Garage Wishlist</span>
                             </button>
                         </div>
+                    `}
 
-                        <div class="guarantee-list">
-                            <div class="guarantee-item">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                                <span>100% Virus-Free & File Integrity Verified</span>
-                            </div>
-                            <div class="guarantee-item">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                <span>Immediate High-Speed Cloud Download</span>
-                            </div>
-                            <div class="guarantee-item">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                                <span>Lifetime Order History Access</span>
-                            </div>
+                    <!-- Trust Points -->
+                    <div class="buybox-trust-list">
+                        <div class="buybox-trust-item">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            <span>256-Bit SSL Secured by Razorpay</span>
                         </div>
+                        <div class="buybox-trust-item">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
+                            <span>Verified Integrity & Virus-Free File</span>
+                        </div>
+                        <div class="buybox-trust-item">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span>Direct Cloud Access via Dashboard</span>
+                        </div>
+                    </div>
+
+                    <div class="buybox-meta-line">
+                        SKU: ENR-${id.slice(0, 8).toUpperCase()} &bull; Bus Simulator Indonesia
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Responsive Sticky Bottom Action Bar (Mobile & Tablet) -->
+        <!-- Sticky Bottom Bar for Mobile -->
         <div class="product-sticky-bottom-bar" id="product-sticky-bottom-bar">
             <div class="sticky-bar-price-wrap">
                 ${isFree ? `
@@ -941,59 +866,91 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
                         <span class="sticky-bar-price">${formatPrice(offerPrice)}</span>
                         <span class="sticky-bar-orig-price">${formatPrice(origPrice)}</span>
                     </div>
-                    <span class="sticky-bar-discount">SAVE ${Math.round(((origPrice - offerPrice) / origPrice) * 100)}%</span>
+                    <span class="sticky-bar-discount">SAVE ${discountPct}%</span>
                 ` : `
                     <span class="sticky-bar-price">${formatPrice(origPrice)}</span>
                 `)}
             </div>
+
             <div class="sticky-bar-actions">
-                ${isOutOfStock ? `
-                    <button class="btn btn-secondary" disabled style="width: 100%; opacity: 0.65; cursor: not-allowed; background: #e2e8f0; color: #64748b; border: 1px solid #cbd5e1; font-weight: 700; padding: 0.65rem 1rem;">
+                ${isUserOwned ? `
+                    <button id="sticky-download-btn" class="btn btn-primary" style="width: 100%;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        <span>Download Mod</span>
+                    </button>
+                ` : (isOutOfStock ? `
+                    <button class="btn btn-secondary" disabled style="width: 100%; opacity: 0.65; cursor: not-allowed; background: #e2e8f0; color: #64748b; font-weight: 700; padding: 0.65rem 1rem;">
                         Out of Stock
                     </button>
                 ` : (!isFree ? `
                     <button id="sticky-add-cart-btn" class="btn btn-outline" title="Add to Cart">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
                         <span>Add to Cart</span>
                     </button>
                     <button id="sticky-buy-btn" class="btn btn-primary" title="Buy Now">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                         <span>Buy Now</span>
                     </button>
                 ` : `
                     <button id="sticky-free-btn" class="btn btn-primary" style="width: 100%;">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                         <span>Free Download</span>
                     </button>
-                `)}
+                `))}
             </div>
         </div>
 
+        <!-- Related Products Section (Task 8) -->
         <div id="related-mods-container"></div>
     `;
 
-    // Move the sticky bottom bar from productContainer to document.body for bulletproof fixed viewport docking.
-    // First, remove any previously mounted sticky bar (from a prior product load).
+    // Mount sticky bottom bar to document.body for fixed docking
     const oldStickyBar = document.body.querySelector(':scope > .product-sticky-bottom-bar');
     if (oldStickyBar) oldStickyBar.remove();
 
-    // Now grab the one that was just created inside productContainer.innerHTML and move it to body.
     const stickyBarEl = document.getElementById('product-sticky-bottom-bar');
     if (stickyBarEl) {
         document.body.appendChild(stickyBarEl);
+
+        // Smart Mobile Sticky Bar: Reveal only when user scrolls past the main buybox
+        const updateStickyVisibility = () => {
+            if (window.innerWidth > 768) {
+                stickyBarEl.classList.remove('is-visible');
+                return;
+            }
+            const buyboxEl = document.querySelector('.buybox-card');
+            if (!buyboxEl) return;
+            const rect = buyboxEl.getBoundingClientRect();
+            // Show sticky bar only when user has scrolled past the main buy buttons
+            if (rect.bottom < 60) {
+                stickyBarEl.classList.add('is-visible');
+            } else {
+                stickyBarEl.classList.remove('is-visible');
+            }
+        };
+
+        window.removeEventListener('scroll', window.__enrouteStickyScrollHandler);
+        window.removeEventListener('resize', window.__enrouteStickyScrollHandler);
+        window.__enrouteStickyScrollHandler = updateStickyVisibility;
+        window.addEventListener('scroll', updateStickyVisibility, { passive: true });
+        window.addEventListener('resize', updateStickyVisibility, { passive: true });
+        updateStickyVisibility();
     }
 
-    // Attach Desktop & Sticky Action Handlers
+    // Attach Event Listeners
+    // Buy button
     const buyBtnEl = document.getElementById('buy-btn');
     if (buyBtnEl) {
         buyBtnEl.addEventListener('click', handleBuyNow);
     }
 
+    // Add to cart button
     const addCartBtnEl = document.getElementById('add-to-cart-btn');
     if (addCartBtnEl) {
         addCartBtnEl.addEventListener('click', handleAddToCartOrGoToCart);
     }
 
+    // Sticky buy buttons
     const stickyBuyBtnEl = document.getElementById('sticky-buy-btn');
     if (stickyBuyBtnEl) {
         stickyBuyBtnEl.addEventListener('click', handleBuyNow);
@@ -1009,37 +966,61 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
         stickyFreeBtnEl.addEventListener('click', handleBuyNow);
     }
 
-    // Set initial button state (Add to Cart vs Go to Cart)
-    updateCartButtonState();
+    // Owned download buttons (Task 7)
+    const downloadTargetUrl = product.downloadLink || '#';
+    const downloadFileName = `${(product.name || 'mod').replace(/[^a-zA-Z0-9_-]/g, '_')}.zip`;
 
-    // Listen for cart modifications to sync button label
-    window.addEventListener('enroute-cart-updated', updateCartButtonState);
-    window.addEventListener('storage', updateCartButtonState);
+    const ownedDownloadBtn = document.getElementById('owned-download-btn');
+    if (ownedDownloadBtn) {
+        ownedDownloadBtn.addEventListener('click', () => {
+            initiateDownload(downloadTargetUrl, downloadFileName, ownedDownloadBtn);
+        });
+    }
 
+    const stickyDownloadBtn = document.getElementById('sticky-download-btn');
+    if (stickyDownloadBtn) {
+        stickyDownloadBtn.addEventListener('click', () => {
+            initiateDownload(downloadTargetUrl, downloadFileName, stickyDownloadBtn);
+        });
+    }
+
+    // Wishlist Toggle
     const detailWishBtn = document.getElementById('detail-wishlist-btn');
     if (detailWishBtn) {
-        let wishlist = JSON.parse(localStorage.getItem('enroute_wishlist') || '[]');
-        if (wishlist.includes(id)) {
-            detailWishBtn.classList.add('active');
-            detailWishBtn.querySelector('svg').style.fill = '#ef4444';
-            detailWishBtn.querySelector('svg').style.color = '#ef4444';
-        }
+        const updateWishBtnUI = () => {
+            const wishlist = JSON.parse(localStorage.getItem('enroute_wishlist') || '[]');
+            const isInWish = wishlist.includes(id);
+            const svg = detailWishBtn.querySelector('svg');
+            const textEl = detailWishBtn.querySelector('.wishlist-btn-text');
+
+            if (isInWish) {
+                detailWishBtn.classList.add('active');
+                if (svg) {
+                    svg.style.fill = '#ef4444';
+                    svg.style.color = '#ef4444';
+                }
+                if (textEl) textEl.textContent = 'In Your Wishlist';
+            } else {
+                detailWishBtn.classList.remove('active');
+                if (svg) {
+                    svg.style.fill = 'none';
+                    svg.style.color = 'currentColor';
+                }
+                if (textEl) textEl.textContent = 'Add to Garage Wishlist';
+            }
+        };
+
+        updateWishBtnUI();
 
         detailWishBtn.addEventListener('click', () => {
-            wishlist = JSON.parse(localStorage.getItem('enroute_wishlist') || '[]');
-            const svg = detailWishBtn.querySelector('svg');
+            let wishlist = JSON.parse(localStorage.getItem('enroute_wishlist') || '[]');
             if (wishlist.includes(id)) {
                 wishlist = wishlist.filter(x => x !== id);
-                detailWishBtn.classList.remove('active');
-                svg.style.fill = 'none';
-                svg.style.color = 'currentColor';
             } else {
                 wishlist.push(id);
-                detailWishBtn.classList.add('active');
-                svg.style.fill = '#ef4444';
-                svg.style.color = '#ef4444';
             }
             localStorage.setItem('enroute_wishlist', JSON.stringify(wishlist));
+            updateWishBtnUI();
             window.dispatchEvent(new Event('enroute-wishlist-updated'));
             updateHeaderWishBadge();
         });
@@ -1060,71 +1041,181 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
         } catch(e) {}
     };
     updateHeaderWishBadge();
-    window.addEventListener('storage', updateHeaderWishBadge);
 
-    // Thumbnail switching logic
-    const thumbItems = document.querySelectorAll('.thumbnail-item');
+    // Tabs Switching Interaction
+    const tabBtns = document.querySelectorAll('.amazon-tab-btn');
+    const tabPanes = document.querySelectorAll('.amazon-tab-pane');
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.getAttribute('data-tab');
+            tabBtns.forEach(b => {
+                b.classList.remove('active');
+                b.setAttribute('aria-selected', 'false');
+            });
+            tabPanes.forEach(p => p.classList.remove('active'));
+
+            btn.classList.add('active');
+            btn.setAttribute('aria-selected', 'true');
+            const targetPane = document.getElementById(targetId);
+            if (targetPane) targetPane.classList.add('active');
+        });
+    });
+
+    // Thumbnail Switching
+    const thumbItems = document.querySelectorAll('.amazon-thumbnail-item');
     const mainImg = document.getElementById('main-product-image');
-    
+
+    const switchImage = (idx) => {
+        if (images[idx]) {
+            thumbItems.forEach(t => t.classList.remove('active'));
+            if (thumbItems[idx]) thumbItems[idx].classList.add('active');
+            mainImg.src = images[idx];
+        }
+    };
+
     thumbItems.forEach(item => {
         item.addEventListener('click', () => {
             const idx = parseInt(item.getAttribute('data-idx'));
-            if (images[idx]) {
-                thumbItems.forEach(t => t.classList.remove('active'));
-                item.classList.add('active');
-                mainImg.src = images[idx];
+            switchImage(idx);
+        });
+
+        item.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                const idx = parseInt(item.getAttribute('data-idx'));
+                switchImage(idx);
             }
         });
     });
 
-    // Load Related Mods
-    if (product.relatedMods && product.relatedMods.length > 0) {
-        const loadRelated = async () => {
-            const relContainer = document.getElementById('related-mods-container');
-            relContainer.innerHTML = '<div class="text-center mt-8 text-secondary">Loading related mods...</div>';
+    // Lightbox Modal for Main Image
+    const mainImageTrigger = document.getElementById('main-image-trigger');
+    if (mainImageTrigger) {
+        mainImageTrigger.addEventListener('click', () => {
+            const currentSrc = mainImg.src;
+            const lightbox = document.createElement('div');
+            lightbox.className = 'image-lightbox-modal';
+            lightbox.id = 'product-lightbox';
+            lightbox.innerHTML = `
+                <div class="lightbox-content">
+                    <button class="lightbox-close-btn" aria-label="Close Preview">&times;</button>
+                    <img src="${currentSrc}" alt="${(product.name || 'Preview').replace(/"/g, '&quot;')}" class="lightbox-img" referrerpolicy="no-referrer">
+                </div>
+            `;
+            document.body.appendChild(lightbox);
 
-            try {
-                const snapshot = await getDocs(collection(db, "products"));
-                const allProducts = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-
-                const relatedProducts = allProducts.filter(p => product.relatedMods.includes(p.id));
-
-                if (relatedProducts.length > 0) {
-                    let gridHtml = '';
-                    relatedProducts.forEach(rp => {
-                        const rpImg = (rp.images && rp.images[0]) ? getImageUrl(rp.images[0]) : getImageUrl(rp.image);
-                        gridHtml += `
-                            <a href="product.html?id=${rp.id}" class="product-card" style="text-decoration: none; color: inherit; display: block;">
-                                <div class="product-img-wrapper">
-                                    <img src="${rpImg}" alt="${rp.name}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=800';">
-                                </div>
-                                <div class="product-card-body">
-                                    <h3 class="product-title" style="margin-bottom: 0.5rem;">${rp.name}</h3>
-                                    <p class="product-category" style="margin-bottom: 1rem; font-size: 0.85rem; text-transform: uppercase;">${rp.category}</p>
-                                    <div style="font-weight: 700; font-size: 1.125rem; color: var(--color-primary);">${formatPrice(rp.price)}</div>
-                                </div>
-                            </a>
-                        `;
-                    });
-
-                    relContainer.innerHTML = `
-                        <div class="related-products-section">
-                            <h2 style="font-size: 1.75rem; margin-bottom: 1rem;">You May Also Like</h2>
-                            <div class="related-products-grid">
-                                ${gridHtml}
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    relContainer.innerHTML = '';
+            const closeLightbox = () => {
+                if (document.body.contains(lightbox)) {
+                    document.body.removeChild(lightbox);
                 }
-            } catch (err) {
-                console.error("Error loading related mods", err);
+                document.removeEventListener('keydown', handleEsc);
+            };
+
+            const handleEsc = (e) => {
+                if (e.key === 'Escape') closeLightbox();
+            };
+
+            lightbox.querySelector('.lightbox-close-btn').addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) closeLightbox();
+            });
+            document.addEventListener('keydown', handleEsc);
+        });
+    }
+
+    // Sync cart button state initially and on events
+    updateCartButtonState();
+    window.addEventListener('enroute-cart-updated', updateCartButtonState);
+    window.addEventListener('storage', updateCartButtonState);
+
+    // LOAD RELATED PRODUCTS (Task 8)
+    const loadRelated = async () => {
+        const relContainer = document.getElementById('related-mods-container');
+        if (!relContainer) return;
+
+        try {
+            const snapshot = await getDocs(collection(db, "products"));
+            const allProducts = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+
+            // Filter out current product and hidden/draft items
+            let candidates = allProducts.filter(p => p.id !== id && p.status !== 'draft' && p.status !== 'archived');
+
+            let relatedList = [];
+            // Prioritize manually linked relatedMods if available
+            if (product.relatedMods && Array.isArray(product.relatedMods) && product.relatedMods.length > 0) {
+                relatedList = candidates.filter(p => product.relatedMods.includes(p.id));
+            }
+
+            // Fill with same category or top products up to 4
+            if (relatedList.length < 4 && product.category) {
+                const sameCategory = candidates.filter(p => p.category === product.category && !relatedList.some(r => r.id === p.id));
+                relatedList = relatedList.concat(sameCategory.slice(0, 4 - relatedList.length));
+            }
+
+            if (relatedList.length < 4) {
+                const remaining = candidates.filter(p => !relatedList.some(r => r.id === p.id));
+                relatedList = relatedList.concat(remaining.slice(0, 4 - relatedList.length));
+            }
+
+            if (relatedList.length > 0) {
+                const cardsHtml = relatedList.slice(0, 4).map(rp => {
+                    const rpImg = (rp.images && rp.images[0]) ? getImageUrl(rp.images[0]) : getImageUrl(rp.image);
+                    const rpIsFree = rp.pricingType === 'free' || rp.price === 0;
+                    const rpOrigPrice = rp.originalPrice ?? rp.price ?? 0;
+                    const rpHasOffer = (!rpIsFree && rp.offerPrice !== undefined && rp.offerPrice !== null && rp.offerPrice !== '' && Number(rp.offerPrice) < Number(rpOrigPrice));
+                    const rpIsLimited = rp.offerPeriodType === 'limited';
+                    const rpIsExpired = rpIsLimited && rp.offerExpiryDate && new Date(rp.offerExpiryDate) <= new Date();
+                    const rpOfferActive = rpHasOffer && !rpExpired(rp);
+                    const rpFinalPrice = rpIsFree ? 'FREE' : formatPrice(rpOfferActive ? rp.offerPrice : (rp.price ?? rpOrigPrice));
+
+                    function rpExpired(item) {
+                        return item.offerPeriodType === 'limited' && item.offerExpiryDate && new Date(item.offerExpiryDate) <= new Date();
+                    }
+
+                    return `
+                        <a href="product.html?id=${rp.id}" onclick="try{sessionStorage.setItem('viewProductId', '${rp.id}');}catch(e){}" class="product-card" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; background: #FFFFFF; border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; transition: transform 0.2s, box-shadow 0.2s;">
+                            <div class="product-img-wrapper" style="aspect-ratio: 16/10; overflow: hidden; background: #f1f5f9;">
+                                <img src="${rpImg}" alt="${(rp.name || 'Product').replace(/"/g, '&quot;')}" style="width: 100%; height: 100%; object-fit: cover;" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=800';">
+                            </div>
+                            <div class="product-card-body" style="padding: 1rem; display: flex; flex-direction: column; flex: 1; justify-content: space-between;">
+                                <div>
+                                    <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--color-primary); letter-spacing: 0.05em; display: block; margin-bottom: 0.35rem;">
+                                        ${rp.category || 'Mod'}
+                                    </span>
+                                    <h4 style="font-size: 0.95rem; font-weight: 700; margin: 0 0 0.5rem; line-height: 1.35; color: var(--text-primary);">
+                                        ${rp.name || 'BUSSID Mod'}
+                                    </h4>
+                                </div>
+                                <div style="display: flex; align-items: baseline; justify-content: space-between; margin-top: 0.5rem; border-top: 1px solid var(--color-border-subtle); padding-top: 0.5rem;">
+                                    <span style="font-size: 1.1rem; font-weight: 800; font-family: var(--font-heading); color: ${rpIsFree ? 'var(--color-success)' : 'var(--text-primary)'};">
+                                        ${rpFinalPrice}
+                                    </span>
+                                    <span style="font-size: 0.78rem; font-weight: 700; color: var(--color-primary);">View Mod &rarr;</span>
+                                </div>
+                            </div>
+                        </a>
+                    `;
+                }).join('');
+
+                relContainer.innerHTML = `
+                    <div class="related-products-section">
+                        <h2>Explore Related BUSSID Mods</h2>
+                        <div class="related-products-grid">
+                            ${cardsHtml}
+                        </div>
+                    </div>
+                `;
+            } else {
                 relContainer.innerHTML = '';
             }
-        };
-        loadRelated();
-    }
+        } catch (err) {
+            console.warn("Could not load related products:", err);
+            relContainer.innerHTML = '';
+        }
+    };
+
+    loadRelated();
 };
 
 if (document.readyState === 'loading') {

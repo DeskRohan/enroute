@@ -244,8 +244,17 @@
 }
 
 @media (max-width: 820px) {
+  body:has(.header),
+  body:not(:has(.mobile-admin-header)):not(:has(.admin-sidebar)) {
+    padding-top: 100px !important;
+  }
   body {
-    padding-top: 118px !important;
+    padding-top: 100px;
+  }
+  body:has(.mobile-admin-header),
+  body:has(.admin-sidebar),
+  .admin-body {
+    padding-top: 0 !important;
   }
   .header {
     background-color: var(--bg-secondary);
@@ -257,12 +266,12 @@
     align-items: center !important;
     height: auto !important;
     min-height: auto !important;
-    padding: 8px 0 10px 0 !important;
-    row-gap: 8px !important;
+    padding: 6px 0 8px 0 !important;
+    row-gap: 6px !important;
   }
   .logo {
     order: 1 !important;
-    font-size: 1.32rem !important;
+    font-size: 1.3rem !important;
     display: inline-flex !important;
     align-items: center !important;
     flex-shrink: 0 !important;
@@ -285,23 +294,23 @@
     max-width: 100% !important;
     flex: 0 0 100% !important;
     flex-basis: 100% !important;
-    margin: 2px 0 0 0 !important;
+    margin: 0 !important;
     position: relative !important;
   }
   .nav-search-input {
     width: 100% !important;
-    height: 40px !important;
-    font-size: 0.88rem !important;
-    padding: 0 76px 0 14px !important;
+    height: 38px !important;
+    font-size: 0.86rem !important;
+    padding: 0 74px 0 12px !important;
     border-radius: var(--radius-md) !important;
     box-sizing: border-box !important;
     background: var(--bg-card, #FFFFFF) !important;
   }
   .nav-search-btn-group {
     position: absolute !important;
-    top: 4px !important;
-    bottom: 4px !important;
-    right: 4px !important;
+    top: 3px !important;
+    bottom: 3px !important;
+    right: 3px !important;
     display: flex !important;
     align-items: center !important;
     gap: 4px !important;
@@ -1568,6 +1577,32 @@
   padding: var(--spacing-12) 0 var(--spacing-8);
   border-top: 1px solid var(--color-border);
   position: relative;
+}
+
+/* Footer Enroute Brand & Logo Styling */
+.footer .logo,
+.footer a.logo,
+.footer-col .logo {
+  color: var(--color-accent, #FFC220) !important;
+  font-weight: 800 !important;
+  text-decoration: none !important;
+}
+
+.footer .logo span,
+.footer a.logo span {
+  color: var(--color-primary, #007DC6) !important;
+}
+
+.footer .logo .logo-badge {
+  background: var(--color-accent, #FFC220) !important;
+  color: var(--color-dark-navy, #153247) !important;
+  border-color: var(--color-accent) !important;
+}
+
+.footer .enroute-text,
+.footer-bottom .enroute-text,
+.footer-bottom strong.brand {
+  color: var(--color-accent, #FFC220) !important;
 }
 
 .footer-grid {

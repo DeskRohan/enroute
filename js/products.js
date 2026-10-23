@@ -85,7 +85,7 @@ const getImageUrl = (url) => {
 window.goToProduct = (id) => {
     try {
         sessionStorage.setItem('viewProductId', id);
-    } catch(e) {}
+    } catch (e) { }
     window.location.href = `product.html?id=${id}`;
 };
 
@@ -97,7 +97,7 @@ export const updateWishlistBadge = () => {
             b.textContent = list.length;
             b.style.display = list.length > 0 ? 'inline-flex' : 'none';
         });
-    } catch(e) {}
+    } catch (e) { }
 };
 
 window.toggleWishlist = (e, id) => {
@@ -117,7 +117,7 @@ window.toggleWishlist = (e, id) => {
         }
         localStorage.setItem('enroute_wishlist', JSON.stringify(wishlist));
         updateWishlistBadge();
-    } catch(err) {}
+    } catch (err) { }
 };
 
 // Render a single product card (Image 2 for Desktop, Image 1 for Mobile)
@@ -125,16 +125,16 @@ const createProductCard = (product) => {
     const imgUrl = (product.images && product.images.length > 0) ? product.images[0] : product.image;
     const isFree = (product.price === 0 || product.pricingType === 'free');
     const isOutOfStock = Boolean(product.outOfStock);
-    
+
     // Uploader details
     const uploader = adminsMap[product.addedBy] || { name: 'EnrouteIn', isVerified: true };
     const verificationBadge = uploader.isVerified ? `<img src="assets/images/varified.png" title="Verified Creator" style="height: 1.05em; vertical-align: middle; margin-left: 3px; display: inline-block;">` : '';
-    
+
     let isWishlisted = false;
     try {
         const currentWish = JSON.parse(localStorage.getItem('enroute_wishlist') || '[]');
         isWishlisted = currentWish.includes(product.id);
-    } catch(e) {}
+    } catch (e) { }
 
     const origPrice = product.originalPrice ?? product.price ?? 0;
     const offerPrice = product.offerPrice;
@@ -177,17 +177,14 @@ const createProductCard = (product) => {
                     <h3 class="fk-title">${product.name}</h3>
                 </a>
 
-                <!-- Rating & Assured Badge Row -->
-                <div class="fk-rating-row">
-                    <span class="fk-star-badge">4.8 ★</span>
-                    <span class="fk-rating-count">(4,820)</span>
+                <!-- Creator & Assured Tag -->
+                <div class="fk-rating-row" style="margin-bottom: 0.5rem;">
                     <span class="fk-assured-tag" title="Enroute Verified Mod">
                         <span class="fk-assured-shield">🛡️</span>
                         <span class="fk-assured-text">Assured</span>
                     </span>
                     <span class="fk-creator-text" style="font-size: 0.78rem; color: var(--text-muted); margin-left: 4px;">By ${uploader.name}${verificationBadge}</span>
                 </div>
-
                 <!-- Desktop Bullet Specifications (Image 2 style) -->
                 <ul class="fk-specs-bullets">
                     <li>Compatibility: <strong>${product.version || 'BUSSID Universal (v3.8+)'}</strong></li>
@@ -268,7 +265,7 @@ const createProductCard = (product) => {
 // Render array of products to container
 const renderProducts = (products, container) => {
     if (!container) return;
-    
+
     if (products.length === 0) {
         container.innerHTML = `
             <div class="empty-state" style="grid-column: 1/-1; text-align: center; padding: 3rem 1.5rem; background: #FFFFFF; border-radius: var(--radius-md); border: 1px dashed var(--color-border);">
@@ -301,7 +298,7 @@ window.clearProductFilters = () => {
         currentUrl.searchParams.delete('category');
         currentUrl.searchParams.delete('sort');
         window.history.replaceState(null, '', currentUrl.pathname + (currentUrl.search ? currentUrl.search : ''));
-    } catch (_) {}
+    } catch (_) { }
 
     applyFilters();
 };
@@ -319,7 +316,7 @@ export const loadFeaturedProducts = async () => {
         const q = query(collection(db, "products"), orderBy("createdAt", "desc"), limit(25));
         const snapshot = await getDocs(q);
         let products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        
+
         // Filter out scheduled products in the future and out-of-stock from top banner
         const availableProducts = products.filter(p => {
             if (p.outOfStock) return false;
@@ -371,7 +368,7 @@ export const loadAllProducts = async () => {
         const q = query(collection(db, "products"), orderBy("createdAt", "desc"));
         const snapshot = await getDocs(q);
         allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        
+
         // Filter out scheduled products in the future
         allProducts = allProducts.filter(p => {
             if (p.status === 'scheduled') {
@@ -398,7 +395,7 @@ export const loadAllProducts = async () => {
         if (sortParam && sortFilter) {
             sortFilter.value = sortParam;
         }
-        
+
         syncPillsFromCurrent();
         applyFilters();
     } catch (error) {
@@ -410,7 +407,7 @@ export const loadAllProducts = async () => {
 // Filter and Sort Logic
 const applyFilters = () => {
     if (!productsContainer) return;
-    
+
     const headerInput = document.getElementById('header-search-input');
     const bottomInput = document.getElementById('search-input');
     const searchTerm = (headerInput ? headerInput.value : (bottomInput ? bottomInput.value : '')).toLowerCase().trim();
@@ -422,9 +419,9 @@ const applyFilters = () => {
         const safeDesc = (p.description || '').toLowerCase();
         const safeCategory = (p.category || '').toLowerCase();
         const safeAddedBy = (p.addedBy || '').toLowerCase();
-        
+
         const matchesSearch = !searchTerm || safeName.includes(searchTerm) || safeDesc.includes(searchTerm) || safeCategory.includes(searchTerm) || safeAddedBy.includes(searchTerm);
-        
+
         let matchesCategory = false;
         if (category === 'all') {
             matchesCategory = true;
@@ -449,12 +446,6 @@ const applyFilters = () => {
         filtered.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
     } else { // newest
         filtered.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-    }
-
-    // Update count indicator
-    const countEl = document.getElementById('products-count');
-    if (countEl) {
-        countEl.textContent = `${filtered.length} product${filtered.length === 1 ? '' : 's'}`;
     }
 
     // Update filter active dot on trigger button
@@ -628,7 +619,7 @@ if (filterSheetApplyBtn) {
                 currentUrl.searchParams.delete('sort');
             }
             window.history.replaceState(null, '', currentUrl.pathname + (currentUrl.search ? currentUrl.search : ''));
-        } catch (_) {}
+        } catch (_) { }
 
         syncPillsFromCurrent();
         closeFilterModal();
@@ -652,7 +643,7 @@ if (filterSheetResetBtn) {
             currentUrl.searchParams.delete('category');
             currentUrl.searchParams.delete('sort');
             window.history.replaceState(null, '', currentUrl.pathname + (currentUrl.search ? currentUrl.search : ''));
-        } catch (_) {}
+        } catch (_) { }
 
         closeFilterModal();
         applyFilters();
@@ -672,7 +663,7 @@ document.querySelectorAll('input[name="sidebar-category"]').forEach(radio => {
                     currentUrl.searchParams.delete('category');
                 }
                 window.history.replaceState(null, '', currentUrl.pathname + (currentUrl.search ? currentUrl.search : ''));
-            } catch (_) {}
+            } catch (_) { }
             syncPillsFromCurrent();
             applyFilters();
         }
@@ -691,7 +682,7 @@ document.querySelectorAll('input[name="sidebar-sort"]').forEach(radio => {
                     currentUrl.searchParams.delete('sort');
                 }
                 window.history.replaceState(null, '', currentUrl.pathname + (currentUrl.search ? currentUrl.search : ''));
-            } catch (_) {}
+            } catch (_) { }
             syncPillsFromCurrent();
             applyFilters();
         }
@@ -707,7 +698,7 @@ if (sidebarResetBtn) {
             currentUrl.searchParams.delete('category');
             currentUrl.searchParams.delete('sort');
             window.history.replaceState(null, '', currentUrl.pathname + (currentUrl.search ? currentUrl.search : ''));
-        } catch (_) {}
+        } catch (_) { }
         syncPillsFromCurrent();
         applyFilters();
     });
@@ -720,7 +711,7 @@ window.clearCategoryFilter = () => {
         const currentUrl = new URL(window.location.href);
         currentUrl.searchParams.delete('category');
         window.history.replaceState(null, '', currentUrl.pathname + (currentUrl.search ? currentUrl.search : ''));
-    } catch (_) {}
+    } catch (_) { }
     syncPillsFromCurrent();
     applyFilters();
 };
@@ -731,7 +722,7 @@ window.clearSortFilter = () => {
         const currentUrl = new URL(window.location.href);
         currentUrl.searchParams.delete('sort');
         window.history.replaceState(null, '', currentUrl.pathname + (currentUrl.search ? currentUrl.search : ''));
-    } catch (_) {}
+    } catch (_) { }
     syncPillsFromCurrent();
     applyFilters();
 };
@@ -744,7 +735,7 @@ window.clearSearchFilter = () => {
         const currentUrl = new URL(window.location.href);
         currentUrl.searchParams.delete('search');
         window.history.replaceState(null, '', currentUrl.pathname + (currentUrl.search ? currentUrl.search : ''));
-    } catch (_) {}
+    } catch (_) { }
     applyFilters();
 };
 
@@ -759,7 +750,7 @@ if (categoryFilter) {
                 currentUrl.searchParams.delete('category');
             }
             window.history.replaceState(null, '', currentUrl.pathname + (currentUrl.search ? currentUrl.search : ''));
-        } catch (_) {}
+        } catch (_) { }
         syncPillsFromCurrent();
         applyFilters();
     });
@@ -775,7 +766,7 @@ if (sortFilter) {
                 currentUrl.searchParams.delete('sort');
             }
             window.history.replaceState(null, '', currentUrl.pathname + (currentUrl.search ? currentUrl.search : ''));
-        } catch (_) {}
+        } catch (_) { }
         syncPillsFromCurrent();
         applyFilters();
     });
@@ -799,7 +790,7 @@ const initHeaderSearch = () => {
                         currentUrl.searchParams.delete('search');
                     }
                     window.history.replaceState(null, '', currentUrl.pathname + (currentUrl.search ? currentUrl.search : ''));
-                } catch (_) {}
+                } catch (_) { }
                 applyFilters();
             }
         });
@@ -825,7 +816,7 @@ const initHeaderSearch = () => {
                         currentUrl.searchParams.delete('search');
                     }
                     window.history.replaceState(null, '', currentUrl.pathname + (currentUrl.search ? currentUrl.search : ''));
-                } catch (_) {}
+                } catch (_) { }
                 applyFilters();
 
                 // Smooth scroll to catalog results if page is scrolled
@@ -852,10 +843,10 @@ export const initRecentProductsMarquee = () => {
 
     try {
         const q = query(collection(db, "products"), orderBy("createdAt", "desc"), limit(12));
-        
+
         onSnapshot(q, (snapshot) => {
             const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            
+
             // Filter out scheduled future products or out-of-stock
             const recent = products.filter(p => {
                 if (p.outOfStock) return false;
@@ -875,7 +866,7 @@ export const initRecentProductsMarquee = () => {
                 const isFree = p.price === 0 || p.pricingType === 'free';
                 const priceText = isFree ? 'FREE' : formatPrice(p.price);
                 const categoryIcon = p.category === 'livery' ? '🎨' : '🚌';
-                
+
                 return `
                     <a href="product.html?id=${p.id}" class="marquee-product-chip" title="View ${p.name}">
                         <span class="chip-badge">NEW</span>
