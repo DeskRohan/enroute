@@ -83,6 +83,9 @@
             grid-template-columns: minmax(340px, 40%) minmax(300px, 36%) minmax(250px, 24%);
             gap: 1.75rem;
             align-items: start;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         /* Column 1: Left Gallery & Highlights */
@@ -816,27 +819,49 @@
             }
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 820px) {
             .product-amazon-layout {
                 display: flex !important;
                 flex-direction: column !important;
-                gap: 1.25rem !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                gap: 1.15rem !important;
+                box-sizing: border-box !important;
             }
 
             .product-amazon-gallery {
                 order: 1 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                box-sizing: border-box !important;
             }
 
             .product-amazon-buybox {
                 order: 2 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                box-sizing: border-box !important;
             }
 
             .product-amazon-center {
                 order: 3 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                box-sizing: border-box !important;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 1.15rem !important;
             }
 
             .gallery-sticky-wrap {
                 position: static !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
             }
 
             .amazon-title-block h1 {
@@ -850,10 +875,146 @@
                 border-radius: var(--radius-md) !important;
                 gap: 0.85rem !important;
                 box-shadow: var(--shadow-xs) !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                box-sizing: border-box !important;
             }
 
             .buybox-price-main {
                 font-size: 1.85rem !important;
+            }
+
+            /* --- Card 1: ABOUT THIS DIGITAL MOD Mobile Perfection --- */
+            .amazon-about-box {
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                box-sizing: border-box !important;
+                padding: 1rem 0.95rem !important;
+                border-radius: var(--radius-md) !important;
+                background: #FFFFFF !important;
+                border: 1px solid var(--color-border) !important;
+                box-shadow: var(--shadow-xs) !important;
+            }
+
+            .amazon-about-box h3 {
+                font-size: 0.88rem !important;
+                font-weight: 800 !important;
+                margin: 0 0 0.65rem 0 !important;
+                letter-spacing: 0.04em !important;
+            }
+
+            .amazon-bullet-list {
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+                gap: 0.6rem !important;
+            }
+
+            .amazon-bullet-list li {
+                font-size: 0.84rem !important;
+                line-height: 1.5 !important;
+                padding-left: 1.15rem !important;
+                word-break: break-word !important;
+                overflow-wrap: break-word !important;
+            }
+
+            .amazon-bullet-list li strong {
+                color: var(--text-primary) !important;
+            }
+
+            /* --- Card 2: STRUCTURED TABS (Overview, Specs, Video, Delivery) Mobile Perfection --- */
+            .amazon-tabs-card {
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                box-sizing: border-box !important;
+                border-radius: var(--radius-md) !important;
+                background: #FFFFFF !important;
+                border: 1px solid var(--color-border) !important;
+                box-shadow: var(--shadow-xs) !important;
+                overflow: hidden !important;
+            }
+
+            .amazon-tabs-nav {
+                display: flex !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                overflow-x: auto !important;
+                overflow-y: hidden !important;
+                -webkit-overflow-scrolling: touch !important;
+                scrollbar-width: none !important;
+                background: var(--bg-tertiary) !important;
+                border-bottom: 1px solid var(--color-border) !important;
+                box-sizing: border-box !important;
+            }
+
+            .amazon-tabs-nav::-webkit-scrollbar {
+                display: none !important;
+            }
+
+            .amazon-tab-btn {
+                padding: 0.7rem 0.95rem !important;
+                font-size: 0.82rem !important;
+                font-weight: 700 !important;
+                white-space: nowrap !important;
+                flex-shrink: 0 !important;
+                border-bottom: 2.5px solid transparent !important;
+                user-select: none !important;
+                -webkit-user-select: none !important;
+            }
+
+            .amazon-tab-btn.active {
+                background: #FFFFFF !important;
+                border-bottom-color: var(--color-primary) !important;
+                color: var(--color-primary) !important;
+            }
+
+            .amazon-tab-content {
+                padding: 0.95rem !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            .amazon-tab-pane {
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            .amazon-desc-text {
+                font-size: 0.88rem !important;
+                line-height: 1.65 !important;
+                word-break: break-word !important;
+                overflow-wrap: break-word !important;
+                color: var(--text-secondary) !important;
+            }
+
+            /* Responsive Specs Table */
+            .amazon-specs-table {
+                width: 100% !important;
+                max-width: 100% !important;
+                table-layout: fixed !important;
+                box-sizing: border-box !important;
+            }
+
+            .amazon-specs-table th {
+                width: 44% !important;
+                padding: 0.55rem 0.45rem !important;
+                font-size: 0.8rem !important;
+                word-break: break-word !important;
+                overflow-wrap: break-word !important;
+            }
+
+            .amazon-specs-table td {
+                width: 56% !important;
+                padding: 0.55rem 0.45rem !important;
+                font-size: 0.8rem !important;
+                word-break: break-word !important;
+                overflow-wrap: break-word !important;
             }
 
             .product-sticky-bottom-bar {
