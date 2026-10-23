@@ -192,6 +192,7 @@
     display: inline-flex;
   }
   .nav-search-input {
+<<<<<<< HEAD
     padding-right: 74px;
   }
 }
@@ -237,6 +238,86 @@
     width: 32px;
     height: 32px;
     border-radius: calc(var(--radius-sm) - 1px);
+=======
+    padding-right: 76px;
+  }
+}
+
+@media (max-width: 820px) {
+  body {
+    padding-top: 118px !important;
+  }
+  .header {
+    background-color: var(--bg-secondary);
+  }
+  .nav {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    height: auto !important;
+    min-height: auto !important;
+    padding: 8px 0 10px 0 !important;
+    row-gap: 8px !important;
+  }
+  .logo {
+    order: 1 !important;
+    font-size: 1.32rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+  }
+  .nav-links {
+    display: none !important;
+  }
+  .nav-actions {
+    order: 2 !important;
+    margin-left: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-shrink: 0 !important;
+  }
+  .nav-search-form {
+    display: flex !important;
+    order: 3 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+    flex-basis: 100% !important;
+    margin: 2px 0 0 0 !important;
+    position: relative !important;
+  }
+  .nav-search-input {
+    width: 100% !important;
+    height: 40px !important;
+    font-size: 0.88rem !important;
+    padding: 0 76px 0 14px !important;
+    border-radius: var(--radius-md) !important;
+    box-sizing: border-box !important;
+    background: var(--bg-card, #FFFFFF) !important;
+  }
+  .nav-search-btn-group {
+    position: absolute !important;
+    top: 4px !important;
+    bottom: 4px !important;
+    right: 4px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+  }
+  .nav-filter-btn {
+    display: inline-flex !important;
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: calc(var(--radius-md) - 2px) !important;
+  }
+  .nav-search-submit {
+    display: inline-flex !important;
+    width: 34px !important;
+    height: 32px !important;
+    border-radius: calc(var(--radius-md) - 2px) !important;
+>>>>>>> 4036292 (header update)
   }
 }
 
@@ -1555,9 +1636,9 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 820px) {
   .nav-links {
-    display: none;
+    display: none !important;
   }
   
   .footer-grid {
