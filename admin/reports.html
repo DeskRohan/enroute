@@ -23,17 +23,82 @@
             flex-direction: column;
             gap: 0.5rem;
             flex: 1;
-            min-width: 200px;
+            min-width: 190px;
         }
         .filter-group label {
-            font-size: 0.875rem;
-            font-weight: 500;
+            font-size: 0.85rem;
+            font-weight: 600;
             color: var(--text-secondary);
         }
         .date-inputs {
             display: flex;
             gap: var(--spacing-4);
             align-items: center;
+        }
+        .report-view-switcher {
+            display: inline-flex;
+            background: #e2e8f0;
+            border-radius: 12px;
+            padding: 4px;
+            gap: 4px;
+        }
+        .report-view-tab {
+            padding: 8px 18px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border-radius: 9px;
+            border: none;
+            background: transparent;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .report-view-tab.active {
+            background: #ffffff;
+            color: var(--color-primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .super-admin-badge {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #fff;
+            font-size: 0.68rem;
+            font-weight: 800;
+            padding: 3px 9px;
+            border-radius: 999px;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            letter-spacing: 0.03em;
+        }
+        .admin-avatar-badge {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(37, 99, 235, 0.12);
+            color: #2563eb;
+            font-size: 0.75rem;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .share-progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 999px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+        .share-progress-fill {
+            height: 100%;
+            background: #2563eb;
+            border-radius: 999px;
         }
     </style>
 </head>
@@ -57,21 +122,70 @@
     </aside>
 
     <main class="admin-main">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-8);">
-            <h1>Reports</h1>
-            <button class="btn btn-primary" id="export-pdf-btn" disabled>Export Report (PDF)</button>
+        <!-- Top Header & Exports -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-6); flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <h1 style="margin: 0; font-size: 1.75rem; font-weight: 800;">Financial Reports & Analytics</h1>
+                    <span id="super-admin-indicator" class="super-admin-badge" style="display: none;">👑 Super Admin</span>
+                </div>
+                <p class="text-secondary" style="font-size: 0.88rem; margin: 4px 0 0 0;">
+                    Monitor platform earnings, creator revenue distribution, and product sales yields.
+                </p>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="btn btn-outline" id="export-csv-btn" disabled style="display: flex; align-items: center; gap: 6px;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <span>Export CSV</span>
+                </button>
+                <button class="btn btn-primary" id="export-pdf-btn" disabled style="display: flex; align-items: center; gap: 6px;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    <span>Export Report (PDF)</span>
+                </button>
+            </div>
         </div>
 
+        <!-- Super Admin Report View Mode Switcher -->
+        <div id="super-admin-tabs" style="display: none; margin-bottom: 1.25rem;">
+            <div class="report-view-switcher">
+                <button type="button" class="report-view-tab active" id="tab-product-wise" data-view="product">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                    <span>Report by Product-wise</span>
+                </button>
+                <button type="button" class="report-view-tab" id="tab-admin-wise" data-view="admin">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    <span>Report by Admin-wise (Creator Earnings)</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter Card -->
         <div class="card" style="padding: var(--spacing-6); margin-bottom: var(--spacing-8);">
-            <h3>Filter Data</h3>
-            <div class="filter-row" style="margin-top: 1rem;">
-                <div class="filter-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+                <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700;">Filter Parameters</h3>
+                <span id="active-view-tag" style="font-size: 0.76rem; font-weight: 700; color: #2563eb; background: rgba(37,99,235,0.08); padding: 3px 10px; border-radius: 999px;">
+                    Mode: Product-wise
+                </span>
+            </div>
+
+            <div class="filter-row" style="margin-top: 0.75rem;">
+                <!-- Admin / Creator Filter (Visible to admin@enroute.in) -->
+                <div class="filter-group" id="filter-admin-group" style="display: none;">
+                    <label for="filter-admin">Filter by Admin / Creator</label>
+                    <select id="filter-admin" class="form-control">
+                        <option value="all">All Admins & Creators</option>
+                    </select>
+                </div>
+
+                <!-- Product Filter -->
+                <div class="filter-group" id="filter-product-group">
                     <label for="filter-product">Select Mod / Product</label>
                     <select id="filter-product" class="form-control">
                         <option value="all">All Products</option>
                     </select>
                 </div>
 
+                <!-- Time Period Filter -->
                 <div class="filter-group">
                     <label for="filter-time">Time Period</label>
                     <select id="filter-time" class="form-control">
@@ -82,6 +196,7 @@
                     </select>
                 </div>
 
+                <!-- Custom Date Inputs -->
                 <div class="filter-group date-inputs" id="custom-date-group" style="display: none;">
                     <div style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
                         <label for="date-start">Start Date</label>
@@ -94,34 +209,50 @@
                 </div>
                 
                 <div>
-                    <button class="btn btn-accent" id="generate-btn" style="height: 46px;">Generate</button>
+                    <button class="btn btn-accent" id="generate-btn" style="height: 46px; min-width: 110px; font-weight: 700;">Generate</button>
                 </div>
             </div>
         </div>
 
-        <div class="stats-grid" style="margin-bottom: var(--spacing-8);">
+        <!-- KPI Metrics Grid -->
+        <div class="stats-grid" style="margin-bottom: var(--spacing-8); grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));">
             <div class="stat-card">
                 <div class="stat-title">Total Revenue (Filtered)</div>
-                <div class="stat-value" id="summary-revenue">₹0</div>
+                <div class="stat-value" id="summary-revenue" style="color: #059669;">₹0</div>
+                <div style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 4px;">Verified completed payments</div>
             </div>
             <div class="stat-card">
                 <div class="stat-title">Total Units Sold</div>
                 <div class="stat-value" id="summary-units">0</div>
+                <div style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 4px;">Orders completed</div>
+            </div>
+            <div class="stat-card" id="card-metric-3">
+                <div class="stat-title" id="metric-3-title">Products Evaluated</div>
+                <div class="stat-value" id="summary-metric-3">0</div>
+                <div style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 4px;" id="metric-3-sub">Active catalog vehicles</div>
+            </div>
+            <div class="stat-card" id="card-metric-4">
+                <div class="stat-title" id="metric-4-title">Top Performer</div>
+                <div class="stat-value" id="summary-metric-4" style="font-size: 1.15rem; word-break: break-word;">—</div>
+                <div style="font-size: 0.74rem; color: #059669; font-weight: 700; margin-top: 4px;" id="metric-4-sub">Leading revenue generator</div>
             </div>
         </div>
 
+        <!-- Report Data Table -->
         <div class="table-container">
             <table class="admin-table">
-                <thead>
+                <thead id="reports-table-head">
                     <tr>
                         <th>Product Name</th>
+                        <th>Admin / Creator</th>
                         <th>Pricing Type</th>
                         <th>Units Sold</th>
                         <th>Total Revenue Generated</th>
+                        <th>Share %</th>
                     </tr>
                 </thead>
                 <tbody id="reports-table-body">
-                    <tr><td colspan="4" class="text-center text-secondary">Select filters and click Generate to view report.</td></tr>
+                    <tr><td colspan="6" class="text-center text-secondary" style="padding: 2.5rem 1rem;">Select filters and click Generate to view report.</td></tr>
                 </tbody>
             </table>
         </div>
