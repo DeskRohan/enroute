@@ -743,15 +743,14 @@
                                     </div>
                                 </label>
 
-                                <!-- Mode 2: Upcoming with Pre-Booking -->
+                                <!-- Mode 2: Upcoming Premiere Mode -->
                                 <label class="studio-choice-card" id="mode-card-upcoming">
                                     <input type="radio" name="p-status" id="status-upcoming" value="upcoming"
                                         style="display: none;">
                                     <div class="studio-choice-indicator"></div>
                                     <div>
-                                        <div class="studio-choice-title">🚀 Upcoming Release</div>
-                                        <div class="studio-choice-desc">Showcase in catalog as upcoming with optional
-                                            Pre-Booking reservation.</div>
+                                        <div class="studio-choice-title">🎬 Upcoming Premiere</div>
+                                        <div class="studio-choice-desc">Showcase on website with live countdown. Downloads stay locked until release (like YouTube Premiere).</div>
                                     </div>
                                 </label>
 
@@ -769,92 +768,101 @@
                             </div>
                         </div>
 
-                        <!-- UPCOMING & PRE-BOOKING CONFIGURATION PANEL -->
+                        <!-- UPCOMING PREMIERE & PRE-BOOKING CONFIGURATION PANEL -->
                         <div id="upcoming-preorder-panel" class="studio-preorder-box" style="display: none;">
-                            <div
-                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
-                                <div>
-                                    <div class="studio-preorder-badge">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" stroke-width="2.5">
-                                            <polygon
-                                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
-                                            </polygon>
-                                        </svg>
-                                        <span>Early Access & Priority Reservation</span>
+                            <div style="margin-bottom: 1.25rem;">
+                                <div class="studio-preorder-badge" style="background: rgba(109, 40, 217, 0.12); color: #6d28d9;">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2.5">
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                    <span>YouTube Premiere Mode & Timed Drop</span>
+                                </div>
+                                <h4
+                                    style="font-size: 1.1rem; font-weight: 800; color: #4c1d95; margin: 0 0 0.25rem 0; font-family: 'Space Grotesk', sans-serif !important;">
+                                    🎬 Upcoming Premiere Schedule
+                                </h4>
+                                <p style="font-size: 0.82rem; color: #6d28d9; margin: 0;">
+                                    Showcase this mod on the website with a live countdown timer. Downloads remain locked until the release date & time arrives.
+                                </p>
+                            </div>
+
+                            <!-- Target Premiere / Release Date & Time (ALWAYS VISIBLE & REQUIRED) -->
+                            <div class="form-group" style="margin-bottom: 1.25rem;">
+                                <label class="studio-form-label">
+                                    <span>Release Date & Time (Premiere Drop) <span class="req">*</span></span>
+                                    <span class="help-tag" style="color: #6d28d9; font-weight: 700;">Live Storefront Countdown</span>
+                                </label>
+                                <input type="datetime-local" id="p-expected-date" class="studio-input" style="border-color: rgba(109, 40, 217, 0.35);">
+                                <span class="studio-field-hint">
+                                    Product is displayed on the website immediately. Downloads unlock automatically once this date and time arrives.
+                                </span>
+                            </div>
+
+                            <!-- Optional Pre-Booking Section -->
+                            <div style="background: #ffffff; border: 1px solid var(--studio-slate-border); border-radius: var(--radius-md); padding: 1rem 1.15rem; margin-top: 1rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                                    <div>
+                                        <div style="font-weight: 800; font-size: 0.92rem; color: #4c1d95;">
+                                            Enable Pre-Booking / Priority Reservation
+                                        </div>
+                                        <div style="font-size: 0.78rem; color: var(--admin-text-muted);">
+                                            Allow buyers to pay an advance deposit to pre-order before the premiere unlocks
+                                        </div>
                                     </div>
-                                    <h4
-                                        style="font-size: 1.05rem; font-weight: 800; color: #4c1d95; margin: 0 0 0.2rem 0; font-family: 'Space Grotesk', sans-serif !important;">
-                                        Upcoming Mod Pre-Booking Settings
-                                    </h4>
-                                    <p style="font-size: 0.78rem; color: #6d28d9; margin: 0;">
-                                        Allow drivers to secure priority early delivery before public release.
-                                    </p>
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <input type="checkbox" id="p-allow-prebooking"
+                                            style="width: 18px; height: 18px; accent-color: var(--studio-purple); cursor: pointer;">
+                                        <label for="p-allow-prebooking" style="font-size: 0.82rem; font-weight: 700; cursor: pointer; margin: 0;">
+                                            Enable Pre-Booking
+                                        </label>
+                                    </div>
                                 </div>
 
-                                <div
-                                    style="display: flex; align-items: center; gap: 0.65rem; background: #ffffff; padding: 6px 14px; border-radius: var(--radius-sm); border: 1px solid var(--studio-slate-border);">
-                                    <input type="checkbox" id="p-allow-prebooking" checked
-                                        style="width: 18px; height: 18px; accent-color: var(--studio-purple); cursor: pointer;">
-                                    <label for="p-allow-prebooking"
-                                        style="font-size: 0.82rem; font-weight: 700; color: var(--admin-text-primary); margin: 0; cursor: pointer;">
-                                        Enable Pre-Booking
-                                    </label>
-                                </div>
-                                                        <div id="prebooking-fields-wrap">
-                                <!-- Priority Reservation Deposit -->
-                                <div class="form-group" style="margin-bottom: 1.25rem;">
-                                    <label class="studio-form-label">
-                                        <span>Priority Reservation Deposit (₹) <span class="req">*</span></span>
-                                        <span class="help-tag" style="color: var(--studio-purple); font-weight: 700;">Advance Booking</span>
-                                    </label>
-                                    <input type="number" id="p-prebooking-deposit" class="studio-input"
-                                        placeholder="e.g., 99" min="1" step="any">
-                                    <span class="studio-field-hint">
-                                        Initial deposit paid upfront to lock in priority access. Remaining balance payable upon launch.
-                                    </span>
-                                </div>
+                                <div id="prebooking-fields-wrap" style="display: none; margin-top: 1rem; border-top: 1px dashed var(--studio-slate-border); padding-top: 1rem;">
+                                    <!-- Priority Reservation Deposit -->
+                                    <div class="form-group" style="margin-bottom: 1.1rem;">
+                                        <label class="studio-form-label">
+                                            <span>Priority Reservation Deposit (₹) <span class="req">*</span></span>
+                                            <span class="help-tag" style="color: var(--studio-purple); font-weight: 700;">Advance Booking</span>
+                                        </label>
+                                        <input type="number" id="p-prebooking-deposit" class="studio-input"
+                                            placeholder="e.g., 99" min="1" step="any">
+                                        <span class="studio-field-hint">
+                                            Deposit paid upfront to secure priority delivery. Balance due upon release.
+                                        </span>
+                                    </div>
 
-                                <!-- Expected Launch Date -->
-                                <div class="form-group" style="margin-bottom: 1.25rem;">
-                                    <label class="studio-form-label">
-                                        <span>Estimated Launch Date & Time <span class="req">*</span></span>
-                                    </label>
-                                    <input type="datetime-local" id="p-expected-date" class="studio-input">
-                                    <span class="studio-field-hint">
-                                        Displayed on storefront countdown clock and product badge.
-                                    </span>
-                                </div>
+                                    <!-- VIP Slots -->
+                                    <div class="form-group" style="margin-bottom: 1.1rem;">
+                                        <label class="studio-form-label">
+                                            <span>Early Bird VIP Slots / Allocation</span>
+                                            <span class="help-tag">Optional</span>
+                                        </label>
+                                        <input type="number" id="p-prebooking-slots" class="studio-input"
+                                            placeholder="e.g., 50 (Leave blank for Unlimited)" min="1">
+                                        <span class="studio-field-hint">e.g., "Only 18 VIP Pre-Booking Slots Remaining"</span>
+                                    </div>
 
-                                <div class="form-group" style="margin-bottom: 1.25rem;">
-                                    <label class="studio-form-label">
-                                        <span>Early Bird VIP Slots / Allocation</span>
-                                        <span class="help-tag">Optional</span>
-                                    </label>
-                                    <input type="number" id="p-prebooking-slots" class="studio-input"
-                                        placeholder="e.g., 50 (Leave blank for Unlimited)" min="1">
-                                    <span class="studio-field-hint">Creates urgency (e.g., "Only 18 VIP Pre-Booking Slots Remaining").</span>
-                                </div>
+                                    <!-- Perk Note -->
+                                    <div class="form-group" style="margin-bottom: 1.1rem;">
+                                        <label class="studio-form-label">
+                                            <span>Early Bird Advantage / Incentive</span>
+                                            <span class="help-tag">Optional</span>
+                                        </label>
+                                        <input type="text" id="p-prebooking-perk-note" class="studio-input"
+                                            placeholder="e.g., Save ₹100 vs Launch Price + VIP Discord Role">
+                                    </div>
 
-                                <div class="form-group" style="margin-bottom: 1.25rem;">
-                                    <label class="studio-form-label">
-                                        <span>Early Bird Advantage / Incentive</span>
-                                        <span class="help-tag">Optional</span>
-                                    </label>
-                                    <input type="text" id="p-prebooking-perk-note" class="studio-input"
-                                        placeholder="e.g., Save ₹100 vs Launch Price + VIP Discord Role">
-                                    <span class="studio-field-hint">Highlights the financial or exclusive benefit of reserving early.</span>
-                                </div>      </div>
-
-                                <div class="form-group" style="margin-bottom: 0;">
-                                    <label class="studio-form-label">
-                                        <span>Included Pre-Booking Perks & Deliverables</span>
-                                        <span class="help-tag">Comma separated or points</span>
-                                    </label>
-                                    <input type="text" id="p-prebooking-perks" class="studio-input"
-                                        placeholder="e.g., 24h Early Access Beta, Free 4K HD Livery Pack, Priority Support, Special Mod Badge">
-                                    <span class="studio-field-hint">Perks will be highlighted as bullet points in the
-                                        product early-access card.</span>
+                                    <!-- Perks List -->
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <label class="studio-form-label">
+                                            <span>Included Pre-Booking Perks & Deliverables</span>
+                                            <span class="help-tag">Comma separated</span>
+                                        </label>
+                                        <input type="text" id="p-prebooking-perks" class="studio-input"
+                                            placeholder="e.g., 24h Early Access Beta, Free 4K HD Livery Pack, Priority Support">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -965,10 +973,10 @@
                         </div>
                     </div>
 
-                    <!-- SECTION 4: Cloud Mod Archive (ShareMods Integration) -->
+                    <!-- SECTION 4: Vehicle Mod Archive & In-Place Direct Download -->
                     <div class="studio-card">
                         <div class="studio-card-header">
-                            <div class="studio-card-icon">
+                            <div class="studio-card-icon emerald">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="2.5">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -977,9 +985,30 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="studio-card-title">Vehicle Mod Archive File</h3>
-                                <p class="studio-card-desc">Upload vehicle mod archive (.zip, .rar, .7z, .bussidmod up to 200MB) directly to secure cloud storage</p>
+                                <h3 class="studio-card-title">Vehicle Mod Archive File (In-Place Download)</h3>
+                                <p class="studio-card-desc">Provide direct cloud storage or upload archive file for 1-click in-place download directly on your store</p>
                             </div>
+                        </div>
+
+                        <!-- Direct Cloud Storage Link (Primary & Recommended for In-Place Website Downloads) -->
+                        <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: var(--radius-md); padding: 1.15rem 1.25rem; margin-bottom: 1.25rem;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem; flex-wrap: wrap; gap: 0.5rem;">
+                                <label class="studio-form-label" for="manual-download-url" style="margin-bottom: 0; color: #166534; font-weight: 800;">
+                                    <span>⚡ Direct In-Place Download Link (Recommended)</span>
+                                </label>
+                                <span style="font-size: 0.72rem; font-weight: 800; background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 999px; text-transform: uppercase;">100% In-Place Download</span>
+                            </div>
+                            <input type="url" id="manual-download-url" class="studio-input" style="border-color: #86efac; background: #ffffff;" placeholder="https://drive.google.com/file/d/... or direct .zip / .bussidmod URL">
+                            <div id="direct-link-status" style="font-size: 0.76rem; color: #166534; margin-top: 0.45rem; line-height: 1.4; display: flex; align-items: center; gap: 6px;">
+                                <span>Paste a <strong>Google Drive</strong>, <strong>Dropbox</strong>, or direct file link (.zip, .bussidmod, .rar). Customers will download <strong>directly on the website</strong> without opening any external sites!</span>
+                            </div>
+                        </div>
+
+                        <!-- Divider -->
+                        <div style="display: flex; align-items: center; gap: 10px; margin: 1.25rem 0 0.85rem 0;">
+                            <div style="flex: 1; height: 1px; background: var(--studio-slate-border);"></div>
+                            <span style="font-size: 0.72rem; font-weight: 800; color: var(--admin-text-muted); text-transform: uppercase;">Or Upload Archive File Directly</span>
+                            <div style="flex: 1; height: 1px; background: var(--studio-slate-border);"></div>
                         </div>
 
                         <!-- Cloud Upload Zone -->
@@ -1454,12 +1483,12 @@
                             </div>
 
                             <button type="submit" form="product-editor-form" class="btn-studio-save"
-                                id="studio-save-bottom-btn" style="width: 100%;">
+                                id="studio-save-sidebar-btn" style="width: 100%;">
                                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="2.5">
                                     <polyline points="20 6 9 17 4 12"></polyline>
                                 </svg>
-                                <span id="studio-save-bottom-label">Save & Publish Product</span>
+                                <span id="studio-save-sidebar-label">Save & Publish Product</span>
                             </button>
 
                             <a href="products.html" class="btn-studio-outline"
@@ -1527,7 +1556,7 @@
         import { requireAdmin } from '../js/admin/admin-auth.js';
         requireAdmin();
     </script>
-    <script type="module" src="../js/admin/admin-product-editor.js?v=20261022_4"></script>
+    <script type="module" src="../js/admin/admin-product-editor.js?v=20261106_1"></script>
 </body>
 
 </html>

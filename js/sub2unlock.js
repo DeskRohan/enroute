@@ -1,5 +1,6 @@
 import { db } from './firebase-config.js';
 import { doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { downloadModInPlace } from './inplace-downloader.js';
 
 const urlParams = new URLSearchParams(window.location.search);
 let productId = urlParams.get('id') || sessionStorage.getItem('unlockProductId');
@@ -28,12 +29,24 @@ const init = async () => {
         if (docSnap.exists()) {
             const product = docSnap.data();
             
-            // Block access for non-admins if product is scheduled in the future
+            // Block access for non-admins if product is in upcoming premiere or scheduled in the future
             const isAdmin = localStorage.getItem('userRole') === 'admin';
+            const releaseTime = product.expectedReleaseDate || product.scheduledDate;
+            const isUpcomingPremiere = (product.status === 'upcoming' || product.isUpcoming) && releaseTime && (new Date(releaseTime) > new Date());
             const isScheduled = product.status === 'scheduled' && (!product.scheduledDate || new Date(product.scheduledDate) > new Date());
-            if (isScheduled && !isAdmin) {
-                modNameEl.textContent = 'This mod is scheduled to go live later.';
+            
+            if ((isUpcomingPremiere || isScheduled) && !isAdmin) {
+                const formattedTime = releaseTime ? new Date(releaseTime).toLocaleString('en-IN', {
+                    day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                }) : 'soon';
+                modNameEl.innerHTML = `<span style="color: #7c3aed;">🎬 Premiere Locked:</span> ${product.name}`;
                 btnSubscribe.disabled = true;
+                const lockBox = document.createElement('div');
+                lockBox.style.cssText = 'margin: 1.5rem auto; padding: 1.25rem; background: #faf5ff; border: 1px solid #c4b5fd; border-radius: 10px; color: #4c1d95; font-size: 0.95rem; line-height: 1.5; text-align: center; max-width: 480px;';
+                lockBox.innerHTML = `<strong>🎬 YouTube Premiere Active!</strong><br><span style="font-size: 0.88rem; color: #6d28d9;">Free download will automatically unlock on <strong>${formattedTime}</strong>. Please check back when the premiere starts!</span>`;
+                if (btnSubscribe.parentElement) {
+                    btnSubscribe.parentElement.appendChild(lockBox);
+                }
                 return;
             }
 
@@ -114,84 +127,8 @@ btnGetLink.addEventListener('click', async () => {
             console.error("Error updating count", err);
         }
 
-        try {
-            if (targetDownloadLink.includes('sharemods.com') || /^[a-z0-9]{12}$/i.test(targetDownloadLink.trim())) {
-                const apiBase = (window.location.hostname === 'localhost' && window.location.port !== '3001')
-                    ? 'http://localhost:3001'
-                    : '';
-                const res = await fetch(`${apiBase}/api/direct-download?url=${encodeURIComponent(targetDownloadLink)}`);
-                const data = await res.json();
-                if (data.ok && data.directUrl) {
-                    btnGetLink.innerHTML = `<span>✓ Download Started!</span>`;
-                    const a = document.createElement('a');
-                    a.href = data.directUrl;
-                    if (data.filename) a.download = data.filename;
-                    a.style.display = 'none';
-                    document.body.appendChild(a);
-                    a.click();
-                    setTimeout(() => {
-                        document.body.removeChild(a);
-                        btnGetLink.disabled = false;
-                        btnGetLink.innerHTML = originalText;
-                    }, 3500);
-                    return;
-                }
-            }
-
-            // Fallback
-            const a = document.createElement('a');
-            a.href = targetDownloadLink;
-            a.download = '';
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => {
-                document.body.removeChild(a);
-                btnGetLink.disabled = false;
-                btnGetLink.innerHTML = originalText;
-            }, 1000);
-        } catch (e) {
-            console.error('Download error:', e);
-            btnGetLink.disabled = false;
-            btnGetLink.innerHTML = originalText;
-            
-            let fileCode = '';
-            const match = targetDownloadLink.match(/sharemods\.com\/([a-zA-Z0-9]+)/);
-            if (match) fileCode = match[1];
-            else if (/^[a-z0-9]{8,20}$/i.test(targetDownloadLink.trim())) fileCode = targetDownloadLink.trim();
-
-            if (fileCode) {
-                let iframe = document.getElementById('enroute-download-frame');
-                if (!iframe) {
-                    iframe = document.createElement('iframe');
-                    iframe.id = 'enroute-download-frame';
-                    iframe.name = 'enroute-download-frame';
-                    iframe.style.display = 'none';
-                    document.body.appendChild(iframe);
-                }
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = `https://sharemods.com/${fileCode}`;
-                form.target = 'enroute-download-frame';
-                const fields = { op: 'download2', id: fileCode, rand: '', referer: `https://sharemods.com/${fileCode}`, method_free: '', method_premium: '' };
-                for (const [k, v] of Object.entries(fields)) {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = k;
-                    input.value = v;
-                    form.appendChild(input);
-                }
-                document.body.appendChild(form);
-                form.submit();
-                setTimeout(() => document.body.removeChild(form), 1000);
-            } else {
-                const fallbackA = document.createElement('a');
-                fallbackA.href = targetDownloadLink;
-                fallbackA.download = '';
-                document.body.appendChild(fallbackA);
-                fallbackA.click();
-                setTimeout(() => document.body.removeChild(fallbackA), 1000);
-            }
-        }
+        const modTitle = modNameEl ? modNameEl.textContent : 'BUSSID Mod';
+        await downloadModInPlace(targetDownloadLink, modTitle, btnGetLink);
     } else {
         alert("No download link is available for this mod.");
     }

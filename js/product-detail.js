@@ -1,6 +1,7 @@
 import { db, auth } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { doc, getDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { downloadModInPlace } from './inplace-downloader.js';
 
 let currentAuthUser = auth.currentUser;
 let currentProductData = null;
@@ -88,69 +89,10 @@ async function checkUserOwnership(user, prodId) {
     return null;
 }
 
-// Download executor matching dashboard.js implementation
+// In-Place Mod Download Executor (NEVER redirects to external websites)
 async function initiateDownload(url, filename, btn) {
-    if (!url || url === '#' || url.trim() === '') {
-        alert("The download file link is currently unavailable. Please reach out to customer support.");
-        return;
-    }
-
-    const originalHtml = btn ? btn.innerHTML : '';
-    if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = `
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path></svg>
-            <span>Preparing Download...</span>
-        `;
-    }
-
-    try {
-        if (url.includes('sharemods.com') || /^[a-z0-9]{12}$/i.test(url.trim())) {
-            const apiBase = (window.location.hostname === 'localhost' && window.location.port !== '3001') ? 'http://localhost:3001' : '';
-            const res = await fetch(`${apiBase}/api/direct-download?url=${encodeURIComponent(url)}`);
-            const data = await res.json();
-            if (data.ok && data.directUrl) {
-                if (btn) btn.innerHTML = `<span>✓ Downloading...</span>`;
-                const a = document.createElement('a');
-                a.href = data.directUrl;
-                if (data.filename) a.download = data.filename;
-                a.style.display = 'none';
-                document.body.appendChild(a);
-                a.click();
-                setTimeout(() => {
-                    if (document.body.contains(a)) document.body.removeChild(a);
-                    if (btn) {
-                        btn.disabled = false;
-                        btn.innerHTML = originalHtml;
-                    }
-                }, 3000);
-                return;
-            }
-        }
-
-        // Direct link fallback
-        const a = document.createElement('a');
-        a.href = url;
-        if (filename) a.download = filename;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => {
-            if (document.body.contains(a)) document.body.removeChild(a);
-            if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = originalHtml;
-            }
-        }, 2000);
-    } catch (err) {
-        console.error("Download error:", err);
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = originalHtml;
-        }
-        window.open(url, '_blank', 'noopener,noreferrer');
-    }
+    const modTitle = currentProductData?.name || filename || 'BUSSID Mod';
+    await downloadModInPlace(url, modTitle, btn);
 }
 
 // React to auth state changes to dynamically reflect ownership
@@ -315,6 +257,36 @@ const loadProduct = async () => {
     }
 };
 
+const startPremiereCountdown = (targetIso, timerElId) => {
+    const targetDate = new Date(targetIso).getTime();
+    const tick = () => {
+        const timerEl = document.getElementById(timerElId);
+        if (!timerEl) return;
+        const now = Date.now();
+        const diff = targetDate - now;
+        if (diff <= 0) {
+            timerEl.textContent = '00:00:00 - UNLOCKED!';
+            timerEl.style.color = '#34d399';
+            setTimeout(() => {
+                window.location.reload();
+            }, 1800);
+            return;
+        }
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const mins = Math.floor((diff / (1000 * 60)) % 60);
+        const secs = Math.floor((diff / 1000) % 60);
+
+        let str = '';
+        if (days > 0) str += `${days}d `;
+        str += `${String(hours).padStart(2, '0')}h : ${String(mins).padStart(2, '0')}m : ${String(secs).padStart(2, '0')}s`;
+        timerEl.textContent = str;
+    };
+    tick();
+    setInterval(tick, 1000);
+};
+
 const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants = [], userOwnedOrder = null) => {
     document.title = `${product.name || 'Product'} | EnrouteIn BUSSID Store`;
 
@@ -330,10 +302,30 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
     const isOutOfStock = Boolean(product.outOfStock);
     const isUserOwned = Boolean(userOwnedOrder);
 
+    // YouTube Premiere Mode Detection
+    const releaseTime = product.expectedReleaseDate || product.scheduledDate;
+    const isUpcomingPremiere = (product.status === 'upcoming' || product.isUpcoming) && releaseTime && (new Date(releaseTime) > new Date());
+    const isPrebooking = isUpcomingPremiere && Boolean(product.allowPreBooking);
+    const prebookingDeposit = (isPrebooking && product.preBookingDeposit) ? Number(product.preBookingDeposit) : null;
+    const formattedPremiereDate = releaseTime ? new Date(releaseTime).toLocaleString('en-IN', {
+        dateStyle: 'medium',
+        timeStyle: 'short'
+    }) : 'Coming Soon';
+
     // Buy Now Handler (Preserves existing direct checkout logic)
     const handleBuyNow = () => {
         if (isOutOfStock) {
             alert('This product is currently out of stock.');
+            return;
+        }
+
+        if (isUpcomingPremiere && isFree) {
+            alert(`🎬 This mod is in Premiere Mode and scheduled to release on ${formattedPremiereDate}. Free download will unlock automatically at premiere time!`);
+            return;
+        }
+
+        if (isUpcomingPremiere && !isPrebooking) {
+            alert(`🎬 This mod is in Premiere Mode and scheduled to release on ${formattedPremiereDate}. Purchases and downloads will unlock at premiere time!`);
             return;
         }
 
@@ -343,15 +335,21 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
             return;
         }
 
+        const effectiveCheckoutPrice = (isPrebooking && prebookingDeposit) ? prebookingDeposit : currentPrice;
+
         // Save single product checkout state
         try {
-            sessionStorage.setItem('checkoutMode', 'single');
+            sessionStorage.setItem('checkoutMode', isPrebooking ? 'prebooking' : 'single');
             sessionStorage.setItem(
                 'checkoutProduct',
                 JSON.stringify({
                     id,
                     ...product,
-                    price: currentPrice,
+                    price: effectiveCheckoutPrice,
+                    fullPrice: currentPrice,
+                    isPrebooking: isPrebooking,
+                    prebookingDeposit: prebookingDeposit,
+                    expectedReleaseDate: releaseTime,
                     originalPrice: origPrice,
                     offerPrice: isOfferActive ? offerPrice : null,
                     isOfferActive,
@@ -613,6 +611,35 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
             <span style="color: var(--text-primary); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; display: inline-block; vertical-align: middle;">${product.name || 'Details'}</span>
         </nav>
 
+        ${isUpcomingPremiere ? `
+            <!-- YouTube Premiere Countdown Banner -->
+            <div class="premiere-banner" style="background: linear-gradient(135deg, #1e1b4b 0%, #2e1065 50%, #4c1d95 100%); color: #ffffff; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; box-shadow: 0 10px 25px -5px rgba(124, 58, 237, 0.35); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border: 1px solid rgba(167, 139, 250, 0.35);">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(255, 255, 255, 0.12); display: flex; align-items: center; justify-content: center; font-size: 1.45rem; flex-shrink: 0;">
+                        🎬
+                    </div>
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="background: #ef4444; color: #fff; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;">PREMIERE</span>
+                            <span style="font-size: 0.85rem; color: #ddd6fe; font-weight: 600;">YouTube Premiere Mode</span>
+                        </div>
+                        <div style="font-size: 1.25rem; font-weight: 800; font-family: var(--font-heading); margin-top: 3px;">
+                            Premieres: ${formattedPremiereDate}
+                        </div>
+                        <div style="font-size: 0.8rem; color: #c4b5fd; margin-top: 2px;">
+                            Mod archive download is locked until this countdown reaches zero.
+                        </div>
+                    </div>
+                </div>
+                <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; padding: 0.65rem 1.15rem; text-align: center; min-width: 210px;">
+                    <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: #a78bfa; font-weight: 700; margin-bottom: 3px;">Unlocks In</div>
+                    <div id="premiere-countdown-timer" style="font-family: monospace, sans-serif; font-size: 1.35rem; font-weight: 800; color: #ffffff; letter-spacing: 1px;">
+                        Loading...
+                    </div>
+                </div>
+            </div>
+        ` : ''}
+
         <div class="product-amazon-layout">
             <!-- COLUMN 1: LEFT GALLERY & HIGHLIGHTS -->
             <div class="product-amazon-gallery">
@@ -735,44 +762,73 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
                     </div>
 
                     <!-- Availability Status -->
-                    <div class="buybox-stock-status ${isOutOfStock ? 'out-of-stock' : 'in-stock'}">
-                        <span class="buybox-stock-dot"></span>
-                        <span>${isOutOfStock ? 'Currently Out of Stock' : 'In Stock &bull; Instant Download'}</span>
-                    </div>
+                    ${isUpcomingPremiere ? `
+                        <div class="buybox-stock-status" style="background: rgba(124, 58, 237, 0.08); border-color: rgba(124, 58, 237, 0.25); color: #6d28d9;">
+                            <span class="buybox-stock-dot" style="background: #7c3aed;"></span>
+                            <span><strong>Premiere Event:</strong> Unlocks ${formattedPremiereDate}</span>
+                        </div>
+                    ` : `
+                        <div class="buybox-stock-status ${isOutOfStock ? 'out-of-stock' : 'in-stock'}">
+                            <span class="buybox-stock-dot"></span>
+                            <span>${isOutOfStock ? 'Currently Out of Stock' : 'In Stock &bull; Instant Download'}</span>
+                        </div>
+                    `}
 
                     <!-- Digital Delivery Notice -->
-                    <div class="buybox-delivery-note">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        <span><strong>Digital Product:</strong> Files are accessible in your account immediately after purchase.</span>
-                    </div>
+                    ${isUpcomingPremiere ? `
+                        <div class="buybox-delivery-note" style="border-left: 3px solid #7c3aed; background: #faf5ff;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            <span style="color: #4c1d95;"><strong>Premiere Lock Active:</strong> Mod archive download is locked until <strong>${formattedPremiereDate}</strong>.</span>
+                        </div>
+                    ` : `
+                        <div class="buybox-delivery-note">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span><strong>Digital Product:</strong> Files are accessible in your account immediately after purchase.</span>
+                        </div>
+                    `}
 
                     <!-- Actions or Purchased State -->
                     ${isUserOwned ? `
-                        <!-- Customer Purchased State (Task 7) -->
-                        <div class="buybox-owned-card">
-                            <div class="buybox-owned-title">
+                        <!-- Customer Purchased / Pre-booked State -->
+                        <div class="buybox-owned-card" style="${isUpcomingPremiere ? 'border-left: 4px solid #7c3aed; background: #faf5ff;' : ''}">
+                            <div class="buybox-owned-title" style="${isUpcomingPremiere ? 'color: #6d28d9;' : ''}">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                                     <polyline points="22 4 12 14.01 9 11.01"></polyline>
                                 </svg>
-                                <span>You Own This Mod</span>
+                                <span>${isUpcomingPremiere ? 'Priority Premiere Reservation Confirmed' : 'You Own This Mod'}</span>
                             </div>
-                            <p class="buybox-owned-desc">
-                                Verified order entitlement. You have lifetime access to download this mod file.
+                            <p class="buybox-owned-desc" style="${isUpcomingPremiere ? 'color: #5b21b6;' : ''}">
+                                ${isUpcomingPremiere 
+                                    ? `Your early access spot is secured! Mod download will unlock automatically right here on <strong>${formattedPremiereDate}</strong>.` 
+                                    : 'Verified order entitlement. You have lifetime access to download this mod file.'}
                             </p>
                         </div>
 
                         <div class="buybox-actions">
-                            <button id="owned-download-btn" class="btn-buy-now" title="Download Purchased Mod">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                    <polyline points="7 10 12 15 17 10"></polyline>
-                                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                                </svg>
-                                <span>Download Mod Files</span>
-                            </button>
+                            ${isUpcomingPremiere ? `
+                                <button id="owned-download-btn" class="btn-buy-now" style="background: #e2e8f0; color: #64748b; border: 1px solid #cbd5e1; cursor: not-allowed;" title="Download unlocks at premiere">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                    </svg>
+                                    <span>🔒 Download Unlocks at Premiere</span>
+                                </button>
+                            ` : `
+                                <button id="owned-download-btn" class="btn-buy-now" title="Download Purchased Mod">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="7 10 12 15 17 10"></polyline>
+                                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                                    </svg>
+                                    <span>Download Mod Files</span>
+                                </button>
+                            `}
 
                             <a href="dashboard.html#garage" class="btn-add-cart" style="text-decoration: none;" title="Go to Virtual Garage">
                                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -790,6 +846,31 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
                                 <button class="btn-buy-now" disabled style="opacity: 0.6; cursor: not-allowed; background: #64748b;">
                                     Out of Stock
                                 </button>
+                            ` : (isUpcomingPremiere ? `
+                                ${isFree ? `
+                                    <button id="buy-btn" class="btn-buy-now" style="background: #e2e8f0; color: #64748b; border: 1px solid #cbd5e1; cursor: not-allowed;" title="Download unlocks at premiere">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                        </svg>
+                                        <span>🔒 Free Download Unlocks at Premiere</span>
+                                    </button>
+                                ` : (isPrebooking ? `
+                                    <button id="buy-btn" class="btn-buy-now" style="background: linear-gradient(135deg, #7c3aed, #4c1d95); border: none;" title="Pre-Book for early access">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                        </svg>
+                                        <span>⚡ Pre-Book Now (₹${prebookingDeposit})</span>
+                                    </button>
+                                ` : `
+                                    <button id="buy-btn" class="btn-buy-now" style="background: #e2e8f0; color: #64748b; border: 1px solid #cbd5e1; cursor: not-allowed;" title="Premieres on ${formattedPremiereDate}">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                        </svg>
+                                        <span>🔒 Purchases Unlock at Premiere</span>
+                                    </button>
+                                `)}
                             ` : (isFree ? `
                                 <button id="buy-btn" class="btn-buy-now" title="Unlock Free Download">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -815,13 +896,13 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
                                     </svg>
                                     <span>Add to Cart</span>
                                 </button>
-                            `)}
+                            `))}
 
                             <button id="detail-wishlist-btn" class="btn-wishlist-toggle" title="Add to Garage Wishlist">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                                 </svg>
-                                <span class="wishlist-btn-text">Add to Garage Wishlist</span>
+                                <span class="wishlist-btn-text">${isUpcomingPremiere ? 'Save to Wishlist (Notify Me)' : 'Add to Garage Wishlist'}</span>
                             </button>
                         </div>
                     `}
@@ -874,14 +955,28 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
 
             <div class="sticky-bar-actions">
                 ${isUserOwned ? `
-                    <button id="sticky-download-btn" class="btn btn-primary" style="width: 100%;">
+                    <button id="sticky-download-btn" class="btn btn-primary" style="width: 100%; ${isUpcomingPremiere ? 'background: #e2e8f0; color: #64748b; border: 1px solid #cbd5e1; cursor: not-allowed;' : ''}">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        <span>Download Mod</span>
+                        <span>${isUpcomingPremiere ? '🔒 Unlocks at Premiere' : 'Download Mod'}</span>
                     </button>
                 ` : (isOutOfStock ? `
                     <button class="btn btn-secondary" disabled style="width: 100%; opacity: 0.65; cursor: not-allowed; background: #e2e8f0; color: #64748b; font-weight: 700; padding: 0.65rem 1rem;">
                         Out of Stock
                     </button>
+                ` : (isUpcomingPremiere ? `
+                    ${isFree ? `
+                        <button id="sticky-free-btn" class="btn btn-secondary" style="width: 100%; opacity: 0.85; cursor: not-allowed; background: #e2e8f0; color: #64748b; font-weight: 700;">
+                            🔒 Free at Premiere
+                        </button>
+                    ` : (isPrebooking ? `
+                        <button id="sticky-buy-btn" class="btn btn-primary" style="width: 100%; background: linear-gradient(135deg, #7c3aed, #4c1d95); border: none; font-weight: 700;">
+                            ⚡ Pre-Book (₹${prebookingDeposit})
+                        </button>
+                    ` : `
+                        <button id="sticky-buy-btn" class="btn btn-secondary" style="width: 100%; opacity: 0.85; cursor: not-allowed; background: #e2e8f0; color: #64748b; font-weight: 700;">
+                            🔒 Premieres Soon
+                        </button>
+                    `)}
                 ` : (!isFree ? `
                     <button id="sticky-add-cart-btn" class="btn btn-outline" title="Add to Cart">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
@@ -896,7 +991,7 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                         <span>Free Download</span>
                     </button>
-                `))}
+                `)))}
             </div>
         </div>
 
@@ -973,6 +1068,10 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
     const ownedDownloadBtn = document.getElementById('owned-download-btn');
     if (ownedDownloadBtn) {
         ownedDownloadBtn.addEventListener('click', () => {
+            if (isUpcomingPremiere) {
+                alert(`🎬 Your premiere spot is secured! Mod download files will unlock automatically right here on ${formattedPremiereDate}.`);
+                return;
+            }
             initiateDownload(downloadTargetUrl, downloadFileName, ownedDownloadBtn);
         });
     }
@@ -980,8 +1079,17 @@ const renderProduct = (product, id, uploader, totalDownloads = 0, linkedVariants
     const stickyDownloadBtn = document.getElementById('sticky-download-btn');
     if (stickyDownloadBtn) {
         stickyDownloadBtn.addEventListener('click', () => {
+            if (isUpcomingPremiere) {
+                alert(`🎬 Your premiere spot is secured! Mod download files will unlock automatically right here on ${formattedPremiereDate}.`);
+                return;
+            }
             initiateDownload(downloadTargetUrl, downloadFileName, stickyDownloadBtn);
         });
+    }
+
+    // Start Premiere Countdown timer if product is in upcoming premiere mode
+    if (isUpcomingPremiere && releaseTime) {
+        startPremiereCountdown(releaseTime, 'premiere-countdown-timer');
     }
 
     // Wishlist Toggle

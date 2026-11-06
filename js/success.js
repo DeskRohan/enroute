@@ -1,6 +1,7 @@
 import { db, auth } from './firebase-config.js';
 import { doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { downloadModInPlace } from './inplace-downloader.js';
 
 const orderDetailsContainer = document.getElementById('order-details-container');
 const mainContent = document.getElementById('main-content');
@@ -313,118 +314,7 @@ const buildInvoice = (order, items, id) => {
 };
 
 const triggerDirectDownload = async (url, productName = '', btnEl = null) => {
-    if (!url || url === '#' || url === 'undefined') {
-        alert('Download link is not available. Please check your garage or contact support.');
-        return;
-    }
-
-    let originalHtml = '';
-    if (btnEl) {
-        originalHtml = btnEl.innerHTML;
-        btnEl.disabled = true;
-        btnEl.innerHTML = `
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path></svg>
-            <span>Preparing Download...</span>
-        `;
-    }
-
-    try {
-        // If it's a cloud storage / mod link, resolve the direct binary download URL
-        if (url.includes('sharemods.com') || /^[a-z0-9]{12}$/i.test(url.trim())) {
-            const apiBase = (window.location.hostname === 'localhost' && window.location.port !== '3001')
-                ? 'http://localhost:3001'
-                : '';
-
-            const res = await fetch(`${apiBase}/api/direct-download?url=${encodeURIComponent(url)}`);
-            const data = await res.json();
-
-            if (data.ok && data.directUrl) {
-                if (btnEl) {
-                    btnEl.innerHTML = `
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        <span>Download Starting...</span>
-                    `;
-                }
-
-                // Trigger in-browser direct file download without navigating away
-                const a = document.createElement('a');
-                a.href = data.directUrl;
-                if (data.filename) a.download = data.filename;
-                a.style.display = 'none';
-                document.body.appendChild(a);
-                a.click();
-                setTimeout(() => {
-                    document.body.removeChild(a);
-                    if (btnEl) {
-                        btnEl.disabled = false;
-                        btnEl.innerHTML = originalHtml;
-                    }
-                }, 3000);
-                return;
-            } else {
-                throw new Error(data.error || 'Failed to resolve direct download link');
-            }
-        }
-
-        // Generic direct URL download
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = '';
-        a.style.display = 'none';
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => {
-            document.body.removeChild(a);
-            if (btnEl) {
-                btnEl.disabled = false;
-                btnEl.innerHTML = originalHtml;
-            }
-        }, 1000);
-    } catch (err) {
-        console.error('Direct download error:', err);
-        if (btnEl) {
-            btnEl.disabled = false;
-            btnEl.innerHTML = originalHtml;
-        }
-        // Fallback: seamless client-side download form / tab without showing raw API JSON error
-        let fileCode = '';
-        const match = url.match(/sharemods\.com\/([a-zA-Z0-9]+)/);
-        if (match) fileCode = match[1];
-        else if (/^[a-zA-Z0-9]{8,20}$/.test(url.trim())) fileCode = url.trim();
-
-        if (fileCode) {
-            let iframe = document.getElementById('enroute-download-frame');
-            if (!iframe) {
-                iframe = document.createElement('iframe');
-                iframe.id = 'enroute-download-frame';
-                iframe.name = 'enroute-download-frame';
-                iframe.style.display = 'none';
-                document.body.appendChild(iframe);
-            }
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = `https://sharemods.com/${fileCode}`;
-            form.target = 'enroute-download-frame';
-            const fields = { op: 'download2', id: fileCode, rand: '', referer: `https://sharemods.com/${fileCode}`, method_free: '', method_premium: '' };
-            for (const [k, v] of Object.entries(fields)) {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = k;
-                input.value = v;
-                form.appendChild(input);
-            }
-            document.body.appendChild(form);
-            form.submit();
-            setTimeout(() => document.body.removeChild(form), 1000);
-        } else {
-            const fallbackA = document.createElement('a');
-            fallbackA.href = url;
-            fallbackA.download = '';
-            document.body.appendChild(fallbackA);
-            fallbackA.click();
-            setTimeout(() => document.body.removeChild(fallbackA), 1000);
-        }
-    }
+    await downloadModInPlace(url, productName, btnEl);
 };
 
 const triggerAutoDownload = (url) => {

@@ -1,6 +1,7 @@
 import { db, auth } from './firebase-config.js';
 import { collection, query, where, getDocs, doc, getDoc, addDoc, updateDoc, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { downloadModInPlace } from './inplace-downloader.js';
 
 // DOM Elements
 const emailDisplay = document.getElementById('user-email-display');
@@ -87,6 +88,36 @@ const formatDate = (timestamp) => {
     if (!timestamp) return 'N/A';
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
     return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+};
+
+// YouTube Premiere Drop check & formatter
+const isPremiereLocked = (product) => {
+    if (!product) return false;
+    const isUpcoming = product.status === 'upcoming' || product.isUpcoming;
+    const releaseTime = product.expectedReleaseDate || product.scheduledDate;
+    if (!isUpcoming || !releaseTime) return false;
+    try {
+        const dropDate = releaseTime.toDate ? releaseTime.toDate() : new Date(releaseTime);
+        return dropDate.getTime() > Date.now();
+    } catch (e) {
+        return false;
+    }
+};
+
+const formatPremiereDate = (dateVal) => {
+    if (!dateVal) return '';
+    try {
+        const d = dateVal.toDate ? dateVal.toDate() : new Date(dateVal);
+        return d.toLocaleString('en-IN', {
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        });
+    } catch (e) {
+        return '';
+    }
 };
 
 // Toast notification trigger
@@ -775,94 +806,10 @@ const updateWishlistCount = () => {
 };
 
 // ----------------------------------------------------
-// Download Executor Helper
+// Download Executor Helper (In-Place on Website)
 // ----------------------------------------------------
-const executeDirectDownload = async (url, btn) => {
-    if (!url || url === '#' || url === 'undefined') {
-        showToast('Download link is not available.');
-        return;
-    }
-    const originalHtml = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = `
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path></svg>
-        <span>Preparing...</span>
-    `;
-
-    try {
-        if (url.includes('sharemods.com') || /^[a-z0-9]{12}$/i.test(url.trim())) {
-            const apiBase = (window.location.hostname === 'localhost' && window.location.port !== '3001') ? 'http://localhost:3001' : '';
-            const res = await fetch(`${apiBase}/api/direct-download?url=${encodeURIComponent(url)}`);
-            const data = await res.json();
-            if (data.ok && data.directUrl) {
-                btn.innerHTML = `<span>✓ Downloading!</span>`;
-                const a = document.createElement('a');
-                a.href = data.directUrl;
-                if (data.filename) a.download = data.filename;
-                a.style.display = 'none';
-                document.body.appendChild(a);
-                a.click();
-                setTimeout(() => {
-                    document.body.removeChild(a);
-                    btn.disabled = false;
-                    btn.innerHTML = originalHtml;
-                }, 3000);
-                return;
-            }
-        }
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = '';
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => {
-            document.body.removeChild(a);
-            btn.disabled = false;
-            btn.innerHTML = originalHtml;
-        }, 1000);
-    } catch (err) {
-        console.error('Direct download error:', err);
-        btn.disabled = false;
-        btn.innerHTML = originalHtml;
-        
-        let fileCode = '';
-        const match = url.match(/sharemods\.com\/([a-zA-Z0-9]+)/);
-        if (match) fileCode = match[1];
-        else if (/^[a-z0-9]{8,20}$/i.test(url.trim())) fileCode = url.trim();
-
-        if (fileCode) {
-            let iframe = document.getElementById('enroute-download-frame');
-            if (!iframe) {
-                iframe = document.createElement('iframe');
-                iframe.id = 'enroute-download-frame';
-                iframe.name = 'enroute-download-frame';
-                iframe.style.display = 'none';
-                document.body.appendChild(iframe);
-            }
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = `https://sharemods.com/${fileCode}`;
-            form.target = 'enroute-download-frame';
-            const fields = { op: 'download2', id: fileCode, rand: '', referer: `https://sharemods.com/${fileCode}`, method_free: '', method_premium: '' };
-            for (const [k, v] of Object.entries(fields)) {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = k;
-                input.value = v;
-                form.appendChild(input);
-            }
-            document.body.appendChild(form);
-            form.submit();
-            setTimeout(() => document.body.removeChild(form), 1000);
-        } else {
-            const fallbackA = document.createElement('a');
-            fallbackA.href = url;
-            fallbackA.download = '';
-            document.body.appendChild(fallbackA);
-            fallbackA.click();
-            setTimeout(() => document.body.removeChild(fallbackA), 1000);
-        }
-    }
+const executeDirectDownload = async (url, btn, modName = '') => {
+    await downloadModInPlace(url, modName, btn);
 };
 
 // ----------------------------------------------------
@@ -920,24 +867,38 @@ const renderOverviewTab = () => {
         recentOrdersHtml = recentOrders.map((order, idx) => {
             const orderProduct = cachedGarageProducts.find(p => p.id === order.productId);
             const downloadLink = orderProduct?.downloadLink || order.downloadLink || '#';
+            const locked = isPremiereLocked(orderProduct);
+            const releaseDateStr = locked ? formatPremiereDate(orderProduct.expectedReleaseDate || orderProduct.scheduledDate) : '';
+
             return `
                 <div style="background: var(--bg-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.15rem 1.25rem; margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                     <div>
                         <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 2px;">
                             Order #${order.id.slice(0, 8).toUpperCase()} • ${formatDate(order.createdAt)}
                         </div>
-                        <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">${order.productName || 'BUSSID Mod'}</h4>
+                        <h4 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">
+                            ${order.productName || 'BUSSID Mod'}
+                            ${locked ? `<span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.7rem; font-weight: 800; padding: 2px 6px; border-radius: 4px; background: rgba(239, 68, 68, 0.12); color: #ef4444; margin-left: 6px; vertical-align: middle;">🎬 PREMIERE</span>` : ''}
+                        </h4>
                         <div style="font-size: 0.8rem; color: var(--text-secondary); display: flex; align-items: center; gap: 8px;">
                             <span style="font-weight: 700; color: var(--color-primary);">${formatPrice(order.amount)}</span>
                             <span>•</span>
                             <span style="color: var(--color-success); font-weight: 700;">✓ Paid (Razorpay)</span>
+                            ${locked ? `<span>•</span><span style="color: #ef4444; font-weight: 700;">🔒 Unlocks ${releaseDateStr}</span>` : ''}
                         </div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 8px;">
-                        <button type="button" class="btn btn-primary btn-sm overview-download-btn" data-url="${downloadLink}" style="gap: 5px;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                            <span>Download Mod</span>
-                        </button>
+                        ${locked ? `
+                            <button type="button" class="btn btn-outline btn-sm" disabled style="gap: 5px; opacity: 0.85; cursor: not-allowed; background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.35); color: #ef4444;" title="Unlocks at Premiere: ${releaseDateStr}">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                <span>🔒 Premiere (${releaseDateStr || 'Upcoming'})</span>
+                            </button>
+                        ` : `
+                            <button type="button" class="btn btn-primary btn-sm overview-download-btn" data-url="${downloadLink}" style="gap: 5px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                <span>Download Mod</span>
+                            </button>
+                        `}
                         <button type="button" class="btn btn-outline btn-sm overview-invoice-btn" data-order-index="${idx}" title="Tax Invoice">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                             <span>Invoice</span>
@@ -1077,6 +1038,9 @@ const renderGarageTab = () => {
     let garageCardsHtml = '';
     cachedGarageProducts.forEach(p => {
         const primaryImg = (p.images && p.images.length > 0) ? p.images[0] : p.image;
+        const locked = isPremiereLocked(p);
+        const releaseDateStr = locked ? formatPremiereDate(p.expectedReleaseDate || p.scheduledDate) : '';
+
         garageCardsHtml += `
             <div class="garage-card">
                 <div class="garage-media">
@@ -1084,6 +1048,11 @@ const renderGarageTab = () => {
                     <span style="position: absolute; top: 10px; left: 10px; background: rgba(9, 13, 22, 0.75); backdrop-filter: blur(4px); color: #fff; font-size: 0.7rem; font-weight: 800; padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">
                         ${p.category || 'MOD'}
                     </span>
+                    ${locked ? `
+                        <span style="position: absolute; top: 10px; right: 10px; background: rgba(239, 68, 68, 0.9); backdrop-filter: blur(4px); color: #fff; font-size: 0.7rem; font-weight: 800; padding: 3px 8px; border-radius: 4px; display: flex; align-items: center; gap: 4px;">
+                            🎬 PREMIERE
+                        </span>
+                    ` : ''}
                 </div>
                 <div class="garage-body">
                     <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.25rem; font-family: var(--font-heading); color: var(--text-primary); line-height: 1.35;">${p.name}</h3>
@@ -1096,11 +1065,24 @@ const renderGarageTab = () => {
                         <div>💺 Interior: <strong>${p.interior ? 'Yes' : 'Basic'}</strong></div>
                     </div>
 
+                    ${locked ? `
+                        <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 6px; padding: 6px 10px; font-size: 0.78rem; color: #ef4444; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                            <span>🔒 Unlocks at Premiere: <strong>${releaseDateStr || 'Coming Soon'}</strong></span>
+                        </div>
+                    ` : ''}
+
                     <div style="display: flex; gap: var(--spacing-3); margin-top: auto;">
-                        <button type="button" class="btn btn-primary btn-sm garage-download-btn" data-url="${p.downloadLink || '#'}" data-name="${(p.name || '').replace(/"/g, '&quot;')}" style="flex: 1; justify-content: center;">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                            <span>Download Mod</span>
-                        </button>
+                        ${locked ? `
+                            <button type="button" class="btn btn-outline btn-sm" disabled style="flex: 1; justify-content: center; opacity: 0.85; cursor: not-allowed; background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.35); color: #ef4444;" title="Unlocks at Premiere: ${releaseDateStr}">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                <span>🔒 Drops ${releaseDateStr || 'Soon'}</span>
+                            </button>
+                        ` : `
+                            <button type="button" class="btn btn-primary btn-sm garage-download-btn" data-url="${p.downloadLink || '#'}" data-name="${(p.name || '').replace(/"/g, '&quot;')}" style="flex: 1; justify-content: center;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                <span>Download Mod</span>
+                            </button>
+                        `}
                         <a href="product.html?id=${p.id}" class="btn btn-outline btn-sm" title="View Specs">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
                         </a>
@@ -1157,96 +1139,13 @@ const renderGarageTab = () => {
         </div>
     `;
 
-    // Attach direct download listener to each vehicle card
+    // Attach direct in-place download listener to each vehicle card
     contentArea.querySelectorAll('.garage-download-btn').forEach(btn => {
         btn.addEventListener('click', async (e) => {
             e.preventDefault();
             const url = btn.getAttribute('data-url');
-            if (!url || url === '#' || url === 'undefined') {
-                showToast('Download link is not available.');
-                return;
-            }
-            const originalHtml = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = `
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path></svg>
-                <span>Preparing...</span>
-            `;
-
-            try {
-                if (url.includes('sharemods.com') || /^[a-z0-9]{12}$/i.test(url.trim())) {
-                    const apiBase = (window.location.hostname === 'localhost' && window.location.port !== '3001') ? 'http://localhost:3001' : '';
-                    const res = await fetch(`${apiBase}/api/direct-download?url=${encodeURIComponent(url)}`);
-                    const data = await res.json();
-                    if (data.ok && data.directUrl) {
-                        btn.innerHTML = `<span>✓ Downloading!</span>`;
-                        const a = document.createElement('a');
-                        a.href = data.directUrl;
-                        if (data.filename) a.download = data.filename;
-                        a.style.display = 'none';
-                        document.body.appendChild(a);
-                        a.click();
-                        setTimeout(() => {
-                            document.body.removeChild(a);
-                            btn.disabled = false;
-                            btn.innerHTML = originalHtml;
-                        }, 3000);
-                        return;
-                    }
-                }
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = '';
-                document.body.appendChild(a);
-                a.click();
-                setTimeout(() => {
-                    document.body.removeChild(a);
-                    btn.disabled = false;
-                    btn.innerHTML = originalHtml;
-                }, 1000);
-            } catch (err) {
-                console.error('Garage download error:', err);
-                btn.disabled = false;
-                btn.innerHTML = originalHtml;
-                
-                let fileCode = '';
-                const match = url.match(/sharemods\.com\/([a-zA-Z0-9]+)/);
-                if (match) fileCode = match[1];
-                else if (/^[a-z0-9]{8,20}$/i.test(url.trim())) fileCode = url.trim();
-
-                if (fileCode) {
-                    let iframe = document.getElementById('enroute-download-frame');
-                    if (!iframe) {
-                        iframe = document.createElement('iframe');
-                        iframe.id = 'enroute-download-frame';
-                        iframe.name = 'enroute-download-frame';
-                        iframe.style.display = 'none';
-                        document.body.appendChild(iframe);
-                    }
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = `https://sharemods.com/${fileCode}`;
-                    form.target = 'enroute-download-frame';
-                    const fields = { op: 'download2', id: fileCode, rand: '', referer: `https://sharemods.com/${fileCode}`, method_free: '', method_premium: '' };
-                    for (const [k, v] of Object.entries(fields)) {
-                        const input = document.createElement('input');
-                        input.type = 'hidden';
-                        input.name = k;
-                        input.value = v;
-                        form.appendChild(input);
-                    }
-                    document.body.appendChild(form);
-                    form.submit();
-                    setTimeout(() => document.body.removeChild(form), 1000);
-                } else {
-                    const fallbackA = document.createElement('a');
-                    fallbackA.href = url;
-                    fallbackA.download = '';
-                    document.body.appendChild(fallbackA);
-                    fallbackA.click();
-                    setTimeout(() => document.body.removeChild(fallbackA), 1000);
-                }
-            }
+            const modName = btn.getAttribute('data-name') || '';
+            await downloadModInPlace(url, modName, btn);
         });
     });
 };
@@ -1568,6 +1467,8 @@ const renderOrdersTab = () => {
         const orderProduct = cachedGarageProducts.find(p => p.id === order.productId);
         const downloadLink = orderProduct?.downloadLink || order.downloadLink || '#';
         const primaryImg = (orderProduct?.images && orderProduct.images.length > 0) ? orderProduct.images[0] : (orderProduct?.image || '');
+        const locked = isPremiereLocked(orderProduct);
+        const releaseDateStr = locked ? formatPremiereDate(orderProduct.expectedReleaseDate || orderProduct.scheduledDate) : '';
 
         ordersHtml += `
             <div class="order-container" style="background: var(--bg-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); margin-bottom: 1.25rem; overflow: hidden;">
@@ -1584,7 +1485,7 @@ const renderOrdersTab = () => {
                         </div>
                         <div>
                             <span style="color: var(--text-muted); text-transform: uppercase; font-size: 0.72rem; font-weight: 700; display: block;">STATUS</span>
-                            <span style="font-weight: 800; color: var(--color-success);">✓ Paid & Verified</span>
+                            <span style="font-weight: 800; color: var(--color-success);">${locked ? '⚡ Pre-Booked (Premiere Drop)' : '✓ Paid & Verified'}</span>
                         </div>
                     </div>
                     <div style="text-align: right;">
@@ -1602,22 +1503,33 @@ const renderOrdersTab = () => {
                             <div style="width: 80px; height: 56px; background: var(--color-primary-light); color: var(--color-primary); display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); border: 1px solid var(--color-border); font-size: 1.5rem;">🚍</div>
                         `}
                         <div>
-                            <h4 style="font-size: 1.1rem; font-weight: 700; margin: 0 0 4px 0; color: var(--text-primary);">${order.productName || 'BUSSID Vehicle Mod'}</h4>
+                            <h4 style="font-size: 1.1rem; font-weight: 700; margin: 0 0 4px 0; color: var(--text-primary);">
+                                ${order.productName || 'BUSSID Vehicle Mod'}
+                                ${locked ? `<span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.7rem; font-weight: 800; padding: 2px 6px; border-radius: 4px; background: rgba(239, 68, 68, 0.12); color: #ef4444; margin-left: 6px; vertical-align: middle;">🎬 PREMIERE</span>` : ''}
+                            </h4>
                             <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 2px;">
                                 Digital Product: <strong>${orderProduct?.category || 'BUSSID Mod / Livery'}</strong>
                             </div>
                             <div style="font-size: 0.75rem; color: var(--text-muted);">
                                 Payment Ref: <code style="font-family: monospace; font-size: 0.75rem;">${order.paymentId || 'pay_verified'}</code>
+                                ${locked ? ` • <span style="color: #ef4444; font-weight: 700;">Unlocks at Premiere: ${releaseDateStr}</span>` : ''}
                             </div>
                         </div>
                     </div>
 
                     <!-- Direct Action Buttons -->
                     <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-                        <button type="button" class="btn btn-primary btn-sm order-download-btn" data-url="${downloadLink}" data-name="${(order.productName || '').replace(/"/g, '&quot;')}" style="gap: 6px;">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                            <span>Mod / Livery Download</span>
-                        </button>
+                        ${locked ? `
+                            <button type="button" class="btn btn-outline btn-sm" disabled style="gap: 6px; opacity: 0.85; cursor: not-allowed; background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.35); color: #ef4444;" title="Unlocks at Premiere: ${releaseDateStr}">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                <span>🔒 Unlocks at Premiere (${releaseDateStr || 'Upcoming'})</span>
+                            </button>
+                        ` : `
+                            <button type="button" class="btn btn-primary btn-sm order-download-btn" data-url="${downloadLink}" data-name="${(order.productName || '').replace(/"/g, '&quot;')}" style="gap: 6px;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                <span>Mod / Livery Download</span>
+                            </button>
+                        `}
                         <button type="button" class="btn btn-outline btn-sm order-invoice-btn" data-order-index="${index}" style="gap: 6px;">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                             <span>Invoice Download</span>
@@ -1648,7 +1560,8 @@ const renderOrdersTab = () => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
             const url = btn.getAttribute('data-url');
-            executeDirectDownload(url, btn);
+            const modName = btn.getAttribute('data-name') || '';
+            executeDirectDownload(url, btn, modName);
         });
     });
 

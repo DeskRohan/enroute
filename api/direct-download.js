@@ -25,8 +25,33 @@ export default async function handler(req, res) {
 
     const target = rawTarget.trim();
 
-    // If it's already a direct binary file URL (e.g. presigned R2/S3 or zip)
-    if (target.includes('.r2.cloudflarestorage.com') || target.includes('/dl.cgi/') || target.endsWith('.zip') || target.endsWith('.bussidmod')) {
+    // 1. Google Drive direct conversion
+    const gDriveMatch = target.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?id=)([a-zA-Z0-9_-]+)/i);
+    if (gDriveMatch && gDriveMatch[1]) {
+      const gId = gDriveMatch[1];
+      const directUrl = `https://drive.google.com/uc?export=download&id=${gId}&confirm=t`;
+      if (shouldRedirect) {
+        res.setHeader('Location', directUrl);
+        return res.status(302).end();
+      }
+      return res.status(200).json({ ok: true, directUrl, isGoogleDrive: true, fileCode: gId });
+    }
+
+    // 2. Dropbox direct conversion
+    if (target.includes('dropbox.com')) {
+      let directUrl = target.replace('www.dropbox.com', 'dl.dropboxusercontent.com').replace(/[?&]dl=0/, '');
+      if (!directUrl.includes('dl=1') && !directUrl.includes('dropboxusercontent.com')) {
+        directUrl += (directUrl.includes('?') ? '&' : '?') + 'dl=1';
+      }
+      if (shouldRedirect) {
+        res.setHeader('Location', directUrl);
+        return res.status(302).end();
+      }
+      return res.status(200).json({ ok: true, directUrl, isDropbox: true });
+    }
+
+    // 3. Direct binary file URLs (e.g. .bussidmod, .zip, .rar, .7z, presigned R2/S3/Firebase)
+    if (/\.(zip|rar|7z|bussidmod|bussidvehicle)($|\?)/i.test(target) || target.includes('.r2.cloudflarestorage.com') || target.includes('firebasestorage.googleapis.com') || target.includes('/dl.cgi/')) {
       if (shouldRedirect) {
         res.setHeader('Location', target);
         return res.status(302).end();
@@ -64,18 +89,38 @@ export default async function handler(req, res) {
 
     // 1. Check official ShareMods API direct_link using provided API key
     const apiKey = process.env.SHAREMODS_API_KEY || '184356pw7b4tb78jfy6i0h01sw1675aegj2xty';
+    let filename = '';
+    let fileSize = 0;
+
+    // Fetch official file metadata for correct mod name & size
     try {
-      const apiRes = await fetch(`https://sharemods.com/api/file/direct_link?key=${apiKey}&file_code=${fileCode}`);
+      const infoRes = await fetch(`https://sharemods.com/api/file/info?key=${apiKey}&file_code=${fileCode}`, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+      });
+      if (infoRes.ok) {
+        const infoData = await infoRes.json();
+        const fInfo = Array.isArray(infoData.result) ? infoData.result[0] : infoData.result;
+        if (fInfo) {
+          filename = fInfo.name || '';
+          fileSize = fInfo.size || 0;
+        }
+      }
+    } catch (_) {}
+
+    try {
+      const apiRes = await fetch(`https://sharemods.com/api/file/direct_link?key=${apiKey}&file_code=${fileCode}`, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+      });
       if (apiRes.ok) {
         const apiData = await apiRes.json();
         const directUrl = apiData.result?.url || apiData.result?.direct_link || (typeof apiData.result === 'string' && apiData.result.startsWith('http') ? apiData.result : null);
         if (directUrl) {
-          linkCache.set(fileCode, { directUrl, filename: '', timestamp: Date.now() });
+          linkCache.set(fileCode, { directUrl, filename, timestamp: Date.now() });
           if (shouldRedirect) {
             res.setHeader('Location', directUrl);
             return res.status(302).end();
           }
-          return res.status(200).json({ ok: true, directUrl, fileCode });
+          return res.status(200).json({ ok: true, directUrl, fileCode, filename, fileSize });
         }
       }
     } catch (_) {}
@@ -163,32 +208,37 @@ export default async function handler(req, res) {
         res.setHeader('Location', pageUrl);
         return res.status(302).end();
       }
-      return res.status(404).json({
-        error: 'Direct download link could not be resolved from storage provider',
-        fallbackUrl: pageUrl
+      return res.status(200).json({
+        ok: false,
+        error: 'Direct streaming link restricted by storage provider',
+        fallbackUrl: pageUrl,
+        filename,
+        fileSize,
+        fileCode
       });
     }
 
     const directUrl = btnMatch[1].replace(/&amp;/g, '&');
 
-    // Extract filename if present
-    let filename = '';
-    const fnMatch = directUrl.match(/filename%3D%22([^%"]+)%22/) 
-                 || directUrl.match(/filename=["']?([^"';&]+)/);
-    if (fnMatch) {
-      try {
-        filename = decodeURIComponent(fnMatch[1]);
-      } catch (_) {
-        filename = fnMatch[1];
-      }
-    } else {
-      try {
-        const u = new URL(directUrl);
-        const lastPart = u.pathname.split('/').filter(Boolean).pop();
-        if (lastPart && (lastPart.endsWith('.zip') || lastPart.endsWith('.rar') || lastPart.endsWith('.7z') || lastPart.endsWith('.bussidmod'))) {
-          filename = decodeURIComponent(lastPart);
+    // Extract filename if not already discovered
+    if (!filename) {
+      const fnMatch = directUrl.match(/filename%3D%22([^%"]+)%22/) 
+                   || directUrl.match(/filename=["']?([^"';&]+)/);
+      if (fnMatch) {
+        try {
+          filename = decodeURIComponent(fnMatch[1]);
+        } catch (_) {
+          filename = fnMatch[1];
         }
-      } catch (_) {}
+      } else {
+        try {
+          const u = new URL(directUrl);
+          const lastPart = u.pathname.split('/').filter(Boolean).pop();
+          if (lastPart && (lastPart.endsWith('.zip') || lastPart.endsWith('.rar') || lastPart.endsWith('.7z') || lastPart.endsWith('.bussidmod'))) {
+            filename = decodeURIComponent(lastPart);
+          }
+        } catch (_) {}
+      }
     }
 
     // Save to memory cache for fast repeat downloads

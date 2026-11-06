@@ -74,10 +74,17 @@ const pageTitle = document.getElementById('studio-page-title');
 const modePill = document.getElementById('studio-mode-pill');
 const breadcrumbAction = document.getElementById('breadcrumb-current-action');
 const deleteBtn = document.getElementById('studio-delete-btn');
-const saveTopBtn = document.getElementById('studio-save-top-btn');
 const saveBottomBtn = document.getElementById('studio-save-bottom-btn');
-const saveLabel = document.getElementById('studio-save-label');
 const saveBottomLabel = document.getElementById('studio-save-bottom-label');
+const manualDownloadInput = document.getElementById('manual-download-url');
+const toggleManualLinkBtn = document.getElementById('toggle-manual-link-btn');
+const manualLinkContainer = document.getElementById('manual-link-container');
+
+const updateSaveButtonsText = (txt) => {
+    document.querySelectorAll('#studio-save-bottom-label, #studio-save-label, #studio-save-sidebar-label, .btn-studio-save span').forEach(el => {
+        el.textContent = txt;
+    });
+};
 
 // Form Input Elements
 const fId = document.getElementById('p-id');
@@ -488,12 +495,17 @@ const setListingMode = (mode) => {
         if (upcomingPreorderPanel) upcomingPreorderPanel.style.display = 'block';
         if (scheduledDatetimeGroup) scheduledDatetimeGroup.style.display = 'none';
         if (fScheduledDate) fScheduledDate.required = false;
+        if (fExpectedDate) fExpectedDate.required = true;
+        if (prebookingFieldsWrap) {
+            prebookingFieldsWrap.style.display = (fAllowPrebooking && fAllowPrebooking.checked) ? 'block' : 'none';
+        }
     } else if (mode === 'scheduled') {
         if (modeCardScheduled) modeCardScheduled.classList.add('active');
         if (statusScheduledRadio) statusScheduledRadio.checked = true;
         if (upcomingPreorderPanel) upcomingPreorderPanel.style.display = 'none';
         if (scheduledDatetimeGroup) scheduledDatetimeGroup.style.display = 'block';
         if (fScheduledDate) fScheduledDate.required = true;
+        if (fExpectedDate) fExpectedDate.required = false;
     }
     updateLivePreview();
 };
@@ -503,11 +515,17 @@ if (modeCardUpcoming) modeCardUpcoming.addEventListener('click', () => setListin
 if (modeCardScheduled) modeCardScheduled.addEventListener('click', () => setListingMode('scheduled'));
 
 // Pre-booking Toggle
-fAllowPrebooking.addEventListener('change', () => {
-    prebookingFieldsWrap.style.display = fAllowPrebooking.checked ? 'block' : 'none';
-    fPrebookingDeposit.required = fAllowPrebooking.checked;
-    updateLivePreview();
-});
+if (fAllowPrebooking) {
+    fAllowPrebooking.addEventListener('change', () => {
+        if (prebookingFieldsWrap) {
+            prebookingFieldsWrap.style.display = fAllowPrebooking.checked ? 'block' : 'none';
+        }
+        if (fPrebookingDeposit) {
+            fPrebookingDeposit.required = fAllowPrebooking.checked;
+        }
+        updateLivePreview();
+    });
+}
 
 // Promotional Offer Period Switcher
 offerLifetimeChoice.addEventListener('click', () => {
@@ -553,7 +571,7 @@ fPricingType.addEventListener('change', (e) => {
 });
 
 // =====================================================
-// ShareMods File Upload Handling
+// ShareMods File Upload Handling & Manual Link
 // =====================================================
 const resetShareModsUpload = () => {
     if (shareModsCurrentXHR) {
@@ -564,16 +582,25 @@ const resetShareModsUpload = () => {
     if (fDownload) fDownload.value = '';
     if (fDownloadSource) fDownloadSource.value = 'manual';
     if (shareModsFileInput) shareModsFileInput.value = '';
+    if (manualDownloadInput) manualDownloadInput.value = '';
     if (shareModsUploadContent) shareModsUploadContent.style.display = 'block';
     if (shareModsUploadProgress) shareModsUploadProgress.style.display = 'none';
     if (shareModsUploadSuccess) shareModsUploadSuccess.style.display = 'none';
-    if (shareModsProgressBar) shareModsProgressBar.style.width = '0%';
+    if (shareModsProgressBar) {
+        shareModsProgressBar.style.width = '0%';
+        shareModsProgressBar.style.background = 'var(--studio-blue)';
+    }
+    if (shareModsProgressPercent) shareModsProgressPercent.textContent = '0%';
+    if (shareModsProgressLabel) {
+        shareModsProgressLabel.textContent = 'Uploading Mod Archive...';
+        shareModsProgressLabel.style.color = 'var(--studio-blue)';
+    }
     if (shareModsUploadZone) {
         shareModsUploadZone.classList.remove('has-file');
         shareModsUploadZone.style.borderColor = 'rgba(37, 99, 235, 0.35)';
         shareModsUploadZone.style.background = '#f8fafc';
     }
-    inspectorFileText.textContent = 'None Attached';
+    if (inspectorFileText) inspectorFileText.textContent = 'None Attached';
 };
 
 const handleShareModsUpload = async (file) => {
@@ -587,7 +614,8 @@ const handleShareModsUpload = async (file) => {
 
     const MAX_SIZE = 200 * 1024 * 1024; // 200MB
     if (file.size > MAX_SIZE) {
-        alert("Selected file exceeds the 200MB limit for cloud upload.");
+        alert(`Selected file (${(file.size / (1024 * 1024)).toFixed(1)} MB) exceeds the 200MB limit for cloud upload.`);
+        resetShareModsUpload();
         return;
     }
 
@@ -598,86 +626,202 @@ const handleShareModsUpload = async (file) => {
     shareModsUploadContent.style.display = 'none';
     shareModsUploadProgress.style.display = 'block';
     shareModsUploadSuccess.style.display = 'none';
+    if (shareModsUploadZone) {
+        shareModsUploadZone.classList.add('has-file');
+        shareModsUploadZone.style.borderColor = 'var(--studio-blue)';
+        shareModsUploadZone.style.background = 'var(--studio-blue-light)';
+    }
     shareModsProgressBar.style.width = '0%';
+    shareModsProgressBar.style.background = 'var(--studio-blue)';
     shareModsProgressPercent.textContent = '0%';
-    shareModsProgressLabel.textContent = 'Uploading Mod Archive...';
+    shareModsProgressLabel.textContent = 'Connecting to Storage Server...';
+    shareModsProgressLabel.style.color = 'var(--studio-blue)';
 
-    const formData = new FormData();
-    formData.append('key', apiKey);
-    formData.append('file', file);
+    try {
+        // Step 1: Query the serverless backend for an active upload server node and session ID
+        let uploadServerUrl = '';
+        let sessId = '';
 
-    const xhr = new XMLHttpRequest();
-    shareModsCurrentXHR = xhr;
-
-    xhr.upload.addEventListener('progress', (e) => {
-        if (e.lengthComputable) {
-            const percent = Math.round((e.loaded / e.total) * 95);
-            shareModsProgressBar.style.width = percent + '%';
-            shareModsProgressPercent.textContent = percent + '%';
-        }
-    });
-
-    xhr.addEventListener('load', () => {
-        shareModsCurrentXHR = null;
-        if (xhr.status >= 200 && xhr.status < 300) {
-            try {
-                let downloadUrl = '';
-                const ct = xhr.getResponseHeader('content-type') || '';
-                if (ct.includes('application/json') || xhr.responseText.trim().startsWith('{')) {
-                    const res = JSON.parse(xhr.responseText);
-                    downloadUrl = res.url || res.download_url || res.file_code || res.link || '';
-                } else {
-                    const match = xhr.responseText.match(/https?:\/\/(?:www\.)?sharemods\.com\/[^\s"'<>]+/);
-                    if (match) downloadUrl = match[0];
+        try {
+            const apiRes = await fetch(`/api/sharemods-server?key=${encodeURIComponent(apiKey)}`);
+            if (apiRes.ok) {
+                const apiData = await apiRes.json();
+                if (apiData.uploadServerUrl) {
+                    uploadServerUrl = apiData.uploadServerUrl;
+                    sessId = apiData.sessId || '';
                 }
-
-                if (!downloadUrl && xhr.responseText.includes('sharemods.com')) {
-                    const urlMatch = xhr.responseText.match(/https:\/\/sharemods\.com\/[a-zA-Z0-9_\-\.\/]+/);
-                    if (urlMatch) downloadUrl = urlMatch[0];
-                }
-
-                if (downloadUrl) {
-                    shareModsUploadedUrl = downloadUrl;
-                    if (fDownload) fDownload.value = downloadUrl;
-                    if (fDownloadSource) fDownloadSource.value = 'sharemods';
-
-                    shareModsProgressBar.style.width = '100%';
-                    shareModsProgressPercent.textContent = '100%';
-                    shareModsProgressLabel.textContent = 'Upload Complete!';
-
-                    setTimeout(() => {
-                        shareModsUploadProgress.style.display = 'none';
-                        shareModsUploadSuccess.style.display = 'block';
-                        shareModsSuccessFilename.textContent = `${file.name} (${sizeFormatted})`;
-                        if (shareModsUploadZone) {
-                            shareModsUploadZone.classList.add('has-file');
-                            shareModsUploadZone.style.borderColor = 'var(--studio-emerald)';
-                            shareModsUploadZone.style.background = 'var(--studio-emerald-light)';
-                        }
-                        inspectorFileText.textContent = `Attached (${sizeFormatted})`;
-                    }, 400);
-                } else {
-                    throw new Error("Could not parse file link from cloud upload response.");
-                }
-            } catch (err) {
-                console.error("Cloud upload parse error:", err, xhr.responseText);
-                alert("Upload completed, but could not automatically retrieve download link. Please try re-uploading.");
-                resetShareModsUpload();
+            } else {
+                console.warn('/api/sharemods-server status:', apiRes.status);
             }
-        } else {
-            alert(`Upload failed (Status ${xhr.status}). Please check your connection and try again.`);
-            resetShareModsUpload();
+        } catch (e) {
+            console.warn('Backend proxy /api/sharemods-server unreachable:', e);
         }
-    });
 
-    xhr.addEventListener('error', () => {
-        shareModsCurrentXHR = null;
-        alert("Network error occurred during upload. Please check your connection.");
-        resetShareModsUpload();
-    });
+        // Local development server fallback (port 3001)
+        if (!uploadServerUrl) {
+            try {
+                const localRes = await fetch(`http://localhost:3001/api/sharemods-server?key=${encodeURIComponent(apiKey)}`);
+                if (localRes.ok) {
+                    const localData = await localRes.json();
+                    if (localData.uploadServerUrl) {
+                        uploadServerUrl = localData.uploadServerUrl;
+                        sessId = localData.sessId || '';
+                    }
+                }
+            } catch (_) {}
+        }
 
-    xhr.open('POST', 'https://sharemods.com/api/upload');
-    xhr.send(formData);
+        // Direct fallback if proxy is temporarily unreachable
+        if (!uploadServerUrl) {
+            uploadServerUrl = 'https://bio7.sharemods.com/cgi-bin/upload.cgi';
+        }
+
+        shareModsProgressLabel.textContent = 'Uploading Mod Archive...';
+
+        // Step 2: Upload file directly to dedicated storage node (supports CORS Origin: *)
+        const formData = new FormData();
+        if (sessId) {
+            formData.append('sess_id', sessId);
+        }
+        formData.append('key', apiKey);
+        formData.append('file_0', file);
+
+        const downloadUrl = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            shareModsCurrentXHR = xhr;
+
+            xhr.upload.addEventListener('progress', (e) => {
+                if (e.lengthComputable) {
+                    const percent = Math.round((e.loaded / e.total) * 100);
+                    shareModsProgressBar.style.width = `${percent}%`;
+                    shareModsProgressPercent.textContent = `${percent}%`;
+                    if (percent >= 100) {
+                        shareModsProgressLabel.textContent = 'Finalizing Mod Archive...';
+                    }
+                }
+            });
+
+            xhr.addEventListener('load', () => {
+                shareModsCurrentXHR = null;
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    const responseText = xhr.responseText;
+                    let fileCode = null;
+                    let fileUrl = null;
+
+                    try {
+                        const data = JSON.parse(responseText);
+                        if (Array.isArray(data) && data[0]) {
+                            fileCode = data[0].file_code;
+                            fileUrl = data[0].url || data[0].download_url;
+                        } else if (data.file_code) {
+                            fileCode = data.file_code;
+                        } else if (data.result) {
+                            if (typeof data.result === 'string') {
+                                if (data.result.startsWith('http')) {
+                                    fileUrl = data.result;
+                                } else {
+                                    fileCode = data.result;
+                                }
+                            } else if (data.result.file_code) {
+                                fileCode = data.result.file_code;
+                            } else if (data.result.url) {
+                                fileUrl = data.result.url;
+                            }
+                        } else if (data.files && data.files[0]) {
+                            const f = data.files[0];
+                            fileUrl = f.url || f.download_url;
+                            fileCode = f.file_code;
+                        }
+                    } catch (_) {
+                        // XML or plain text fallback
+                        const parser = new DOMParser();
+                        const xml = parser.parseFromString(responseText, 'text/xml');
+                        const urlNode = xml.querySelector('url') || xml.querySelector('download_url');
+                        const codeNode = xml.querySelector('file_code');
+                        if (urlNode) {
+                            fileUrl = urlNode.textContent;
+                        } else if (codeNode) {
+                            fileCode = codeNode.textContent;
+                        }
+                    }
+
+                    // Regex fallback for sharemods URLs
+                    if (!fileUrl && !fileCode) {
+                        const match = responseText.match(/https?:\/\/(?:www\.)?sharemods\.com\/([a-zA-Z0-9_\-\.\/]+)/);
+                        if (match) fileUrl = match[0];
+                    }
+
+                    // Canonical ShareMods download page link (never causes "no such file with this filename" error)
+                    if (!fileUrl && fileCode) {
+                        fileUrl = `https://sharemods.com/${fileCode}`;
+                    }
+
+                    if (fileUrl) {
+                        resolve(fileUrl);
+                    } else if (responseText.trim().startsWith('http')) {
+                        resolve(responseText.trim());
+                    } else {
+                        reject(new Error('Could not extract download URL from storage server response.'));
+                    }
+                } else {
+                    reject(new Error(`Storage server upload failed with HTTP status ${xhr.status}`));
+                }
+            });
+
+            xhr.addEventListener('error', () => {
+                shareModsCurrentXHR = null;
+                reject(new Error('Network error during file upload. Please check your connection or CORS settings.'));
+            });
+
+            xhr.addEventListener('abort', () => {
+                shareModsCurrentXHR = null;
+                reject(new Error('Upload cancelled.'));
+            });
+
+            xhr.open('POST', uploadServerUrl, true);
+            xhr.send(formData);
+        });
+
+        // Step 3: Upload succeeded — update UI
+        shareModsUploadedUrl = downloadUrl;
+        if (fDownload) fDownload.value = downloadUrl;
+        if (fDownloadSource) fDownloadSource.value = 'sharemods';
+        if (manualDownloadInput) manualDownloadInput.value = downloadUrl;
+
+        shareModsProgressBar.style.width = '100%';
+        shareModsProgressBar.style.background = 'var(--studio-emerald)';
+        shareModsProgressPercent.textContent = '100%';
+        shareModsProgressLabel.textContent = 'Upload Complete!';
+        shareModsProgressLabel.style.color = 'var(--studio-emerald)';
+
+        setTimeout(() => {
+            shareModsUploadProgress.style.display = 'none';
+            shareModsUploadSuccess.style.display = 'block';
+            shareModsSuccessFilename.textContent = `${file.name} (${sizeFormatted})`;
+            if (shareModsUploadZone) {
+                shareModsUploadZone.classList.add('has-file');
+                shareModsUploadZone.style.borderColor = 'var(--studio-emerald)';
+                shareModsUploadZone.style.background = 'var(--studio-emerald-light)';
+            }
+            if (inspectorFileText) inspectorFileText.textContent = `Attached (${sizeFormatted})`;
+        }, 400);
+
+        console.log('ShareMods upload success:', downloadUrl);
+
+    } catch (error) {
+        console.error('ShareMods upload error:', error);
+        shareModsProgressLabel.textContent = 'Upload failed!';
+        shareModsProgressLabel.style.color = '#ef4444';
+        shareModsProgressPercent.textContent = '';
+        shareModsProgressBar.style.width = '100%';
+        shareModsProgressBar.style.background = '#ef4444';
+
+        setTimeout(() => {
+            resetShareModsUpload();
+        }, 3500);
+
+        alert(`Upload Error: ${error.message || 'Failed to complete cloud upload.'}`);
+    }
 };
 
 // ShareMods upload zone click & drag-drop
@@ -728,6 +872,72 @@ shareModsReuploadBtn.addEventListener('click', (e) => {
     shareModsFileInput.click();
 });
 
+// Manual direct download link input handling
+if (toggleManualLinkBtn && manualLinkContainer) {
+    toggleManualLinkBtn.addEventListener('click', () => {
+        const isHidden = manualLinkContainer.style.display === 'none';
+        manualLinkContainer.style.display = isHidden ? 'block' : 'none';
+        toggleManualLinkBtn.textContent = isHidden 
+            ? 'Hide direct download link input' 
+            : 'Or provide direct download link (Google Drive, Mega, MediaFire, etc.)';
+        if (isHidden && manualDownloadInput) {
+            manualDownloadInput.focus();
+        }
+    });
+}
+
+if (manualDownloadInput) {
+    const statusEl = document.getElementById('direct-link-status');
+    const updateLinkStatus = () => {
+        const url = manualDownloadInput.value.trim();
+        if (!url) {
+            if (statusEl) {
+                statusEl.innerHTML = `<span>Paste a <strong>Google Drive</strong>, <strong>Dropbox</strong>, or direct file link (.zip, .bussidmod, .rar). Customers will download <strong>directly on the website</strong> without opening any external sites!</span>`;
+                statusEl.style.color = '#166534';
+            }
+            if (!shareModsUploadSuccess || shareModsUploadSuccess.style.display !== 'block') {
+                shareModsUploadedUrl = '';
+                if (fDownload) fDownload.value = '';
+                if (inspectorFileText) inspectorFileText.textContent = 'None Attached';
+            }
+            return;
+        }
+
+        shareModsUploadedUrl = url;
+        if (fDownload) fDownload.value = url;
+        if (fDownloadSource) fDownloadSource.value = url.includes('sharemods.com') ? 'sharemods' : 'manual';
+
+        if (url.includes('drive.google.com')) {
+            if (statusEl) {
+                statusEl.innerHTML = `<span>🟢 <strong>Google Drive Verified:</strong> 1-Click in-place direct download is active on the website!</span>`;
+                statusEl.style.color = '#15803d';
+            }
+            if (inspectorFileText) inspectorFileText.textContent = 'Google Drive (In-Place)';
+        } else if (url.includes('dropbox.com')) {
+            if (statusEl) {
+                statusEl.innerHTML = `<span>🟢 <strong>Dropbox Verified:</strong> 1-Click in-place direct download active!</span>`;
+                statusEl.style.color = '#15803d';
+            }
+            if (inspectorFileText) inspectorFileText.textContent = 'Dropbox (In-Place)';
+        } else if (/\.(zip|rar|7z|bussidmod|bussidvehicle)($|\?)/i.test(url)) {
+            if (statusEl) {
+                statusEl.innerHTML = `<span>🟢 <strong>Direct File Archive:</strong> 1-Click in-place direct download active!</span>`;
+                statusEl.style.color = '#15803d';
+            }
+            if (inspectorFileText) inspectorFileText.textContent = 'Direct Archive (In-Place)';
+        } else {
+            if (statusEl) {
+                statusEl.innerHTML = `<span>⚡ In-Place Download Link Attached.</span>`;
+                statusEl.style.color = '#166534';
+            }
+            if (inspectorFileText) inspectorFileText.textContent = 'Direct Link';
+        }
+    };
+
+    manualDownloadInput.addEventListener('input', updateLinkStatus);
+    manualDownloadInput.addEventListener('change', updateLinkStatus);
+}
+
 // =====================================================
 // Load Existing Product on Edit Mode (?id=...)
 // =====================================================
@@ -763,8 +973,7 @@ const initProductEditor = async () => {
             modePill.style.borderColor = 'rgba(217, 119, 6, 0.25)';
         }
         if (deleteBtn) deleteBtn.style.display = 'inline-flex';
-        if (saveLabel) saveLabel.textContent = 'Update Product';
-        if (saveBottomLabel) saveBottomLabel.textContent = 'Update Product';
+        updateSaveButtonsText('Update Product');
 
         // 2. Fetch the target product document
         try {
@@ -856,16 +1065,25 @@ const initProductEditor = async () => {
                 shareModsUploadedUrl = p.downloadLink;
                 if (fDownload) fDownload.value = p.downloadLink;
                 if (fDownloadSource) fDownloadSource.value = hasShareModsLink ? 'sharemods' : 'manual';
-                if (shareModsUploadContent) shareModsUploadContent.style.display = 'none';
-                if (shareModsUploadProgress) shareModsUploadProgress.style.display = 'none';
-                if (shareModsUploadSuccess) shareModsUploadSuccess.style.display = 'block';
-                if (shareModsSuccessFilename) shareModsSuccessFilename.textContent = `${p.name || 'Vehicle'} (Mod Archive Attached)`;
-                if (shareModsUploadZone) {
-                    shareModsUploadZone.classList.add('has-file');
-                    shareModsUploadZone.style.borderColor = 'var(--studio-emerald)';
-                    shareModsUploadZone.style.background = 'var(--studio-emerald-light)';
+                if (manualDownloadInput) {
+                    manualDownloadInput.value = p.downloadLink;
+                    manualDownloadInput.dispatchEvent(new Event('input'));
                 }
-                if (inspectorFileText) inspectorFileText.textContent = 'Attached';
+
+                if (hasShareModsLink) {
+                    if (shareModsUploadContent) shareModsUploadContent.style.display = 'none';
+                    if (shareModsUploadProgress) shareModsUploadProgress.style.display = 'none';
+                    if (shareModsUploadSuccess) shareModsUploadSuccess.style.display = 'block';
+                    if (shareModsSuccessFilename) shareModsSuccessFilename.textContent = `${p.name || 'Vehicle'} (Mod Archive Attached)`;
+                    if (shareModsUploadZone) {
+                        shareModsUploadZone.classList.add('has-file');
+                        shareModsUploadZone.style.borderColor = 'var(--studio-emerald)';
+                        shareModsUploadZone.style.background = 'var(--studio-emerald-light)';
+                    }
+                    if (inspectorFileText) inspectorFileText.textContent = 'Attached';
+                } else {
+                    if (inspectorFileText) inspectorFileText.textContent = 'Direct Link';
+                }
             } else {
                 resetShareModsUpload();
             }
@@ -921,8 +1139,7 @@ const initProductEditor = async () => {
             modePill.style.borderColor = 'var(--studio-blue-border)';
         }
         if (deleteBtn) deleteBtn.style.display = 'none';
-        if (saveLabel) saveLabel.textContent = 'Save Product';
-        if (saveBottomLabel) saveBottomLabel.textContent = 'Save Product';
+        updateSaveButtonsText('Save Product');
         setListingMode('live');
         updateLivePreview();
     }
@@ -988,7 +1205,13 @@ form.addEventListener('submit', async (e) => {
     const selectedMode = document.querySelector('input[name="p-status"]:checked').value;
     const isUpcoming = selectedMode === 'upcoming';
     const isScheduled = selectedMode === 'scheduled';
-    const isPrebooking = isUpcoming && fAllowPrebooking.checked;
+    const isPrebooking = isUpcoming && Boolean(fAllowPrebooking && fAllowPrebooking.checked);
+
+    if (isUpcoming && !fExpectedDate.value) {
+        alert("Please set the Premiere / Release Date & Time for this upcoming mod.");
+        fExpectedDate.focus();
+        return;
+    }
 
     if (isPrebooking) {
         const depositVal = parseFloat(fPrebookingDeposit.value);
@@ -1011,7 +1234,17 @@ form.addEventListener('submit', async (e) => {
         return;
     }
 
-    const finalDownloadLink = shareModsUploadedUrl || fDownload.value.trim();
+    if (shareModsCurrentXHR) {
+        alert("The mod archive file is currently uploading. Please wait for upload to complete before saving.");
+        return;
+    }
+
+    if (shareModsFileInput && shareModsFileInput.files && shareModsFileInput.files.length > 0 && !shareModsUploadedUrl && !fDownload.value.trim() && !(manualDownloadInput && manualDownloadInput.value.trim())) {
+        alert("A file was selected but has not completed uploading yet. Please wait for upload to finish.");
+        return;
+    }
+
+    const finalDownloadLink = shareModsUploadedUrl || fDownload.value.trim() || (manualDownloadInput ? manualDownloadInput.value.trim() : '');
     if (!finalDownloadLink) {
         if (!confirm("No mod archive or download link attached yet. Do you want to save this product anyway? Customers won't be able to download files until a link is added.")) {
             return;
@@ -1026,12 +1259,11 @@ form.addEventListener('submit', async (e) => {
 
     // Buttons state
     const setSaving = (saving) => {
-        [saveTopBtn, saveBottomBtn].filter(Boolean).forEach(b => {
+        document.querySelectorAll('.btn-studio-save').forEach(b => {
             b.disabled = saving;
         });
         const txt = saving ? 'Saving Product...' : (editingProductId ? 'Update Product' : 'Save & Publish Product');
-        if (saveLabel) saveLabel.textContent = txt;
-        if (saveBottomLabel) saveBottomLabel.textContent = txt;
+        updateSaveButtonsText(txt);
     };
     setSaving(true);
 
@@ -1107,11 +1339,12 @@ form.addEventListener('submit', async (e) => {
         status: selectedMode,
         scheduledDate: scheduledDateValue,
 
-        // UPCOMING & PRE-BOOKING TELEMETRY
+        // UPCOMING & PREMIERE TELEMETRY
         isUpcoming: isUpcoming,
+        isPremiere: isUpcoming,
         allowPreBooking: isPrebooking,
         preBookingDeposit: isPrebooking ? (parseFloat(fPrebookingDeposit.value) || 0) : null,
-        expectedReleaseDate: (isUpcoming && fExpectedDate.value) ? new Date(fExpectedDate.value).toISOString() : null,
+        expectedReleaseDate: scheduledDateValue,
         preBookingSlots: (isPrebooking && fPrebookingSlots.value) ? parseInt(fPrebookingSlots.value, 10) : null,
         preBookingPerkNote: isPrebooking ? fPrebookingPerkNote.value.trim() : '',
         preBookingPerks: isPrebooking ? fPrebookingPerks.value.trim() : '',

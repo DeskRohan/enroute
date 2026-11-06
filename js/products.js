@@ -144,10 +144,22 @@ const createProductCard = (product) => {
     const isOfferActive = hasOffer && !isExpired;
     const discountPct = (origPrice > 0 && isOfferActive) ? Math.round(((origPrice - offerPrice) / origPrice) * 100) : 0;
 
+    // Upcoming Premiere Check (YouTube Premiere style)
+    const releaseTime = product.expectedReleaseDate || product.scheduledDate;
+    const isUpcomingPremiere = (product.status === 'upcoming' || product.isUpcoming) && releaseTime && (new Date(releaseTime) > new Date());
+    const isPrebooking = isUpcomingPremiere && Boolean(product.allowPreBooking);
+    const prebookingDeposit = product.preBookingDeposit ? Number(product.preBookingDeposit) : null;
+    const formattedPremiereDate = isUpcomingPremiere ? new Date(releaseTime).toLocaleDateString('en-IN', {
+        day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+    }) : '';
+
     // Badge on top-left of image
     let badgeText = 'Bestseller';
     let badgeBg = '#238636';
-    if (isOutOfStock) {
+    if (isUpcomingPremiere) {
+        badgeText = isPrebooking ? '⚡ PRE-BOOK' : '🎬 PREMIERE';
+        badgeBg = 'linear-gradient(135deg, #7c3aed, #4c1d95)';
+    } else if (isOutOfStock) {
         badgeText = 'Out of Stock';
         badgeBg = '#dc2626';
     } else if (product.category === 'livery') {
@@ -185,6 +197,13 @@ const createProductCard = (product) => {
                     </span>
                     <span class="fk-creator-text" style="font-size: 0.78rem; color: var(--text-muted); margin-left: 4px;">By ${uploader.name}${verificationBadge}</span>
                 </div>
+
+                ${isUpcomingPremiere ? `
+                    <div style="background: rgba(124, 58, 237, 0.08); border: 1px solid rgba(124, 58, 237, 0.25); border-radius: 6px; padding: 4px 10px; margin: 4px 0 10px; display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; color: #6d28d9; font-weight: 800;">
+                        <span>🎬 Premieres: ${formattedPremiereDate}</span>
+                    </div>
+                ` : ''}
+
                 <!-- Desktop Bullet Specifications (Image 2 style) -->
                 <ul class="fk-specs-bullets">
                     <li>Compatibility: <strong>${product.version || 'BUSSID Universal (v3.8+)'}</strong></li>
@@ -234,15 +253,17 @@ const createProductCard = (product) => {
 
                     ${(isOutOfStock) ? `
                         <span style="font-size: 0.75rem; font-weight: 800; color: #dc2626; margin-top: 4px;">Currently Out of Stock</span>
+                    ` : (isUpcomingPremiere ? `
+                        <div class="fk-desktop-perk" style="color: #7c3aed; font-weight: 700;">Downloads unlock at premiere</div>
                     ` : (isOfferActive && !isFree ? `
                         <div class="fk-desktop-orig-price">
                             <span class="fk-strikethrough">${formatPrice(origPrice)}</span>
                             <span class="fk-discount-green">${discountPct}% off</span>
                         </div>
-                    ` : '')}
+                    ` : ''))}
 
-                    <div class="fk-desktop-perk">Free Instant Download</div>
-                    ${isOfferActive ? '<div class="fk-desktop-offer-tag">Special Creator Deal</div>' : ''}
+                    ${!isUpcomingPremiere ? '<div class="fk-desktop-perk">Free Instant Download</div>' : ''}
+                    ${isOfferActive && !isUpcomingPremiere ? '<div class="fk-desktop-offer-tag">Special Creator Deal</div>' : ''}
                 </div>
 
                 <div class="fk-desktop-action">
@@ -250,12 +271,17 @@ const createProductCard = (product) => {
                         <a href="product.html?id=${product.id}" onclick="try{sessionStorage.setItem('viewProductId', '${product.id}');}catch(e){}" class="btn btn-outline btn-sm" style="width: 100%; border-color: #ef4444; color: #ef4444;">
                             <span>Unavailable</span>
                         </a>
+                    ` : (isUpcomingPremiere ? `
+                        <a href="product.html?id=${product.id}" onclick="try{sessionStorage.setItem('viewProductId', '${product.id}');}catch(e){}" class="btn btn-primary btn-sm" style="width: 100%; font-weight: 700; background: linear-gradient(135deg, #7c3aed, #4c1d95); border: none;">
+                            <span>${isPrebooking ? '⚡ Pre-Book Mod' : 'View Premiere 🎬'}</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        </a>
                     ` : `
                         <a href="product.html?id=${product.id}" onclick="try{sessionStorage.setItem('viewProductId', '${product.id}');}catch(e){}" class="btn btn-primary btn-sm" style="width: 100%; font-weight: 700;">
                             <span>View Details</span>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                         </a>
-                    `}
+                    `)}
                 </div>
             </div>
         </div>
